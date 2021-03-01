@@ -7,12 +7,12 @@ namespace GenericsAnalyzer.Core
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
-        private Dictionary<INamedTypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<INamedTypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
+        private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
         public bool OnlyPermitSpecifiedTypes { get; set; }
 
-        public void Add(TypeConstraintRule rule, params INamedTypeSymbol[] types) => Add(rule, (IEnumerable<INamedTypeSymbol>)types);
-        public void Add(TypeConstraintRule rule, IEnumerable<INamedTypeSymbol> types)
+        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
             foreach (var t in types)
             {
@@ -23,7 +23,7 @@ namespace GenericsAnalyzer.Core
             }
         }
 
-        public bool IsPermitted(INamedTypeSymbol type)
+        public bool IsPermitted(ITypeSymbol type)
         {
             if (type is null)
                 return false;
@@ -66,7 +66,7 @@ namespace GenericsAnalyzer.Core
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private bool? IsPermitted(INamedTypeSymbol type, TypeConstraintReferencePoint referencePoint)
+        private bool? IsPermitted(ITypeSymbol type, TypeConstraintReferencePoint referencePoint)
         {
             if (!typeConstraintRules.ContainsKey(type))
                 return null;

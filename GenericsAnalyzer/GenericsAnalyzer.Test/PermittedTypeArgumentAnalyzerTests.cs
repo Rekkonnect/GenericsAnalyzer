@@ -17,6 +17,23 @@ namespace GenericsAnalyzer.Test
             ValidateCode(@"");
         }
 
+        // Usage of type arguments in inheritance
+        [TestMethod]
+        public void IntermediateGenericTypeUsage()
+        {
+            var testCode =
+@"
+class A<T>
+{
+}
+class B<T> : A<T>
+{
+}
+";
+
+            ValidateCode(testCode);
+        }
+
         // Usage of prohibited type arguments for class
         [TestMethod]
         public void GenericClassTestCode()

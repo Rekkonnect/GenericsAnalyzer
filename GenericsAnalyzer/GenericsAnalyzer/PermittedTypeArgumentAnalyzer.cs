@@ -114,10 +114,10 @@ namespace GenericsAnalyzer
                 var argument = typeArguments[i];
 
                 var system = constraints[i];
-                var argumentType = semanticModel.GetTypeInfo(argument);
-                if (!system.IsPermitted(argumentType.Type as INamedTypeSymbol))
+                var argumentType = semanticModel.GetTypeInfo(argument).Type;
+                if (!system.IsPermitted(argumentType))
                 {
-                    var diagnostic = Diagnostic.Create(Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.Type.ToDisplayString());
+                    var diagnostic = Diagnostic.Create(Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                     context.ReportDiagnostic(diagnostic);
                 }
             }

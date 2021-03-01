@@ -9,6 +9,9 @@ namespace GenericsAnalyzer.Core
     {
         private Dictionary<INamedTypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<INamedTypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
+        public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public void Add(TypeConstraintRule rule, params INamedTypeSymbol[] types) => Add(rule, (IEnumerable<INamedTypeSymbol>)types);
         public void Add(TypeConstraintRule rule, IEnumerable<INamedTypeSymbol> types)
         {
             foreach (var t in types)
@@ -60,7 +63,7 @@ namespace GenericsAnalyzer.Core
             }
             while (!(type is null));
 
-            return true;
+            return !OnlyPermitSpecifiedTypes;
         }
 
         private bool? IsPermitted(INamedTypeSymbol type, TypeConstraintReferencePoint referencePoint)

@@ -80,10 +80,18 @@ namespace GenericsAnalyzer
                 var system = new TypeConstraintSystem();
                 foreach (var a in attributes)
                 {
+                    if (a.AttributeClass.Name == nameof(OnlyPermitSpecifiedTypesAttribute))
+                    {
+                        system.OnlyPermitSpecifiedTypes = true;
+                        continue;
+                    }
+
                     var rule = ParseAttributeRule(a);
                     if (rule is null)
                         continue;
 
+                    // The arguments will be always stored as an array, regardless of their count
+                    // If an error is thrown here, a common cause could be having forgotten to import a namespace
                     system.Add(rule.Value, a.ConstructorArguments[0].Values.Select(c => c.Value as INamedTypeSymbol));
                 }
 

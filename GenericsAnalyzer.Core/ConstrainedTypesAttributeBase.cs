@@ -5,7 +5,6 @@ using System.Linq;
 namespace GenericsAnalyzer.Core
 {
     /// <summary>Denotes that a generic type argument permits the usage of the specified types.</summary>
-    [AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = true)]
     public abstract class ConstrainedTypesAttributeBase : Attribute
     {
         private static Type[] constrainedTypeAttributeTypes;

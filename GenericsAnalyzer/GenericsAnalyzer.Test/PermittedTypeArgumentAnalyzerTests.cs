@@ -8,6 +8,8 @@ namespace GenericsAnalyzer.Test
     {
         protected override string TestedDiagnosticID => PermittedTypeArgumentAnalyzer.DiagnosticID;
 
+        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
+
         // No diagnostics expected to show up
         [TestMethod]
         public void EmptyCode()
@@ -49,7 +51,7 @@ class Generic
             AssertDiagnostics(testCode);
         }
 
-        // Usage of prohibited type arguments for class
+        // Usage of prohibited type arguments for function
         [TestMethod]
         public void GenericFunctionTestCode()
         {
@@ -84,6 +86,40 @@ class Program
             AssertDiagnostics(testCode);
         }
 
-        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
+        // Usage of prohibited type arguments for class with OnlyPermitSpecifiedTypesAttribute
+        [TestMethod]
+        public void OnlyPermitSpecifiedTypesTestCode()
+        {
+            var testCode =
+@"
+using System;
+using System.Collections.Generic;
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new Generic<int>();
+        new Generic<long>();
+        new Generic<string>();
+        new Generic<↓ulong>();
+        new Generic<↓byte>();
+    }
+}
+
+class Generic
+<
+    [PermittedTypes(typeof(int), typeof(long))]
+    [PermittedBaseTypes(typeof(IEnumerable<>))]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+{
+}
+";
+
+            AssertDiagnostics(testCode);
+        }
     }
 }

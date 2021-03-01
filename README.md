@@ -7,4 +7,4 @@ A Roslyn analyzer for C# for generic types and functions
 
 ## Downloads
 - [NuGet Package](https://www.nuget.org/packages/GenericsAnalyzer.Core)
-- VSIX Plugin - Soon
+- [VSIX Plugin](https://marketplace.visualstudio.com/items?itemName=Rekkon.GenericAnalyzer)

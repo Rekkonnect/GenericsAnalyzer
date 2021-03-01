@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Authors>Alex Kalfakakos</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company />
+    <Product>GenericsAnalyzer.Core</Product>
+    <Copyright>© 2021, Alex Kalfakakos</Copyright>
+    <Description>The core components for using the generics analyzer.</Description>
+    <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
+    <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

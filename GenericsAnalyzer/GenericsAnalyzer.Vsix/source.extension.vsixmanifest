@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="GenericsAnalyzer.b5a53289-2e4d-4b3c-aa5c-f7554cd35b21" Version="1.0" Language="en-US" Publisher="Rekkon"/>
+    <Identity Id="GenericsAnalyzer.b5a53289-2e4d-4b3c-aa5c-f7554cd35b21" Version="1.0" Language="en-US" Publisher="Alex Kalfakakos"/>
     <DisplayName>GenericsAnalyzer</DisplayName>
     <Description xml:space="preserve">Provides the ability to explicitly permit or prohibit types being used as type arguments in the code.</Description>
   </Metadata>

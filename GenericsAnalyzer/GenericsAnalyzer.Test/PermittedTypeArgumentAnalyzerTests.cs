@@ -1,18 +1,18 @@
-﻿using Gu.Roslyn.Asserts;
+﻿using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test
 {
     [TestClass]
-    public class PermittedTypeArgumentAnalyzerTests
+    public class PermittedTypeArgumentAnalyzerTests : BaseAnalyzerTests
     {
+        protected override string TestedDiagnosticID => PermittedTypeArgumentAnalyzer.DiagnosticID;
+
         // No diagnostics expected to show up
         [TestMethod]
         public void EmptyCode()
         {
-            var testCode = @"";
-
-            RoslynAssert.Valid(new PermittedTypeArgumentAnalyzer(), testCode);
+            ValidateCode(@"");
         }
 
         // Usage of prohibited type arguments for class
@@ -46,8 +46,7 @@ class Generic
 }
 ";
 
-            var diagnostic = ExpectedDiagnostic.Create(PermittedTypeArgumentAnalyzer.DiagnosticID);
-            RoslynAssert.Diagnostics(new PermittedTypeArgumentAnalyzer(), diagnostic, testCode);
+            AssertDiagnostics(testCode);
         }
 
         // Usage of prohibited type arguments for class
@@ -82,8 +81,9 @@ class Program
 }
 ";
 
-            var diagnostic = ExpectedDiagnostic.Create(PermittedTypeArgumentAnalyzer.DiagnosticID);
-            RoslynAssert.Diagnostics(new PermittedTypeArgumentAnalyzer(), diagnostic, testCode);
+            AssertDiagnostics(testCode);
         }
+
+        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
     }
 }

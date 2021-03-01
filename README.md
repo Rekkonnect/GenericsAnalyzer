@@ -1,8 +1,10 @@
 # GenericsAnalyzer
 A Roslyn analyzer for C# for generic types and functions
 
-## [Usage](docs/usage.md)
+## References
+- [Usage](docs/usage.md)
+- [Diagnostics](docs/rules/)
 
-## [NuGet Package](https://www.nuget.org/packages/GenericsAnalyzer.Core)
-
-## VSIX Plugin - Soon
+## Downloads
+- [NuGet Package](https://www.nuget.org/packages/GenericsAnalyzer.Core)
+- VSIX Plugin - Soon

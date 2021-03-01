@@ -7,4 +7,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentation](?)
+GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0001.md)

@@ -1,38 +1,48 @@
 ﻿using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
     {
-        #region Analyzer Metadata
-        public const string DiagnosticID = "GA0001";
-        public const string Category = "API Restrictions";
-
-        private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.GA0001_Title), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString MessageFormat = new LocalizableResourceString(nameof(Resources.GA0001_MessageFormat), Resources.ResourceManager, typeof(Resources));
-        private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.GA0001_Description), Resources.ResourceManager, typeof(Resources));
-
-        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticID, Title, MessageFormat, Category, DiagnosticSeverity.Error, true, description: Description);
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
-        #endregion 
+        private static readonly ImmutableArray<DiagnosticDescriptor> supportedDiagnostics = new[]
+        {
+            GA0001_Rule,
+            GA0014_Rule,
+        }.ToImmutableArray();
 
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
         private readonly GenericNameUsageCollection genericTypeUsages = new GenericNameUsageCollection();
+
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => supportedDiagnostics;
 
         public override void Initialize(AnalysisContext context)
         {
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.ReportDiagnostics);
             // Concurrent execution is disabled due to the stateful profile of the analyzer
 
+            // Only executed on *usage* of a generic element
             context.RegisterSyntaxNodeAction(AnalyzeGenericName, SyntaxKind.GenericName);
+
+            var genericSupportedMemberDeclarations = new SyntaxKind[]
+            {
+                SyntaxKind.MethodDeclaration,
+                SyntaxKind.ClassDeclaration,
+                SyntaxKind.StructDeclaration,
+                SyntaxKind.InterfaceDeclaration,
+                SyntaxKind.RecordDeclaration,
+                SyntaxKind.DelegateDeclaration,
+            };
+            context.RegisterSyntaxNodeAction(AnalyzeGenericDeclaration, genericSupportedMemberDeclarations);
         }
 
         private void AnalyzeGenericName(SyntaxNodeAnalysisContext context)
@@ -46,16 +56,41 @@ namespace GenericsAnalyzer
             var symbolInfo = semanticModel.GetSymbolInfo(genericNameNode);
             var symbol = symbolInfo.Symbol;
 
-            if (symbol.IsDefinition)
-                return;
-
             genericTypeUsages.Register(symbol, genericNameNode);
             var originalDefinition = symbol.OriginalDefinition;
-            AnalyzeGenericTypeDefinition(originalDefinition);
-            AnalyzeGenericTypeUsage(context, symbol, genericNameNode);
+            AnalyzeGenericNameDefinition(context, originalDefinition);
+            AnalyzeGenericNameUsage(context, symbol, genericNameNode);
+        }
+        private void AnalyzeGenericDeclaration(SyntaxNodeAnalysisContext context)
+        {
+            var semanticModel = context.SemanticModel;
+
+            var declarationExpressionNode = context.Node as MemberDeclarationSyntax;
+
+            // Arity determines how many generic type arguments there are
+            // Imagine if only there was an IAritySyntax interface
+            switch (declarationExpressionNode)
+            {
+                case TypeDeclarationSyntax typeDeclaration:
+                    if (typeDeclaration.Arity == 0)
+                        return;
+                    break;
+                case DelegateDeclarationSyntax delegateDeclaration:
+                    if (delegateDeclaration.Arity == 0)
+                        return;
+                    break;
+                case MethodDeclarationSyntax methodDeclaration:
+                    if (methodDeclaration.Arity == 0)
+                        return;
+                    break;
+            }
+
+            var symbol = semanticModel.GetDeclaredSymbol(declarationExpressionNode);
+            AnalyzeGenericNameDefinition(context, symbol);
         }
 
-        private void AnalyzeGenericTypeDefinition(ISymbol symbol)
+        // Okay this needs some serious refactoring
+        private void AnalyzeGenericNameDefinition(SyntaxNodeAnalysisContext context, ISymbol symbol)
         {
             if (genericNames.ContainsInfo(symbol))
                 return;
@@ -76,10 +111,51 @@ namespace GenericsAnalyzer
             {
                 var parameter = typeParameters[i];
 
+                // This truly is ridiculous
                 var attributes = parameter.GetAttributes();
+                var typeParameterSyntaxNode = parameter.DeclaringSyntaxReferences[0].GetSyntax() as TypeParameterSyntax;
+                var lists = typeParameterSyntaxNode.AttributeLists;
+                var attributeSyntaxNodes = new List<AttributeSyntax>();
+                foreach (var l in lists)
+                    attributeSyntaxNodes.AddRange(l.Attributes);
+
                 var system = new TypeConstraintSystem();
-                foreach (var a in attributes)
+                for (int j = 0; j < attributes.Length; j++)
                 {
+                    var a = attributes[j];
+                    var attributeSyntaxNode = attributeSyntaxNodes[j];
+
+                    if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
+                    {
+                        if (!(symbol is INamedTypeSymbol type) || !type.TypeKind.CanInheritTypes())
+                        {
+                            var diagnostic = Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
+                            context.ReportDiagnostic(diagnostic);
+                            continue;
+                        }
+
+                        var inheritedTypes = new List<INamedTypeSymbol>();
+                        var baseType = type.BaseType;
+                        if (baseType != null)
+                            inheritedTypes.Add(baseType);
+                        inheritedTypes.AddRange(type.AllInterfaces);
+
+                        foreach (var inheritedType in inheritedTypes)
+                        {
+                            if (!inheritedType.IsGenericType)
+                                continue;
+
+                            // Recursively analyze base type definitions
+                            AnalyzeGenericNameDefinition(context, inheritedType);
+
+                            var typeArguments = inheritedType.TypeArguments;
+                            for (int k = 0; k < typeArguments.Length; k++)
+                                if (typeArguments[k].Name == parameter.Name)
+                                    system.InheritFrom(genericNames[inheritedType][k]);
+                        }
+                        continue;
+                    }
+
                     if (a.AttributeClass.Name == nameof(OnlyPermitSpecifiedTypesAttribute))
                     {
                         system.OnlyPermitSpecifiedTypes = true;
@@ -100,7 +176,7 @@ namespace GenericsAnalyzer
 
             genericNames[symbol] = constraints;
         }
-        private void AnalyzeGenericTypeUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
+        private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
         {
             var semanticModel = context.SemanticModel;
 
@@ -117,7 +193,7 @@ namespace GenericsAnalyzer
                 var argumentType = semanticModel.GetTypeInfo(argument).Type;
                 if (!system.IsPermitted(argumentType))
                 {
-                    var diagnostic = Diagnostic.Create(Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                    var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                     context.ReportDiagnostic(diagnostic);
                 }
             }

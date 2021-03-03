@@ -1,12 +1,13 @@
-﻿using Microsoft.CodeAnalysis.Diagnostics;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GenericsAnalyzer.Test
+namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public class PermittedTypeArgumentAnalyzerTests : BaseAnalyzerTests
+    public sealed class GA0001_Tests : BaseAnalyzerTests
     {
-        protected override string TestedDiagnosticID => PermittedTypeArgumentAnalyzer.DiagnosticID;
+        protected override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0001_Rule;
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
@@ -32,6 +33,91 @@ class B<T> : A<T>
 ";
 
             ValidateCode(testCode);
+        }
+
+        // Usage of prohibited type arguments in inheritance
+        [TestMethod]
+        public void IntermediateProhibitedGenericTypeUsage()
+        {
+            var testCode =
+@"
+using System;
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new A<int>();
+        new B<int>();
+        new A<↓string>();
+        new B<↓string>();
+    }
+}
+
+class A
+<
+    [ProhibitedTypes(typeof(string))]
+    T
+>
+{
+}
+class B
+<
+    [InheritBaseTypeUsageConstraints]
+    T
+> : A<T>
+{
+}
+";
+
+            AssertDiagnostics(testCode);
+        }
+
+        // Usage of prohibited type arguments in inheritance
+        [TestMethod]
+        public void IntermediateTwoClassProhibitedGenericTypeUsage()
+        {
+            var testCode =
+@"
+using System;
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new A<int>();
+        new C<int>();
+        new A<↓string>();
+        new C<↓string>();
+    }
+}
+
+class A
+<
+    [ProhibitedTypes(typeof(string))]
+    T
+>
+{
+}
+class B
+<
+    [InheritBaseTypeUsageConstraints]
+    T
+> : A<T>
+{
+}
+class C
+<
+    [InheritBaseTypeUsageConstraints]
+    T
+> : B<T>
+{
+}
+";
+
+            AssertDiagnostics(testCode);
         }
 
         // Usage of prohibited type arguments for class

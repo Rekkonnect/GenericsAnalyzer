@@ -133,6 +133,6 @@
     <value>Redundant usage of the attribute; the element '{0}' cannot inherit other types.</value>
   </data>
   <data name="GA0014_Title" xml:space="preserve">
-    <value>Redundant usage of the attribute</value>
+    <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>
   </data>
 </root>

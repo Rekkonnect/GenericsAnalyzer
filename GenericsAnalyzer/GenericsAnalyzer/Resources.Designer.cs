@@ -97,7 +97,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant usage of the attribute.
+        ///   Looks up a localized string similar to Redundant usage of InheritBaseTypeUsageConstraintsAttribute.
         /// </summary>
         internal static string GA0014_Title {
             get {

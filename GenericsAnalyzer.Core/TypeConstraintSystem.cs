@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using GenericsAnalyzer.Core.Utilities;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,11 @@ namespace GenericsAnalyzer.Core
         private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
         public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public void InheritFrom(TypeConstraintSystem other)
+        {
+            typeConstraintRules.AddOrSetRange(other.typeConstraintRules);
+        }
 
         public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
         public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)

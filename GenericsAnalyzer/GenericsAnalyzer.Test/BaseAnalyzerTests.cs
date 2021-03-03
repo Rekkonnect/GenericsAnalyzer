@@ -1,13 +1,14 @@
 ﻿using Gu.Roslyn.Asserts;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace GenericsAnalyzer.Test
 {
     public abstract class BaseAnalyzerTests
     {
-        protected abstract string TestedDiagnosticID { get; }
+        protected abstract DiagnosticDescriptor TestedDiagnosticRule { get; }
 
-        protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(PermittedTypeArgumentAnalyzer.DiagnosticID);
+        protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(TestedDiagnosticRule);
 
         protected abstract DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance();
 

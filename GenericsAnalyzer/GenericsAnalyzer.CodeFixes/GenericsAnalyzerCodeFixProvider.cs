@@ -21,7 +21,7 @@ namespace GenericsAnalyzer
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
-            get { return ImmutableArray.Create(PermittedTypeArgumentAnalyzer.DiagnosticID); }
+            get { return ImmutableArray.Create(DiagnosticDescriptors.GA0001_Rule.Id); }
         }
 
         public sealed override FixAllProvider GetFixAllProvider()

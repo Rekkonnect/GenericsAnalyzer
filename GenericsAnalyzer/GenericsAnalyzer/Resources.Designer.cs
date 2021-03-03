@@ -86,5 +86,23 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0001_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Redundant usage of the attribute; the element &apos;{0}&apos; cannot inherit other types..
+        /// </summary>
+        internal static string GA0014_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0014_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Redundant usage of the attribute.
+        /// </summary>
+        internal static string GA0014_Title {
+            get {
+                return ResourceManager.GetString("GA0014_Title", resourceCulture);
+            }
+        }
     }
 }

@@ -1,26 +1,26 @@
 name: Run Tests
- 
-on: [push]
- 
+
+on: [push, pull_request]
+
 jobs:
-  build:
-    runs-on: windows-latest
- 
-    steps:
-    - name: Checkout Code
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
       uses: actions/checkout@v1
-      
+
     - name: Setup Nuget.exe
       uses: warrenbuckley/Setup-Nuget@v1
-      
+
     - name: Restore packages
       run: nuget restore GenericsAnalyzer.sln
-      
+
     - name: Setup MSBuild.exe
       uses: warrenbuckley/Setup-MSBuild@v1
-      
+
     - name: Build with MSBuild
       run: msbuild GenericsAnalyzer.sln -p:Configuration=Release
-      
+
     - name: Run tests
       run: dotnet test ~/GenericsAnalyzer/GenericsAnalyzer.Test/GenericsAnalyzer.Test.csproj

@@ -35,8 +35,8 @@ namespace GenericsAnalyzer.Core
                 return false;
 
             var permission = IsPermitted(type, TypeConstraintReferencePoint.ExactType);
-            if (permission != null)
-                return permission.Value;
+            if (permission != PermissionResult.Unknown)
+                return permission == PermissionResult.Permitted;
 
             var interfaceQueue = new Queue<INamedTypeSymbol>(type.Interfaces);
             while (interfaceQueue.Any())
@@ -44,15 +44,15 @@ namespace GenericsAnalyzer.Core
                 var i = interfaceQueue.Dequeue();
 
                 permission = IsPermitted(i, TypeConstraintReferencePoint.BaseType);
-                if (permission != null)
-                    return permission.Value;
+                if (permission != PermissionResult.Unknown)
+                    return permission == PermissionResult.Permitted;
 
                 if (i.IsGenericType && !i.IsUnboundGenericType)
                 {
                     var unbound = i.ConstructUnboundGenericType();
                     permission = IsPermitted(unbound, TypeConstraintReferencePoint.BaseType);
-                    if (permission != null)
-                        return permission.Value;
+                    if (permission != PermissionResult.Unknown)
+                        return permission == PermissionResult.Permitted;
                 }
 
                 foreach (var indirectInterface in i.Interfaces)
@@ -62,8 +62,8 @@ namespace GenericsAnalyzer.Core
             do
             {
                 permission = IsPermitted(type, TypeConstraintReferencePoint.BaseType);
-                if (permission != null)
-                    return permission.Value;
+                if (permission != PermissionResult.Unknown)
+                    return permission == PermissionResult.Permitted;
 
                 type = type.BaseType;
             }
@@ -72,16 +72,16 @@ namespace GenericsAnalyzer.Core
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private bool? IsPermitted(ITypeSymbol type, TypeConstraintReferencePoint referencePoint)
+        private PermissionResult IsPermitted(ITypeSymbol type, TypeConstraintReferencePoint referencePoint)
         {
             if (!typeConstraintRules.ContainsKey(type))
-                return null;
+                return PermissionResult.Unknown;
 
             var rule = typeConstraintRules[type];
             if (rule.TypeReferencePoint == referencePoint)
-                return rule.Rule == ConstraintRule.Permit;
+                return (PermissionResult)rule.Rule;
 
-            return null;
+            return PermissionResult.Unknown;
         }
     }
 }

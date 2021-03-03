@@ -1,11 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
@@ -16,9 +11,9 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
-        // Usage of prohibited type arguments in inheritance
+        // Redundant usage of the attribute
         [TestMethod]
-        public void IntermediateProhibitedGenericTypeUsage()
+        public void RedundantUsageInFunctionAndDelegate()
         {
             var testCode =
 @"

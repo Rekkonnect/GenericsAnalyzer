@@ -118,21 +118,102 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="GA0001_Description" xml:space="preserve">
-    <value>The type '{0}' has specified explicit type constraints, preventing the type '{1}' from being used.</value>
-    <comment>An optional longer localizable description of the diagnostic.</comment>
+    <value>The type '{0}' has specified explicit type constraints, preventing the type '{1}' from being used</value>
   </data>
   <data name="GA0001_MessageFormat" xml:space="preserve">
-    <value>The type '{1}' cannot be used as a generic type argument for the type '{0}' in this position.</value>
-    <comment>The formattable message the diagnostic displays.</comment>
+    <value>The type '{1}' cannot be used as a generic type argument for the type '{0}' in this position</value>
   </data>
   <data name="GA0001_Title" xml:space="preserve">
     <value>Prohibited type argument</value>
-    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="GA0002_MessageFormat" xml:space="preserve">
+    <value>The type parameter '{0}' already includes a type constraint rule for the type '{1}'</value>
+  </data>
+  <data name="GA0002_Title" xml:space="preserve">
+    <value>Cannot apply multiple constraint rules for the same type</value>
+  </data>
+  <data name="GA0003_MessageFormat" xml:space="preserve">
+    <value>The type parameter '{0}' already includes a type constraint rule for the unbound version of the generic type '{1}'</value>
+  </data>
+  <data name="GA0003_Title" xml:space="preserve">
+    <value>Cannot include both a bound and an unbound version of the same type</value>
+  </data>
+  <data name="GA0004_MessageFormat" xml:space="preserve">
+    <value>The type '{0}' is an invalid type argument</value>
+  </data>
+  <data name="GA0004_Title" xml:space="preserve">
+    <value>Cannot assign an invalid type argument as a type constraint</value>
+  </data>
+  <data name="GA0005_MessageFormat" xml:space="preserve">
+    <value>The type '{0}' is prohibited from being used as a type argument for the type parameter '{1}'</value>
+  </data>
+  <data name="GA0005_Title" xml:space="preserve">
+    <value>Type prohibited from generic type constraints in the constraint clause</value>
+  </data>
+  <data name="GA0006_MessageFormat" xml:space="preserve">
+    <value>Prefer declaring the constraint of a single base bound interface type in the constraints clause</value>
+  </data>
+  <data name="GA0006_Title" xml:space="preserve">
+    <value>Declaration of single base bound interface type</value>
+  </data>
+  <data name="GA0007_MessageFormat" xml:space="preserve">
+    <value>Redundant explicitly permitted exact types; the only restrictions are explicit prohibited exact types</value>
+  </data>
+  <data name="GA0007_Title" xml:space="preserve">
+    <value>Redundant explicitly permitted exact types</value>
+  </data>
+  <data name="GA0008_MessageFormat" xml:space="preserve">
+    <value>Redundant base type rule; the given base type '{0}' is sealed</value>
+  </data>
+  <data name="GA0008_Title" xml:space="preserve">
+    <value>Redundant base type rule</value>
+  </data>
+  <data name="GA0009_MessageFormat" xml:space="preserve">
+    <value>The type '{0}' was declared more than once in the same constraint rule</value>
+  </data>
+  <data name="GA0009_Title" xml:space="preserve">
+    <value>Duplicate type rule</value>
+  </data>
+  <data name="GA0010_MessageFormat" xml:space="preserve">
+    <value>Redundant explicitly prohibited exact types; the only permitted types are exactly specified</value>
+  </data>
+  <data name="GA0010_Title" xml:space="preserve">
+    <value>Redundant explicitly prohibited exact types</value>
+  </data>
+  <data name="GA0011_MessageFormat" xml:space="preserve">
+    <value>Redundant explicitly permitted exact types; no prohibitions or explicit specification for only permitting the specified permitted types via OnlyPermitSpecifiedTypesAttribute</value>
+  </data>
+  <data name="GA0011_Title" xml:space="preserve">
+    <value>Redundant explicitly permitted exact types</value>
+  </data>
+  <data name="GA0012_MessageFormat" xml:space="preserve">
+    <value>Usage of the attribute requires that at least one type is permitted</value>
+  </data>
+  <data name="GA0012_Title" xml:space="preserve">
+    <value>Invalid usage of OnlyPermitSpecifiedTypesAttribute</value>
+  </data>
+  <data name="GA0013_MessageFormat" xml:space="preserve">
+    <value>The only explicitly permitted type argument for the '{0}' type parameter is '{1}'</value>
+  </data>
+  <data name="GA0013_Title" xml:space="preserve">
+    <value>Only one type is explicitly permitted</value>
   </data>
   <data name="GA0014_MessageFormat" xml:space="preserve">
-    <value>Redundant usage of the attribute; the element '{0}' cannot inherit other types.</value>
+    <value>Redundant usage of the attribute; the element '{0}' cannot inherit other types</value>
   </data>
   <data name="GA0014_Title" xml:space="preserve">
+    <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>
+  </data>
+  <data name="GA0015_MessageFormat" xml:space="preserve">
+    <value>Redundant usage of the attribute; the type '{0}' does not inherit other types</value>
+  </data>
+  <data name="GA0015_Title" xml:space="preserve">
+    <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>
+  </data>
+  <data name="GA0016_MessageFormat" xml:space="preserve">
+    <value>Redundant usage of the attribute; the type parameter '{0}' is not used in any of the base types</value>
+  </data>
+  <data name="GA0016_Title" xml:space="preserve">
     <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>
   </data>
 </root>

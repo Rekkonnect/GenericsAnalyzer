@@ -10,17 +10,5 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v1
 
-    #- name: Setup Nuget.exe
-    #  uses: nuget/setup-nuget@v1.0.5
-
-    #- name: Restore packages
-    #  run: nuget restore GenericsAnalyzer.sln
-
-    #- name: Setup MSBuild.exe
-    #  uses: microsoft/setup-msbuild@v1.0.2
-
-    #- name: Build with MSBuild
-    #  run: msbuild GenericsAnalyzer.sln -p:Configuration=Release
-
-    - name: Run tests
+    - name: Run Tests
       run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Test/GenericsAnalyzer.Test.csproj

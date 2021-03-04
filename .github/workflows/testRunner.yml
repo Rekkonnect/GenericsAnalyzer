@@ -10,11 +10,11 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v1
 
-    - name: Setup Nuget.exe
-      uses: nuget/setup-nuget@v1.0.5
+    #- name: Setup Nuget.exe
+    #  uses: nuget/setup-nuget@v1.0.5
 
-    - name: Restore packages
-      run: nuget restore GenericsAnalyzer.sln
+    #- name: Restore packages
+    #  run: nuget restore GenericsAnalyzer.sln
 
     #- name: Setup MSBuild.exe
     #  uses: microsoft/setup-msbuild@v1.0.2

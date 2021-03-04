@@ -18,6 +18,7 @@ namespace GenericsAnalyzer
         {
             GA0001_Rule,
             GA0014_Rule,
+            GA0017_Rule,
         }.ToImmutableArray();
 
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
@@ -192,7 +193,6 @@ namespace GenericsAnalyzer
                 var system = constraints[i];
                 var argumentType = semanticModel.GetTypeInfo(argument).Type;
 
-                bool isPermitted = false;
                 if (argumentType is ITypeParameterSymbol declaredTypeParameter)
                 {
                     var declaringElement = declaredTypeParameter.DeclaringMethod;
@@ -206,20 +206,22 @@ namespace GenericsAnalyzer
                     {
                         if (declaringElementTypeParameters[j].Name == declaredTypeParameter.Name)
                         {
-                            isPermitted = system.IsPermitted(declaredTypeParameter, j, genericNames);
+                            if (!system.IsPermitted(declaredTypeParameter, j, genericNames))
+                            {
+                                var diagnostic = Diagnostic.Create(GA0017_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                                context.ReportDiagnostic(diagnostic);
+                            }
                             break;
                         }
                     }
                 }
                 else
                 {
-                    isPermitted = system.IsPermitted(argumentType);
-                }
-
-                if (!isPermitted)
-                {
-                    var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
-                    context.ReportDiagnostic(diagnostic);
+                    if (!system.IsPermitted(argumentType))
+                    {
+                        var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                        context.ReportDiagnostic(diagnostic);
+                    }
                 }
             }
         }

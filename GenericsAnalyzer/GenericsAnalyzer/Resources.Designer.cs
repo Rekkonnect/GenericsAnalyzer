@@ -104,5 +104,32 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0014_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The explicit type constraints for generic type parameter &apos;{0}&apos; do not match those of type parameter &apos;{1}&apos;.
+        /// </summary>
+        internal static string GA0017_Description {
+            get {
+                return ResourceManager.GetString("GA0017_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type parameter &apos;{1}&apos; cannot be used as a generic type argument for the type &apos;{0}&apos; in this position.
+        /// </summary>
+        internal static string GA0017_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0017_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type argument explicit type constraint mismatch.
+        /// </summary>
+        internal static string GA0017_Title {
+            get {
+                return ResourceManager.GetString("GA0017_Title", resourceCulture);
+            }
+        }
     }
 }

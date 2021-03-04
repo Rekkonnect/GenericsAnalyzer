@@ -11,14 +11,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
-        // No diagnostics expected to show up
-        [TestMethod]
-        public void EmptyCode()
-        {
-            ValidateCode(@"");
-        }
-
-        // Usage of type arguments in inheritance
         [TestMethod]
         public void IntermediateGenericTypeUsage()
         {
@@ -35,7 +27,89 @@ class B<T> : A<T>
             ValidateCode(testCode);
         }
 
-        // Usage of prohibited type arguments in inheritance
+        [TestMethod]
+        public void IntermediateSubsetGenericTypeUsage()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new A<int>();
+        new B<int>();
+        new A<↓A>();
+        new B<↓A>();
+        new A<B>();
+        new B<↓B>();
+    }
+}
+
+class A
+<
+    [ProhibitedBaseTypes(typeof(IA))]
+    T
+>
+{
+}
+class B
+<
+    [ProhibitedBaseTypes(typeof(IB))]
+    T
+> : A<T>
+{
+}
+
+interface IA : IB { }
+interface IB { }
+
+class A : IA { }
+class B : IB { }
+";
+
+            AssertDiagnostics(testCode);
+        }
+
+        [TestMethod]
+        public void IntermediateExplicitlyPermittedGenericTypeUsage()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new A<int>();
+        new B<int>();
+        new A<↓string>();
+        new B<↓string>();
+    }
+}
+
+class A
+<
+    [PermittedTypes(typeof(int), typeof(uint))]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+{
+}
+class B
+<
+    [InheritBaseTypeUsageConstraints]
+    T
+> : A<T>
+{
+}
+";
+
+            AssertDiagnostics(testCode);
+        }
+
         [TestMethod]
         public void IntermediateProhibitedGenericTypeUsage()
         {
@@ -74,7 +148,6 @@ class B
             AssertDiagnostics(testCode);
         }
 
-        // Usage of prohibited type arguments in inheritance
         [TestMethod]
         public void IntermediateTwoClassProhibitedGenericTypeUsage()
         {
@@ -120,7 +193,6 @@ class C
             AssertDiagnostics(testCode);
         }
 
-        // Usage of prohibited type arguments for class
         [TestMethod]
         public void GenericClassTestCode()
         {
@@ -154,7 +226,6 @@ class Generic
             AssertDiagnostics(testCode);
         }
 
-        // Usage of prohibited type arguments for function
         [TestMethod]
         public void GenericFunctionTestCode()
         {
@@ -189,7 +260,6 @@ class Program
             AssertDiagnostics(testCode);
         }
 
-        // Usage of prohibited type arguments for class with OnlyPermitSpecifiedTypesAttribute
         [TestMethod]
         public void OnlyPermitSpecifiedTypesTestCode()
         {

@@ -1,0 +1,14 @@
+name: Run Tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v1
+
+    - name: Run Tests
+      run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Test/GenericsAnalyzer.Test.csproj

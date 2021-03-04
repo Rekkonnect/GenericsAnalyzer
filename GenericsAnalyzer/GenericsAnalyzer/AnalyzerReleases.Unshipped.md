@@ -19,3 +19,4 @@ GA0012 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/
 GA0013 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0013.md)
 GA0015 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0015.md)
 GA0016 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0016.md)
+GA0017 | API Restrictions | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0017.md)

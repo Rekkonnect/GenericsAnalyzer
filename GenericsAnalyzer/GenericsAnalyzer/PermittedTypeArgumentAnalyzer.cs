@@ -18,6 +18,7 @@ namespace GenericsAnalyzer
         {
             GA0001_Rule,
             GA0014_Rule,
+            GA0017_Rule,
         }.ToImmutableArray();
 
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
@@ -148,10 +149,10 @@ namespace GenericsAnalyzer
                             // Recursively analyze base type definitions
                             AnalyzeGenericNameDefinition(context, inheritedType);
 
-                            var typeArguments = inheritedType.TypeArguments;
-                            for (int k = 0; k < typeArguments.Length; k++)
-                                if (typeArguments[k].Name == parameter.Name)
-                                    system.InheritFrom(genericNames[inheritedType][k]);
+                            var inheritedTypeParameters = inheritedType.TypeParameters;
+                            for (int k = 0; k < inheritedTypeParameters.Length; k++)
+                                if (inheritedTypeParameters[k].Name == parameter.Name)
+                                    system.InheritFrom(inheritedTypeParameters[k], genericNames[inheritedType][k]);
                         }
                         continue;
                     }
@@ -191,10 +192,36 @@ namespace GenericsAnalyzer
 
                 var system = constraints[i];
                 var argumentType = semanticModel.GetTypeInfo(argument).Type;
-                if (!system.IsPermitted(argumentType))
+
+                if (argumentType is ITypeParameterSymbol declaredTypeParameter)
                 {
-                    var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
-                    context.ReportDiagnostic(diagnostic);
+                    var declaringElement = declaredTypeParameter.DeclaringMethod;
+                    ImmutableArray<ITypeParameterSymbol> declaringElementTypeParameters;
+                    if (declaringElement is null)
+                        declaringElementTypeParameters = declaredTypeParameter.DeclaringType.TypeParameters;
+                    else
+                        declaringElementTypeParameters = declaringElement.TypeParameters;
+
+                    for (int j = 0; j < declaringElementTypeParameters.Length; j++)
+                    {
+                        if (declaringElementTypeParameters[j].Name == declaredTypeParameter.Name)
+                        {
+                            if (!system.IsPermitted(declaredTypeParameter, j, genericNames))
+                            {
+                                var diagnostic = Diagnostic.Create(GA0017_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                                context.ReportDiagnostic(diagnostic);
+                            }
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (!system.IsPermitted(argumentType))
+                    {
+                        var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                        context.ReportDiagnostic(diagnostic);
+                    }
                 }
             }
         }

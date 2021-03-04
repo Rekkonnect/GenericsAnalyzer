@@ -10,11 +10,15 @@ namespace GenericsAnalyzer.Core
     {
         private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
+        private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+
         public bool OnlyPermitSpecifiedTypes { get; set; }
 
-        public void InheritFrom(TypeConstraintSystem other)
+        public void InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
         {
-            typeConstraintRules.AddOrSetRange(other.typeConstraintRules);
+            OnlyPermitSpecifiedTypes |= baseSystem.OnlyPermitSpecifiedTypes;
+            typeConstraintRules.AddOrSetRange(baseSystem.typeConstraintRules);
+            inheritedTypes.Add(baseTypeParameter);
         }
 
         public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
@@ -27,6 +31,29 @@ namespace GenericsAnalyzer.Core
                 else
                     typeConstraintRules.Add(t, rule);
             }
+        }
+
+        public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
+        public bool SubsetOf(TypeConstraintSystem other)
+        {
+            if (OnlyPermitSpecifiedTypes)
+                return other.OnlyPermitSpecifiedTypes;
+
+            foreach (var rule in other.typeConstraintRules)
+                if (IsPermitted(rule.Key) != (rule.Value.Rule is ConstraintRule.Permit))
+                    return false;
+
+            return true;
+        }
+
+        public bool IsPermitted(ITypeParameterSymbol typeParameter, int typeParameterDeclarationIndex, GenericTypeConstraintInfoCollection infos)
+        {
+            if (inheritedTypes.Contains(typeParameter))
+                return true;
+
+            var declaringElementTypeParameterSystems = infos[(ISymbol)typeParameter.DeclaringType ?? typeParameter.DeclaringMethod];
+            var system = declaringElementTypeParameterSystems[typeParameterDeclarationIndex];
+            return SupersetOf(system);
         }
 
         public bool IsPermitted(ITypeSymbol type)

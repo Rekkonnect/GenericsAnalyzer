@@ -1,6 +1,7 @@
 ﻿using Gu.Roslyn.Asserts;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test
 {
@@ -19,6 +20,13 @@ namespace GenericsAnalyzer.Test
         protected void AssertDiagnostics(string testCode)
         {
             RoslynAssert.Diagnostics(GetNewDiagnosticAnalyzerInstance(), ExpectedDiagnostic, testCode);
+        }
+
+        // No diagnostics expected to show up
+        [TestMethod]
+        public void EmptyCode()
+        {
+            ValidateCode(@"");
         }
     }
 }

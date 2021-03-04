@@ -61,17 +61,9 @@ class B
 > : A<T>
 {
 }
-class C
-<
-    [ProhibitedBaseTypes(typeof(IC))]
-    T
-> : A<↓T>
-{
-}
 
 interface IA : IB { }
 interface IB { }
-interface IC : IA { }
 
 class A : IA { }
 class B : IB { }

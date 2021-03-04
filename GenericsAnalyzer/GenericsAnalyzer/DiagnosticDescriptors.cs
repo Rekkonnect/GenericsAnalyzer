@@ -10,6 +10,7 @@ namespace GenericsAnalyzer
         #region Rules
         public static readonly DiagnosticDescriptor GA0001_Rule = GetDiagnosticDescriptor(1, APIRestrictionsCategory, DiagnosticSeverity.Error);
         public static readonly DiagnosticDescriptor GA0014_Rule = GetDiagnosticDescriptor(14, BrevityCategory, DiagnosticSeverity.Warning);
+        public static readonly DiagnosticDescriptor GA0017_Rule = GetDiagnosticDescriptor(17, APIRestrictionsCategory, DiagnosticSeverity.Error);
         #endregion
 
         public static string GetDiagnosticID(int id) => $"GA{id:0000}";

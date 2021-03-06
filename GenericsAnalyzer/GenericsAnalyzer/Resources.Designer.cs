@@ -106,7 +106,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type parameter &apos;{0}&apos; already includes a type constraint rule for the unbound version of the generic type &apos;{1}&apos;.
+        ///   Looks up a localized string similar to The type parameter &apos;{0}&apos; already includes the same type constraint rule for the unbound version of the generic type &apos;{1}&apos;.
         /// </summary>
         internal static string GA0003_MessageFormat {
             get {
@@ -115,7 +115,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot include both a bound and an unbound version of the same type.
+        ///   Looks up a localized string similar to Redundant type constraint rule for both a bound and the unbound version of the same type.
         /// </summary>
         internal static string GA0003_Title {
             get {
@@ -169,7 +169,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Declaration of single base bound interface type.
+        ///   Looks up a localized string similar to Constraint only permits usage of one base bound interface type.
         /// </summary>
         internal static string GA0006_Title {
             get {
@@ -178,7 +178,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted exact types; the only restrictions are explicit prohibited exact types.
+        ///   Looks up a localized string similar to Redundant explicitly permitted types; the only restrictions are explicit prohibited exact types.
         /// </summary>
         internal static string GA0007_MessageFormat {
             get {
@@ -187,7 +187,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted exact types.
+        ///   Looks up a localized string similar to Redundant explicitly permitted types.
         /// </summary>
         internal static string GA0007_Title {
             get {
@@ -232,7 +232,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly prohibited exact types; the only permitted types are exactly specified.
+        ///   Looks up a localized string similar to Redundant explicitly prohibited types; the only permitted types are exactly specified.
         /// </summary>
         internal static string GA0010_MessageFormat {
             get {
@@ -241,7 +241,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly prohibited exact types.
+        ///   Looks up a localized string similar to Redundant explicitly prohibited types.
         /// </summary>
         internal static string GA0010_Title {
             get {
@@ -250,7 +250,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted exact types; no prohibitions or explicit specification for only permitting the specified permitted types via OnlyPermitSpecifiedTypesAttribute.
+        ///   Looks up a localized string similar to Redundant explicitly permitted types; no prohibitions or explicit specification for only permitting the specified permitted types via OnlyPermitSpecifiedTypesAttribute.
         /// </summary>
         internal static string GA0011_MessageFormat {
             get {
@@ -259,7 +259,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted exact types.
+        ///   Looks up a localized string similar to Redundant explicitly permitted types.
         /// </summary>
         internal static string GA0011_Title {
             get {

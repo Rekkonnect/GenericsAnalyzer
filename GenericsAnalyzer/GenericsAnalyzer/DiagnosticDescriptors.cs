@@ -14,7 +14,7 @@ namespace GenericsAnalyzer
         #region Rules
         public static readonly DiagnosticDescriptor GA0001_Rule = GetDiagnosticDescriptor(1, APIRestrictionsCategory, DiagnosticSeverity.Error);
         public static readonly DiagnosticDescriptor GA0002_Rule = GetDiagnosticDescriptor(2, ValidityCategory, DiagnosticSeverity.Error);
-        public static readonly DiagnosticDescriptor GA0003_Rule = GetDiagnosticDescriptor(3, ValidityCategory, DiagnosticSeverity.Error);
+        public static readonly DiagnosticDescriptor GA0003_Rule = GetDiagnosticDescriptor(3, BrevityCategory, DiagnosticSeverity.Warning);
         public static readonly DiagnosticDescriptor GA0004_Rule = GetDiagnosticDescriptor(4, ValidityCategory, DiagnosticSeverity.Error);
         public static readonly DiagnosticDescriptor GA0005_Rule = GetDiagnosticDescriptor(5, ValidityCategory, DiagnosticSeverity.Error);
         public static readonly DiagnosticDescriptor GA0006_Rule = GetDiagnosticDescriptor(6, BrevityCategory, DiagnosticSeverity.Warning);
@@ -31,11 +31,14 @@ namespace GenericsAnalyzer
         public static readonly DiagnosticDescriptor GA0017_Rule = GetDiagnosticDescriptor(17, APIRestrictionsCategory, DiagnosticSeverity.Error);
         #endregion
 
+        private const string baseRuleDocsURL = "https://github.com/AlFasGD/GenericsAnalyzer/blob/master/docs/rules";
+
+        public static string GetHelpLinkURI(int id) => $"{baseRuleDocsURL}/{GetDiagnosticID(id)}.md";
         public static string GetDiagnosticID(int id) => $"GA{id:0000}";
 
         private static DiagnosticDescriptor GetDiagnosticDescriptor(int id, string category, DiagnosticSeverity severity)
         {
-            return new DiagnosticDescriptor(GetDiagnosticID(id), GetTitle(id), GetMessageFormat(id), category, severity, true, description: GetDescription(id));
+            return new DiagnosticDescriptor(GetDiagnosticID(id), GetTitle(id), GetMessageFormat(id), category, severity, true, helpLinkUri: GetHelpLinkURI(id), description: GetDescription(id));
         }
 
         private static LocalizableResourceString GetTitle(int id) => GetResourceString(id, "Title");

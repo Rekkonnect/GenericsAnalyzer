@@ -7,7 +7,7 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0001.md)
+GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0001.md)
 
 ## Release 1.0.2
 
@@ -15,4 +15,4 @@ GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentatio
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-GA0014 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0014.md)
+GA0014 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0014.md)

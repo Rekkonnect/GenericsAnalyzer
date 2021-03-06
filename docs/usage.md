@@ -17,7 +17,7 @@ public class C
     T
 >
 ```
-On the following code snippet, the analyzer will emit [GA0001](docs/rules/GA0001.md) on the `ulong` word:
+On the following code snippet, the analyzer will emit [GA0001](rules/GA0001.md) on the `ulong` word:
 ```csharp
 new C<ulong>();
 ```
@@ -50,7 +50,7 @@ public class C
     U
 >
 ```
-On the following code snippet, the analyzer will emit [GA0001](docs/rules/GA0001.md) on the `List<int>` word because `List<int>` implements `IList<int>`, which is prohibited from the analyzer's type constraints:
+On the following code snippet, the analyzer will emit [GA0001](rules/GA0001.md) on the `List<int>` word because `List<int>` implements `IList<int>`, which is prohibited from the analyzer's type constraints:
 ```csharp
 new C<List<int>, int>();
 ```

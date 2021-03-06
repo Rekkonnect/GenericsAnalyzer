@@ -6,7 +6,7 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 GA0002 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0002.md)
-GA0003 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0003.md)
+GA0003 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0003.md)
 GA0004 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0004.md)
 GA0005 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0005.md)
 GA0006 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0006.md)
@@ -20,3 +20,4 @@ GA0013 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/
 GA0015 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0015.md)
 GA0016 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0016.md)
 GA0017 | API Restrictions | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0017.md)
+GA0018 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](docs/rules/GA0018.md)

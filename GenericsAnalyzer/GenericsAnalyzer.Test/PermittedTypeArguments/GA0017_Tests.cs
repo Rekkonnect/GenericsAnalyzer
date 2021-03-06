@@ -89,9 +89,12 @@ class B
 > : A<T>
 {
 }
+class C<T> : A<↓T>
+{
+}
 ";
 
-            ValidateCode(testCode);
+            AssertDiagnostics(testCode);
         }
 
         [TestMethod]

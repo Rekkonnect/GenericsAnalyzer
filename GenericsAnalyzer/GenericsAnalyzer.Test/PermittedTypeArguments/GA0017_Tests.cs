@@ -45,14 +45,14 @@ class B
 <
     [ProhibitedBaseTypes(typeof(IB))]
     T
-> : A<T>
+> : A<↓T>
 {
 }
 class C
 <
     [ProhibitedBaseTypes(typeof(IC))]
     T
-> : A<↓T>
+> : A<T>
 {
 }
 

@@ -37,7 +37,8 @@ namespace GenericsAnalyzer.Core
         public bool SubsetOf(TypeConstraintSystem other)
         {
             if (OnlyPermitSpecifiedTypes)
-                return other.OnlyPermitSpecifiedTypes;
+                if (!other.OnlyPermitSpecifiedTypes)
+                    return false;
 
             foreach (var rule in other.typeConstraintRules)
                 if (IsPermitted(rule.Key) != (rule.Value.Rule is ConstraintRule.Permit))
@@ -53,7 +54,7 @@ namespace GenericsAnalyzer.Core
 
             var declaringElementTypeParameterSystems = infos[(ISymbol)typeParameter.DeclaringType ?? typeParameter.DeclaringMethod];
             var system = declaringElementTypeParameterSystems[typeParameterDeclarationIndex];
-            return SupersetOf(system);
+            return SubsetOf(system);
         }
 
         public bool IsPermitted(ITypeSymbol type)

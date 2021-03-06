@@ -36,13 +36,22 @@ namespace GenericsAnalyzer.Core
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
         public bool SubsetOf(TypeConstraintSystem other)
         {
-            if (OnlyPermitSpecifiedTypes)
-                if (!other.OnlyPermitSpecifiedTypes)
+            if (!OnlyPermitSpecifiedTypes)
+                if (other.OnlyPermitSpecifiedTypes)
                     return false;
 
             foreach (var rule in other.typeConstraintRules)
-                if (IsPermitted(rule.Key) != (rule.Value.Rule is ConstraintRule.Permit))
-                    return false;
+            {
+                switch (rule.Value.Rule)
+                {
+                    case ConstraintRule.Permit:
+                        continue;
+                    case ConstraintRule.Prohibit:
+                        if (IsPermitted(rule.Key))
+                            return false;
+                        break;
+                }
+            }
 
             return true;
         }
@@ -54,7 +63,7 @@ namespace GenericsAnalyzer.Core
 
             var declaringElementTypeParameterSystems = infos[(ISymbol)typeParameter.DeclaringType ?? typeParameter.DeclaringMethod];
             var system = declaringElementTypeParameterSystems[typeParameterDeclarationIndex];
-            return SubsetOf(system);
+            return SupersetOf(system);
         }
 
         public bool IsPermitted(ITypeSymbol type)
@@ -62,7 +71,7 @@ namespace GenericsAnalyzer.Core
             if (type is null)
                 return false;
 
-            var permission = IsPermitted(type, TypeConstraintReferencePoint.ExactType);
+            var permission = IsPermitted(type, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
             if (permission != PermissionResult.Unknown)
                 return permission == PermissionResult.Permitted;
 
@@ -100,13 +109,13 @@ namespace GenericsAnalyzer.Core
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private PermissionResult IsPermitted(ITypeSymbol type, TypeConstraintReferencePoint referencePoint)
+        private PermissionResult IsPermitted(ITypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
         {
             if (!typeConstraintRules.ContainsKey(type))
                 return PermissionResult.Unknown;
 
             var rule = typeConstraintRules[type];
-            if (rule.TypeReferencePoint == referencePoint)
+            if (referencePoints.Contains(rule.TypeReferencePoint))
                 return (PermissionResult)rule.Rule;
 
             return PermissionResult.Unknown;

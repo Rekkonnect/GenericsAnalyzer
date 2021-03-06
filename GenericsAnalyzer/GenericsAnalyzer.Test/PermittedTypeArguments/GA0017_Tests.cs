@@ -45,14 +45,14 @@ class B
 <
     [ProhibitedBaseTypes(typeof(IB))]
     T
-> : A<↓T>
+> : A<T>
 {
 }
 class C
 <
     [ProhibitedBaseTypes(typeof(IC))]
     T
-> : A<T>
+> : A<↓T>
 {
 }
 
@@ -118,6 +118,39 @@ class B
 > : A<T>
 {
 }
+";
+
+            ValidateCode(testCode);
+        }
+
+        [TestMethod]
+        public void SubsetVarianceTest()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+
+class A
+<
+    [PermittedBaseTypes(typeof(ID))]
+    [ProhibitedBaseTypes(typeof(IA), typeof(IC))]
+    T
+>
+{
+}
+class B
+<
+    [ProhibitedBaseTypes(typeof(IBase))]
+    T
+> : A<T>
+{
+}
+
+interface IBase { }
+interface IA : IBase { }
+interface IB : IBase { }
+interface IC : IBase { }
+interface ID : IC { }
 ";
 
             ValidateCode(testCode);

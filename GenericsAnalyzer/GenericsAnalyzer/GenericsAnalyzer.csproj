@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <IsPackable>false</IsPackable>
-
-    <!-- Avoid ID conflicts with the package project. -->
-    <PackageId>*$(MSBuildProjectFullPath)*</PackageId>
+    <PackageId>GenericsAnalyzer</PackageId>
     <Version>1.0.4</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Alex Kalfakakos</Authors>
+    <Company />
+    <Copyright>© 2021, Alex Kalfakakos</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
+    <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

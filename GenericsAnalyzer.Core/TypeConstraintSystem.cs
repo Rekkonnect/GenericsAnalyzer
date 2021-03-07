@@ -8,7 +8,7 @@ namespace GenericsAnalyzer.Core
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
-        private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
+        private Dictionary<INamedTypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<INamedTypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
 
@@ -21,8 +21,8 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
-        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
+        public void Add(TypeConstraintRule rule, params INamedTypeSymbol[] types) => Add(rule, (IEnumerable<INamedTypeSymbol>)types);
+        public void Add(TypeConstraintRule rule, IEnumerable<INamedTypeSymbol> types)
         {
             foreach (var t in types)
             {
@@ -36,12 +36,22 @@ namespace GenericsAnalyzer.Core
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
         public bool SubsetOf(TypeConstraintSystem other)
         {
-            if (OnlyPermitSpecifiedTypes)
-                return other.OnlyPermitSpecifiedTypes;
+            if (!OnlyPermitSpecifiedTypes)
+                if (other.OnlyPermitSpecifiedTypes)
+                    return false;
 
             foreach (var rule in other.typeConstraintRules)
-                if (IsPermitted(rule.Key) != (rule.Value.Rule is ConstraintRule.Permit))
-                    return false;
+            {
+                switch (rule.Value.Rule)
+                {
+                    case ConstraintRule.Permit:
+                        continue;
+                    case ConstraintRule.Prohibit:
+                        if (IsPermitted(rule.Key))
+                            return false;
+                        break;
+                }
+            }
 
             return true;
         }
@@ -56,12 +66,12 @@ namespace GenericsAnalyzer.Core
             return SupersetOf(system);
         }
 
-        public bool IsPermitted(ITypeSymbol type)
+        public bool IsPermitted(INamedTypeSymbol type)
         {
             if (type is null)
                 return false;
 
-            var permission = IsPermitted(type, TypeConstraintReferencePoint.ExactType);
+            var permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
             if (permission != PermissionResult.Unknown)
                 return permission == PermissionResult.Permitted;
 
@@ -70,17 +80,9 @@ namespace GenericsAnalyzer.Core
             {
                 var i = interfaceQueue.Dequeue();
 
-                permission = IsPermitted(i, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(i, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
-
-                if (i.IsGenericType && !i.IsUnboundGenericType)
-                {
-                    var unbound = i.ConstructUnboundGenericType();
-                    permission = IsPermitted(unbound, TypeConstraintReferencePoint.BaseType);
-                    if (permission != PermissionResult.Unknown)
-                        return permission == PermissionResult.Permitted;
-                }
 
                 foreach (var indirectInterface in i.Interfaces)
                     interfaceQueue.Enqueue(indirectInterface);
@@ -88,7 +90,7 @@ namespace GenericsAnalyzer.Core
 
             do
             {
-                permission = IsPermitted(type, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
 
@@ -99,13 +101,30 @@ namespace GenericsAnalyzer.Core
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private PermissionResult IsPermitted(ITypeSymbol type, TypeConstraintReferencePoint referencePoint)
+        private PermissionResult IsPermittedWithUnbound(INamedTypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
+        {
+            var permission = IsPermitted(type, referencePoints);
+            if (permission != PermissionResult.Unknown)
+                return permission;
+
+            if (type.IsGenericType && !type.IsUnboundGenericType)
+            {
+                var unbound = type.ConstructUnboundGenericType();
+                permission = IsPermitted(unbound, referencePoints);
+                if (permission != PermissionResult.Unknown)
+                    return permission;
+            }
+
+            return PermissionResult.Unknown;
+        }
+
+        private PermissionResult IsPermitted(INamedTypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
         {
             if (!typeConstraintRules.ContainsKey(type))
                 return PermissionResult.Unknown;
 
             var rule = typeConstraintRules[type];
-            if (rule.TypeReferencePoint == referencePoint)
+            if (referencePoints.Contains(rule.TypeReferencePoint))
                 return (PermissionResult)rule.Rule;
 
             return PermissionResult.Unknown;

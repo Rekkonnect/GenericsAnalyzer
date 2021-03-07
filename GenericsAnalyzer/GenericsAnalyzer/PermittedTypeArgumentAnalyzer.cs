@@ -22,7 +22,6 @@ namespace GenericsAnalyzer
         }.ToImmutableArray();
 
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
-        private readonly GenericNameUsageCollection genericTypeUsages = new GenericNameUsageCollection();
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => supportedDiagnostics;
 
@@ -57,7 +56,6 @@ namespace GenericsAnalyzer
             var symbolInfo = semanticModel.GetSymbolInfo(genericNameNode);
             var symbol = symbolInfo.Symbol;
 
-            genericTypeUsages.Register(symbol, genericNameNode);
             var originalDefinition = symbol.OriginalDefinition;
             AnalyzeGenericNameDefinition(context, originalDefinition);
             AnalyzeGenericNameUsage(context, symbol, genericNameNode);
@@ -112,19 +110,13 @@ namespace GenericsAnalyzer
             {
                 var parameter = typeParameters[i];
 
-                // This truly is ridiculous
                 var attributes = parameter.GetAttributes();
-                var typeParameterSyntaxNode = parameter.DeclaringSyntaxReferences[0].GetSyntax() as TypeParameterSyntax;
-                var lists = typeParameterSyntaxNode.AttributeLists;
-                var attributeSyntaxNodes = new List<AttributeSyntax>();
-                foreach (var l in lists)
-                    attributeSyntaxNodes.AddRange(l.Attributes);
 
                 var system = new TypeConstraintSystem();
                 for (int j = 0; j < attributes.Length; j++)
                 {
                     var a = attributes[j];
-                    var attributeSyntaxNode = attributeSyntaxNodes[j];
+                    var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 
                     if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
                     {
@@ -217,7 +209,7 @@ namespace GenericsAnalyzer
                 }
                 else
                 {
-                    if (!system.IsPermitted(argumentType))
+                    if (!system.IsPermitted(argumentType as INamedTypeSymbol))
                     {
                         var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                         context.ReportDiagnostic(diagnostic);

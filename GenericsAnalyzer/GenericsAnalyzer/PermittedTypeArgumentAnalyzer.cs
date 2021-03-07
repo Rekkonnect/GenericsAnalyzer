@@ -12,19 +12,6 @@ using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
 {
-    public partial class C
-    <
-        [PermittedBaseTypes(typeof(int))]
-        T
-    >
-    { }
-    public partial class C
-    <
-        [ProhibitedBaseTypes(typeof(int))]
-        T
-    >
-    { }
-
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
     {
@@ -36,7 +23,6 @@ namespace GenericsAnalyzer
         }.ToImmutableArray();
 
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
-        private readonly GenericNameUsageCollection genericTypeUsages = new GenericNameUsageCollection();
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => supportedDiagnostics;
 
@@ -71,7 +57,6 @@ namespace GenericsAnalyzer
             var symbolInfo = semanticModel.GetSymbolInfo(genericNameNode);
             var symbol = symbolInfo.Symbol;
 
-            genericTypeUsages.Register(symbol, genericNameNode);
             var originalDefinition = symbol.OriginalDefinition;
             AnalyzeGenericNameDefinition(context, originalDefinition);
             AnalyzeGenericNameUsage(context, symbol, genericNameNode);

@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer

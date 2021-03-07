@@ -16,3 +16,11 @@ GA0001 | API Restrictions | Error | PermittedTypeArgumentAnalyzer, [Documentatio
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 GA0014 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0014.md)
+
+## Release 1.0.4
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+GA0017 | API Restrictions | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0017.md)

@@ -2,15 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
+    <IsPackable>false</IsPackable>
     <PackageId>GenericsAnalyzer</PackageId>
     <Version>1.0.4</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Alex Kalfakakos</Authors>
     <Company />
     <Copyright>© 2021, Alex Kalfakakos</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
+    <Description>A Roslyn analyzer that empowers usage of generics through attributes.</Description>
   </PropertyGroup>
 
   <ItemGroup>

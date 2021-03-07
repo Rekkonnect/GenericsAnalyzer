@@ -9,20 +9,17 @@
 
   <PropertyGroup>
     <PackageId>GenericsAnalyzer</PackageId>
-    <PackageVersion>1.0.0.0</PackageVersion>
-    <Authors>Rekkon</Authors>
-    <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
-    <PackageProjectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</PackageProjectUrl>
-    <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
-    <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
+    <Authors>Alex Kalfakakos</Authors>
+    <Version>1.0.4.1</Version>
+    <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>GenericsAnalyzer</Description>
-    <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
-    <Copyright>Copyright</Copyright>
-    <PackageTags>GenericsAnalyzer, analyzers</PackageTags>
+    <Description>A Roslyn analyzer that empowers usage of generics through attributes.</Description>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <Copyright>© 2021, Alex Kalfakakos</Copyright>
+    <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

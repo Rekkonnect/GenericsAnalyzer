@@ -241,6 +241,7 @@ class Program
         Function<int, int>();
         Function<↓string, int>();
         Function<int, ↓ulong>();
+        Function<int, ↓IComparable<ulong>>();
     }
 
     static void Function
@@ -276,8 +277,11 @@ class Program
         new Generic<int>();
         new Generic<long>();
         new Generic<string>();
+        new Generic<IEnumerable<string>>();
         new Generic<↓ulong>();
         new Generic<↓byte>();
+        new Generic<A<int>>();
+        new Generic<B<int>>();
     }
 }
 
@@ -285,7 +289,54 @@ class Generic
 <
     [PermittedTypes(typeof(int), typeof(long))]
     [PermittedBaseTypes(typeof(IEnumerable<>))]
+    [PermittedBaseTypes(typeof(A<>))]
     [OnlyPermitSpecifiedTypes]
+    T
+>
+{
+}
+
+class A<T> { }
+class B<T> : A<T> { }
+";
+
+            AssertDiagnostics(testCode);
+        }
+
+        [TestMethod]
+        public void PartialClassTestCode()
+        {
+            var testCode =
+@"
+using System;
+using System.Collections.Generic;
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new Generic<int>();
+        new Generic<long>();
+        new Generic<string>();
+        new Generic<IEnumerable<string>>();
+        new Generic<↓ulong>();
+        new Generic<↓byte>();
+    }
+}
+
+partial class Generic
+<
+    [PermittedBaseTypes(typeof(IEnumerable<>))]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+{
+}
+
+partial class Generic
+<
+    [PermittedTypes(typeof(int), typeof(long))]
     T
 >
 {

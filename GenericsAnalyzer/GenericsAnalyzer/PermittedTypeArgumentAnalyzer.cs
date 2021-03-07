@@ -7,10 +7,24 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
 {
+    public partial class C
+    <
+        [PermittedBaseTypes(typeof(int))]
+        T
+    >
+    { }
+    public partial class C
+    <
+        [ProhibitedBaseTypes(typeof(int))]
+        T
+    >
+    { }
+
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
     {
@@ -112,19 +126,13 @@ namespace GenericsAnalyzer
             {
                 var parameter = typeParameters[i];
 
-                // This truly is ridiculous
                 var attributes = parameter.GetAttributes();
-                var typeParameterSyntaxNode = parameter.DeclaringSyntaxReferences[0].GetSyntax() as TypeParameterSyntax;
-                var lists = typeParameterSyntaxNode.AttributeLists;
-                var attributeSyntaxNodes = new List<AttributeSyntax>();
-                foreach (var l in lists)
-                    attributeSyntaxNodes.AddRange(l.Attributes);
 
                 var system = new TypeConstraintSystem();
                 for (int j = 0; j < attributes.Length; j++)
                 {
                     var a = attributes[j];
-                    var attributeSyntaxNode = attributeSyntaxNodes[j];
+                    var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 
                     if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
                     {
@@ -217,7 +225,7 @@ namespace GenericsAnalyzer
                 }
                 else
                 {
-                    if (!system.IsPermitted(argumentType))
+                    if (!system.IsPermitted(argumentType as INamedTypeSymbol))
                     {
                         var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                         context.ReportDiagnostic(diagnostic);

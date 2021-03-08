@@ -5,41 +5,30 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0014_Tests : BaseAnalyzerTests
+    public sealed class GA0016_Tests : BaseAnalyzerTests
     {
-        protected override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0014_Rule;
+        protected override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0016_Rule;
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
-        // Redundant usage of the attribute
         [TestMethod]
-        public void RedundantUsageInFunctionAndDelegate()
+        public void RedundantUsageInClass()
         {
             var testCode =
 @"
 using GenericsAnalyzer.Core;
 
-class A<T> { }
-class C
-<
-    [InheritBaseTypeUsageConstraints]
-    T0
-> : A<T0>
+class C<T>
 {
-    void Function
-    <
-        [↓InheritBaseTypeUsageConstraints]
-        T1
-    >()
-    {
-    }
 }
-
-delegate void Function
+class D
 <
+    T,
     [↓InheritBaseTypeUsageConstraints]
-    T
->();
+    U
+> : C<T>
+{
+}
 ";
 
             AssertDiagnostics(testCode);

@@ -14,6 +14,14 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
         }
+        public static Diagnostic CreateGA0015(AttributeSyntax attributeSyntaxNode, ISymbol symbol)
+        {
+            return Diagnostic.Create(GA0015_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0016(AttributeSyntax attributeSyntaxNode, ISymbol symbol)
+        {
+            return Diagnostic.Create(GA0016_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
+        }
         public static Diagnostic CreateGA0017(SyntaxNode node, ISymbol originalDefinition, ITypeSymbol argumentType)
         {
             return Diagnostic.Create(GA0017_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());

@@ -21,6 +21,8 @@ namespace GenericsAnalyzer
         {
             GA0001_Rule,
             GA0014_Rule,
+            GA0015_Rule,
+            GA0016_Rule,
             GA0017_Rule,
         }.ToImmutableArray();
 
@@ -117,16 +119,10 @@ namespace GenericsAnalyzer
 
                     if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
                     {
-                        var type = symbol as INamedTypeSymbol;
+                        if (AnalyzeInheritArgumentAttirbuteUsage(attributeSyntaxNode, symbol, parameter, context))
+                            continue;
 
-                        if (attributeSyntaxNode != null)
-                        {
-                            if (type is null || !type.TypeKind.CanInheritTypes())
-                            {
-                                context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeSyntaxNode, symbol));
-                                continue;
-                            }
-                        }
+                        var type = symbol as INamedTypeSymbol;
 
                         var inheritedTypes = new List<INamedTypeSymbol>();
                         var baseType = type.BaseType;
@@ -209,6 +205,49 @@ namespace GenericsAnalyzer
                         context.ReportDiagnostic(Diagnostics.CreateGA0001(candidateErrorNode, originalDefinition, argumentType));
                 }
             }
+        }
+
+        // Emits GA0014, GA0015, GA0016
+        private bool AnalyzeInheritArgumentAttirbuteUsage(AttributeSyntax attributeSyntaxNode, ISymbol symbol, ITypeParameterSymbol parameter, SyntaxNodeAnalysisContext context)
+        {
+            if (attributeSyntaxNode is null)
+                return false;
+
+            var type = symbol as INamedTypeSymbol;
+
+            if (symbol is IMethodSymbol || !type.TypeKind.CanInheritTypes())
+            {
+                context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeSyntaxNode, symbol));
+                return true;
+            }
+
+            var allBaseTypes = type.GetAllDirectBaseTypes().ToImmutableArray();
+            var allGenericBaseTypes = allBaseTypes.Where(t => t.IsGenericType).ToImmutableArray();
+
+            if (!allGenericBaseTypes.Any())
+            {
+                context.ReportDiagnostic(Diagnostics.CreateGA0015(attributeSyntaxNode, symbol));
+                return true;
+            }
+
+            bool typeUsedInBaseTypes = false;
+            foreach (var baseType in allGenericBaseTypes)
+            {
+                // The type has type arguments substitute the base type's type parameters
+                if (baseType.TypeArguments.Any(arg => arg.Name == parameter.Name))
+                {
+                    typeUsedInBaseTypes = true;
+                    break;
+                }
+            }
+
+            if (!typeUsedInBaseTypes)
+            {
+                context.ReportDiagnostic(Diagnostics.CreateGA0016(attributeSyntaxNode, symbol));
+                return true;
+            }
+
+            return false;
         }
 
         private static TypeConstraintRule? ParseAttributeRule(AttributeData data)

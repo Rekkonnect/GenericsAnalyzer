@@ -205,7 +205,7 @@
     <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>
   </data>
   <data name="GA0015_MessageFormat" xml:space="preserve">
-    <value>Redundant usage of the attribute; the type '{0}' does not inherit other types</value>
+    <value>Redundant usage of the attribute; the type '{0}' does not inherit other generic types</value>
   </data>
   <data name="GA0015_Title" xml:space="preserve">
     <value>Redundant usage of InheritBaseTypeUsageConstraintsAttribute</value>

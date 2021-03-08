@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <PackageId>GenericsAnalyzer</PackageId>
-    <Version>1.0.4</Version>
+    <PackageId>GenericsAnalyzer.Analyzer</PackageId>
+    <Version>1.0.5</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Alex Kalfakakos</Authors>
     <Company />
@@ -22,7 +22,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\GenericsAnalyzer.Core\GenericsAnalyzer.Core.csproj" />
   </ItemGroup>

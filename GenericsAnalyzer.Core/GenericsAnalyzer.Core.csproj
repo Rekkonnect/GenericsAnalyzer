@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Alex Kalfakakos</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -11,7 +11,7 @@
     <Description>The core components for using the generics analyzer.</Description>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

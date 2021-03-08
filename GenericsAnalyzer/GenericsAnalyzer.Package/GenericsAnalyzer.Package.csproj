@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -10,7 +10,8 @@
   <PropertyGroup>
     <PackageId>GenericsAnalyzer</PackageId>
     <Authors>Alex Kalfakakos</Authors>
-    <Version>1.0.4.1</Version>
+    <Version>1.0.5</Version>
+    <PackageVersion>1.0.5</PackageVersion>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>A Roslyn analyzer that empowers usage of generics through attributes.</Description>
@@ -25,6 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GenericsAnalyzer.CodeFixes\GenericsAnalyzer.CodeFixes.csproj" />
     <ProjectReference Include="..\GenericsAnalyzer\GenericsAnalyzer.csproj" />
+    <ProjectReference Include="..\..\GenericsAnalyzer.Core\GenericsAnalyzer.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +37,7 @@
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(OutputPath)\GenericsAnalyzer.dll" PackagePath="analyzers/dotnet/cs" />
       <TfmSpecificPackageFile Include="$(OutputPath)\GenericsAnalyzer.CodeFixes.dll" PackagePath="analyzers/dotnet/cs" />
+      <TfmSpecificPackageFile Include="$(OutputPath)\GenericsAnalyzer.Core.dll" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
   </Target>
 

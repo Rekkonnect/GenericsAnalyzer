@@ -32,6 +32,7 @@ namespace GenericsAnalyzer
         public static readonly DiagnosticDescriptor GA0018_Rule = GetDiagnosticDescriptor(18, BrevityCategory, DiagnosticSeverity.Warning);
         #endregion
 
+        #region Diagnotsic Descriptor Construction
         private const string baseRuleDocsURL = "https://github.com/AlFasGD/GenericsAnalyzer/blob/master/docs/rules";
 
         public static string GetHelpLinkURI(int id) => $"{baseRuleDocsURL}/{GetDiagnosticID(id)}.md";
@@ -55,5 +56,6 @@ namespace GenericsAnalyzer
 
             return null;
         }
+        #endregion
     }
 }

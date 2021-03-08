@@ -35,6 +35,35 @@ class A<T>
         }
 
         [TestMethod]
+        public void ImplicitFunctionTypeArgumentUsage()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    void Run()
+    {
+        ↓Function(5); // implicit usage of 'int'
+        Function<↓int>(5); // explicit usage of 'int'
+    }
+
+    void Function
+    <
+        [ProhibitedTypes(typeof(int))]
+        T
+    >
+    (T v)
+    {
+    }
+}
+";
+
+            AssertDiagnostics(testCode);
+        }
+
+        [TestMethod]
         public void IntermediateGenericTypeUsage()
         {
             var testCode =

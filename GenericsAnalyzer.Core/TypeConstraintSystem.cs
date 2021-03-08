@@ -8,7 +8,7 @@ namespace GenericsAnalyzer.Core
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
-        private Dictionary<INamedTypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<INamedTypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
+        private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
 
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
 
@@ -21,8 +21,8 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        public void Add(TypeConstraintRule rule, params INamedTypeSymbol[] types) => Add(rule, (IEnumerable<INamedTypeSymbol>)types);
-        public void Add(TypeConstraintRule rule, IEnumerable<INamedTypeSymbol> types)
+        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
             foreach (var t in types)
             {
@@ -66,7 +66,7 @@ namespace GenericsAnalyzer.Core
             return SupersetOf(system);
         }
 
-        public bool IsPermitted(INamedTypeSymbol type)
+        public bool IsPermitted(ITypeSymbol type)
         {
             if (type is null)
                 return false;
@@ -101,24 +101,27 @@ namespace GenericsAnalyzer.Core
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private PermissionResult IsPermittedWithUnbound(INamedTypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
+        private PermissionResult IsPermittedWithUnbound(ITypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
         {
             var permission = IsPermitted(type, referencePoints);
             if (permission != PermissionResult.Unknown)
                 return permission;
 
-            if (type.IsGenericType && !type.IsUnboundGenericType)
+            if (type is INamedTypeSymbol namedType)
             {
-                var unbound = type.ConstructUnboundGenericType();
-                permission = IsPermitted(unbound, referencePoints);
-                if (permission != PermissionResult.Unknown)
-                    return permission;
+                if (namedType.IsGenericType && !namedType.IsUnboundGenericType)
+                {
+                    var unbound = namedType.ConstructUnboundGenericType();
+                    permission = IsPermitted(unbound, referencePoints);
+                    if (permission != PermissionResult.Unknown)
+                        return permission;
+                }
             }
 
             return PermissionResult.Unknown;
         }
 
-        private PermissionResult IsPermitted(INamedTypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
+        private PermissionResult IsPermitted(ITypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
         {
             if (!typeConstraintRules.ContainsKey(type))
                 return PermissionResult.Unknown;

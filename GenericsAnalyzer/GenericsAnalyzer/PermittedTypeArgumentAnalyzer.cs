@@ -9,6 +9,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using static GenericsAnalyzer.DiagnosticDescriptors;
 
+// The analyzer should not be run concurrently due to the state that it preserves 
+#pragma warning disable RS1026 // Enable concurrent execution
+
 namespace GenericsAnalyzer
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -120,11 +123,16 @@ namespace GenericsAnalyzer
 
                     if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
                     {
-                        if (!(symbol is INamedTypeSymbol type) || !type.TypeKind.CanInheritTypes())
+                        var type = symbol as INamedTypeSymbol;
+
+                        if (attributeSyntaxNode != null)
                         {
-                            var diagnostic = Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
-                            context.ReportDiagnostic(diagnostic);
-                            continue;
+                            if (type is null || !type.TypeKind.CanInheritTypes())
+                            {
+                                var diagnostic = Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
+                                context.ReportDiagnostic(diagnostic);
+                                continue;
+                            }
                         }
 
                         var inheritedTypes = new List<INamedTypeSymbol>();
@@ -209,7 +217,7 @@ namespace GenericsAnalyzer
                 }
                 else
                 {
-                    if (!system.IsPermitted(argumentType as INamedTypeSymbol))
+                    if (!system.IsPermitted(argumentType))
                     {
                         var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                         context.ReportDiagnostic(diagnostic);

@@ -12,6 +12,29 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
+        public void ArrayTypeUsage()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+
+class Program
+{
+    static void Main()
+    {
+        new A<int[]>();
+    }
+}
+
+class A<T>
+{
+}
+";
+
+            ValidateCode(testCode);
+        }
+
+        [TestMethod]
         public void IntermediateGenericTypeUsage()
         {
             var testCode =

@@ -123,8 +123,7 @@ namespace GenericsAnalyzer
                         {
                             if (type is null || !type.TypeKind.CanInheritTypes())
                             {
-                                var diagnostic = Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());
-                                context.ReportDiagnostic(diagnostic);
+                                context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeSyntaxNode, symbol));
                                 continue;
                             }
                         }
@@ -183,7 +182,7 @@ namespace GenericsAnalyzer
 
             for (int i = 0; i < typeArguments.Length; i++)
             {
-                if (!(typeArgumentNodes is null))
+                if (typeArgumentNodes != null)
                     candidateErrorNode = typeArgumentNodes[i];
 
                 var argumentType = typeArguments[i];
@@ -198,10 +197,8 @@ namespace GenericsAnalyzer
                         if (declaringElementTypeParameter.Name == declaredTypeParameter.Name)
                         {
                             if (!system.IsPermitted(declaredTypeParameter, genericNames))
-                            {
-                                var diagnostic = Diagnostic.Create(GA0017_Rule, candidateErrorNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
-                                context.ReportDiagnostic(diagnostic);
-                            }
+                                context.ReportDiagnostic(Diagnostics.CreateGA0017(candidateErrorNode, originalDefinition, argumentType));
+                            
                             break;
                         }
                     }
@@ -209,10 +206,7 @@ namespace GenericsAnalyzer
                 else
                 {
                     if (!system.IsPermitted(argumentType))
-                    {
-                        var diagnostic = Diagnostic.Create(GA0001_Rule, candidateErrorNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
-                        context.ReportDiagnostic(diagnostic);
-                    }
+                        context.ReportDiagnostic(Diagnostics.CreateGA0001(candidateErrorNode, originalDefinition, argumentType));
                 }
             }
         }

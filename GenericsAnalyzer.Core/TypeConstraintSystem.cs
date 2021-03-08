@@ -91,7 +91,7 @@ namespace GenericsAnalyzer.Core
 
                 type = type.BaseType;
             }
-            while (!(type is null));
+            while (type != null);
 
             return !OnlyPermitSpecifiedTypes;
         }

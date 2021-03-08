@@ -34,7 +34,7 @@ namespace GenericsAnalyzer
             // Concurrent execution is disabled due to the stateful profile of the analyzer
 
             // Only executed on *usage* of a generic element
-            context.RegisterSyntaxNodeAction(AnalyzeGenericName, SyntaxKind.GenericName);
+            context.RegisterSyntaxNodeAction(AnalyzeGenericNameOrFunctionCall, SyntaxKind.GenericName, SyntaxKind.IdentifierName);
 
             var genericSupportedMemberDeclarations = new SyntaxKind[]
             {
@@ -48,20 +48,39 @@ namespace GenericsAnalyzer
             context.RegisterSyntaxNodeAction(AnalyzeGenericDeclaration, genericSupportedMemberDeclarations);
         }
 
-        private void AnalyzeGenericName(SyntaxNodeAnalysisContext context)
+        private void AnalyzeGenericNameOrFunctionCall(SyntaxNodeAnalysisContext context)
         {
             var semanticModel = context.SemanticModel;
 
-            var genericNameNode = context.Node as GenericNameSyntax;
-            if (genericNameNode.IsUnboundGenericName)
-                return;
-
-            var symbolInfo = semanticModel.GetSymbolInfo(genericNameNode);
+            var node = context.Node;
+            var symbolInfo = semanticModel.GetSymbolInfo(node);
             var symbol = symbolInfo.Symbol;
+            ImmutableArray<ITypeSymbol> typeArguments;
+            
+            switch (node)
+            {
+                case IdentifierNameSyntax _
+                when symbol.Kind == SymbolKind.Method:
+                    break;
+
+                case GenericNameSyntax genericNameNode:
+                    if (genericNameNode.IsUnboundGenericName)
+                        return;
+
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (symbol is INamedTypeSymbol typeSymbol)
+                typeArguments = typeSymbol.TypeArguments;
+            else if (symbol is IMethodSymbol methodSymbol)
+                typeArguments = methodSymbol.TypeArguments;
 
             var originalDefinition = symbol.OriginalDefinition;
             AnalyzeGenericNameDefinition(context, originalDefinition);
-            AnalyzeGenericNameUsage(context, symbol, genericNameNode);
+            AnalyzeGenericNameUsage(context, symbol, typeArguments, node as GenericNameSyntax);
         }
         private void AnalyzeGenericDeclaration(SyntaxNodeAnalysisContext context)
         {
@@ -177,21 +196,19 @@ namespace GenericsAnalyzer
 
             genericNames[symbol] = constraints;
         }
-        private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
+        private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, ImmutableArray<ITypeSymbol> typeArguments, GenericNameSyntax genericNameNode)
         {
-            var semanticModel = context.SemanticModel;
-
             var originalDefinition = symbol.OriginalDefinition;
 
-            var typeArguments = genericNameNode.TypeArgumentList.Arguments.ToArray();
+            var typeArgumentNodes = genericNameNode?.TypeArgumentList.Arguments.ToArray();
 
             var constraints = genericNames[originalDefinition];
             for (int i = 0; i < typeArguments.Length; i++)
             {
-                var argument = typeArguments[i];
+                var candidateErrorNode = typeArgumentNodes?[i] ?? context.Node;
 
                 var system = constraints[i];
-                var argumentType = semanticModel.GetTypeInfo(argument).Type;
+                var argumentType = typeArguments[i];
 
                 if (argumentType is ITypeParameterSymbol declaredTypeParameter)
                 {
@@ -208,7 +225,7 @@ namespace GenericsAnalyzer
                         {
                             if (!system.IsPermitted(declaredTypeParameter, j, genericNames))
                             {
-                                var diagnostic = Diagnostic.Create(GA0017_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                                var diagnostic = Diagnostic.Create(GA0017_Rule, candidateErrorNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                                 context.ReportDiagnostic(diagnostic);
                             }
                             break;
@@ -219,7 +236,7 @@ namespace GenericsAnalyzer
                 {
                     if (!system.IsPermitted(argumentType))
                     {
-                        var diagnostic = Diagnostic.Create(GA0001_Rule, argument.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+                        var diagnostic = Diagnostic.Create(GA0001_Rule, candidateErrorNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                         context.ReportDiagnostic(diagnostic);
                     }
                 }

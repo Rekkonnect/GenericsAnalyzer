@@ -55,12 +55,14 @@ namespace GenericsAnalyzer
             var node = context.Node;
             var symbolInfo = semanticModel.GetSymbolInfo(node);
             var symbol = symbolInfo.Symbol;
-            ImmutableArray<ITypeSymbol> typeArguments;
             
             switch (node)
             {
                 case IdentifierNameSyntax _
-                when symbol.Kind == SymbolKind.Method:
+                when symbol is IMethodSymbol methodSymbol:
+                    if (!methodSymbol.OriginalDefinition.IsGenericMethod)
+                        return;
+
                     break;
 
                 case GenericNameSyntax genericNameNode:
@@ -72,15 +74,10 @@ namespace GenericsAnalyzer
                 default:
                     return;
             }
-
-            if (symbol is INamedTypeSymbol typeSymbol)
-                typeArguments = typeSymbol.TypeArguments;
-            else if (symbol is IMethodSymbol methodSymbol)
-                typeArguments = methodSymbol.TypeArguments;
-
+            
             var originalDefinition = symbol.OriginalDefinition;
             AnalyzeGenericNameDefinition(context, originalDefinition);
-            AnalyzeGenericNameUsage(context, symbol, typeArguments, node as GenericNameSyntax);
+            AnalyzeGenericNameUsage(context, symbol, node as GenericNameSyntax);
         }
         private void AnalyzeGenericDeclaration(SyntaxNodeAnalysisContext context)
         {
@@ -88,23 +85,8 @@ namespace GenericsAnalyzer
 
             var declarationExpressionNode = context.Node as MemberDeclarationSyntax;
 
-            // Arity determines how many generic type arguments there are
-            // Imagine if only there was an IAritySyntax interface
-            switch (declarationExpressionNode)
-            {
-                case TypeDeclarationSyntax typeDeclaration:
-                    if (typeDeclaration.Arity == 0)
-                        return;
-                    break;
-                case DelegateDeclarationSyntax delegateDeclaration:
-                    if (delegateDeclaration.Arity == 0)
-                        return;
-                    break;
-                case MethodDeclarationSyntax methodDeclaration:
-                    if (methodDeclaration.Arity == 0)
-                        return;
-                    break;
-            }
+            if (!declarationExpressionNode.IsGeneric())
+                return;
 
             var symbol = semanticModel.GetDeclaredSymbol(declarationExpressionNode);
             AnalyzeGenericNameDefinition(context, symbol);
@@ -116,15 +98,8 @@ namespace GenericsAnalyzer
             if (genericNames.ContainsInfo(symbol))
                 return;
 
-            ImmutableArray<ITypeParameterSymbol> typeParameters;
-
-            // This is in dire need of some better abstraction
-            // Say something like IGenericSupportSymbol
-            if (symbol is INamedTypeSymbol t)
-                typeParameters = t.TypeParameters;
-            else if (symbol is IMethodSymbol m)
-                typeParameters = m.TypeParameters;
-            else
+            var typeParameters = symbol.GetTypeParameters();
+            if (typeParameters.IsEmpty)
                 return;
 
             var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
@@ -196,9 +171,10 @@ namespace GenericsAnalyzer
 
             genericNames[symbol] = constraints;
         }
-        private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, ImmutableArray<ITypeSymbol> typeArguments, GenericNameSyntax genericNameNode)
+        private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
         {
             var originalDefinition = symbol.OriginalDefinition;
+            var typeArguments = symbol.GetTypeArguments();
 
             var typeArgumentNodes = genericNameNode?.TypeArgumentList.Arguments.ToArray();
 
@@ -210,17 +186,12 @@ namespace GenericsAnalyzer
                 if (!(typeArgumentNodes is null))
                     candidateErrorNode = typeArgumentNodes[i];
 
-                var system = constraints[i];
                 var argumentType = typeArguments[i];
+                var system = constraints[i];
 
                 if (argumentType is ITypeParameterSymbol declaredTypeParameter)
                 {
-                    var declaringElement = declaredTypeParameter.DeclaringMethod;
-                    ImmutableArray<ITypeParameterSymbol> declaringElementTypeParameters;
-                    if (declaringElement is null)
-                        declaringElementTypeParameters = declaredTypeParameter.DeclaringType.TypeParameters;
-                    else
-                        declaringElementTypeParameters = declaringElement.TypeParameters;
+                    var declaringElementTypeParameters = declaredTypeParameter.GetDeclaringSymbol().GetTypeParameters();
 
                     for (int j = 0; j < declaringElementTypeParameters.Length; j++)
                     {

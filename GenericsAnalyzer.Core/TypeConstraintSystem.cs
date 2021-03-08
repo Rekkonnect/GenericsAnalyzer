@@ -25,12 +25,7 @@ namespace GenericsAnalyzer.Core
         public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
             foreach (var t in types)
-            {
-                if (typeConstraintRules.ContainsKey(t))
-                    typeConstraintRules[t] = rule;
-                else
-                    typeConstraintRules.Add(t, rule);
-            }
+                typeConstraintRules.AddOrSet(t, rule);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
@@ -61,7 +56,7 @@ namespace GenericsAnalyzer.Core
             if (inheritedTypes.Contains(typeParameter))
                 return true;
 
-            var declaringElementTypeParameterSystems = infos[(ISymbol)typeParameter.DeclaringType ?? typeParameter.DeclaringMethod];
+            var declaringElementTypeParameterSystems = infos[typeParameter.GetDeclaringSymbol()];
             var system = declaringElementTypeParameterSystems[typeParameterDeclarationIndex];
             return SupersetOf(system);
         }

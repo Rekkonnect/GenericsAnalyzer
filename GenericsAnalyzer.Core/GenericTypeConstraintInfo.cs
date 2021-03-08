@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using GenericsAnalyzer.Core.Utilities;
+using Microsoft.CodeAnalysis;
 
 namespace GenericsAnalyzer.Core
 {
@@ -6,20 +7,36 @@ namespace GenericsAnalyzer.Core
     {
         private readonly TypeConstraintSystem[] systems;
 
-        public GenericTypeConstraintInfo(int parameterCount)
+        public GenericTypeConstraintInfo(int length)
         {
-            systems = new TypeConstraintSystem[parameterCount];
+            systems = new TypeConstraintSystem[length];
         }
 
-        public bool IsPermitted(int parameterIndex, INamedTypeSymbol type)
+        public GenericTypeConstraintInfo(ISymbol symbol)
+            : this(symbol.GetArity()) { }
+        public GenericTypeConstraintInfo(IMethodSymbol methodSymbol)
+            : this(methodSymbol.Arity) { }
+        public GenericTypeConstraintInfo(INamedTypeSymbol typeSymbol)
+            : this(typeSymbol.Arity) { }
+
+        public bool IsPermitted(int index, ITypeSymbol type)
         {
-            return systems[parameterIndex].IsPermitted(type);
+            return this[index].IsPermitted(type);
+        }
+        public bool IsPermitted(ITypeParameterSymbol typeParameter, ITypeSymbol type)
+        {
+            return this[typeParameter].IsPermitted(type);
         }
 
         public TypeConstraintSystem this[int index]
         {
             get => systems[index];
             set => systems[index] = value;
+        }
+        public TypeConstraintSystem this[ITypeParameterSymbol typeParameter]
+        {
+            get => systems[typeParameter.Ordinal];
+            set => systems[typeParameter.Ordinal] = value;
         }
     }
 }

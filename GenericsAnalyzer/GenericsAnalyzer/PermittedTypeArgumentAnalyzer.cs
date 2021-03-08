@@ -203,9 +203,12 @@ namespace GenericsAnalyzer
             var typeArgumentNodes = genericNameNode?.TypeArgumentList.Arguments.ToArray();
 
             var constraints = genericNames[originalDefinition];
+            var candidateErrorNode = context.Node;
+
             for (int i = 0; i < typeArguments.Length; i++)
             {
-                var candidateErrorNode = typeArgumentNodes?[i] ?? context.Node;
+                if (!(typeArgumentNodes is null))
+                    candidateErrorNode = typeArgumentNodes[i];
 
                 var system = constraints[i];
                 var argumentType = typeArguments[i];

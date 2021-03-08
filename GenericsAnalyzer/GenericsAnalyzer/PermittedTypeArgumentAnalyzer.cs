@@ -193,11 +193,11 @@ namespace GenericsAnalyzer
                 {
                     var declaringElementTypeParameters = declaredTypeParameter.GetDeclaringSymbol().GetTypeParameters();
 
-                    for (int j = 0; j < declaringElementTypeParameters.Length; j++)
+                    foreach (var declaringElementTypeParameter in declaringElementTypeParameters)
                     {
-                        if (declaringElementTypeParameters[j].Name == declaredTypeParameter.Name)
+                        if (declaringElementTypeParameter.Name == declaredTypeParameter.Name)
                         {
-                            if (!system.IsPermitted(declaredTypeParameter, j, genericNames))
+                            if (!system.IsPermitted(declaredTypeParameter, genericNames))
                             {
                                 var diagnostic = Diagnostic.Create(GA0017_Rule, candidateErrorNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
                                 context.ReportDiagnostic(diagnostic);

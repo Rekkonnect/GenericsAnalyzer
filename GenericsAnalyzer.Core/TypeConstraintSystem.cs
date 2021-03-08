@@ -51,13 +51,13 @@ namespace GenericsAnalyzer.Core
             return true;
         }
 
-        public bool IsPermitted(ITypeParameterSymbol typeParameter, int typeParameterDeclarationIndex, GenericTypeConstraintInfoCollection infos)
+        public bool IsPermitted(ITypeParameterSymbol typeParameter, GenericTypeConstraintInfoCollection infos)
         {
             if (inheritedTypes.Contains(typeParameter))
                 return true;
 
             var declaringElementTypeParameterSystems = infos[typeParameter.GetDeclaringSymbol()];
-            var system = declaringElementTypeParameterSystems[typeParameterDeclarationIndex];
+            var system = declaringElementTypeParameterSystems[typeParameter];
             return SupersetOf(system);
         }
 

@@ -20,6 +20,8 @@ namespace GenericsAnalyzer
         private static readonly ImmutableArray<DiagnosticDescriptor> supportedDiagnostics = new[]
         {
             GA0001_Rule,
+            GA0002_Rule,
+            GA0009_Rule,
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
@@ -105,10 +107,11 @@ namespace GenericsAnalyzer
                 return;
 
             var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
+            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
+
             for (int i = 0; i < typeParameters.Length; i++)
             {
                 var parameter = typeParameters[i];
-
                 var attributes = parameter.GetAttributes();
 
                 var system = new TypeConstraintSystem();
@@ -158,7 +161,41 @@ namespace GenericsAnalyzer
 
                     // The arguments will be always stored as an array, regardless of their count
                     // If an error is thrown here, a common cause could be having forgotten to import a namespace
-                    system.Add(rule.Value, a.ConstructorArguments[0].Values.Select(c => c.Value as INamedTypeSymbol));
+                    system.Add(rule.Value, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
+                }
+
+                // Re-iterate over the attributes to find conflicting and duplicate types
+                for (int j = 0; j < attributes.Length; j++)
+                {
+                    var a = attributes[j];
+                    var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+
+                    if (attributeSyntaxNode is null)
+                        continue;
+
+                    // Ensure that the attribute is a valid one
+                    if (ParseAttributeRule(a) is null)
+                        continue;
+
+                    var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
+                    var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
+                    for (int argumentIndex = 0; argumentIndex < typeConstants.Length; argumentIndex++)
+                    {
+                        var typeConstant = typeConstants[argumentIndex];
+                        var argumentNode = argumentNodes[argumentIndex];
+
+                        var type = typeDiagnostics.GetDiagnosticType(typeConstant);
+                        switch (type)
+                        {
+                            case TypeConstraintSystemDiagnosticType.Conflicting:
+                                Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant);
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.Duplicate:
+                                Diagnostics.CreateGA0009(argumentNode, typeConstant);
+                                break;
+                        }
+                    }
                 }
 
                 constraints[i] = system;
@@ -248,6 +285,11 @@ namespace GenericsAnalyzer
             }
 
             return false;
+        }
+
+        private static IEnumerable<INamedTypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
+        {
+            return data.ConstructorArguments[0].Values.Select(c => c.Value as INamedTypeSymbol);
         }
 
         private static TypeConstraintRule? ParseAttributeRule(AttributeData data)

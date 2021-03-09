@@ -21,11 +21,28 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
-        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
+        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
+            var conflictingTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            var duplicateTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
             foreach (var t in types)
-                typeConstraintRules.AddOrSet(t, rule);
+            {
+                if (typeConstraintRules.ContainsKey(t))
+                {
+                    if (typeConstraintRules[t] == rule)
+                        duplicateTypes.Add(t);
+                    else
+                        conflictingTypes.Add(t);
+
+                    continue;
+                }
+
+                typeConstraintRules.Add(t, rule);
+            }
+
+            return new TypeConstraintSystemAddResult(conflictingTypes, duplicateTypes);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);

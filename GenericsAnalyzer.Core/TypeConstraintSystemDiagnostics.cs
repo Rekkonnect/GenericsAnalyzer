@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
@@ -10,6 +11,8 @@ namespace GenericsAnalyzer.Core
 
         public ISet<ITypeSymbol> ConflictingTypes => new HashSet<ITypeSymbol>(conflictingTypes, SymbolEqualityComparer.Default);
         public ISet<ITypeSymbol> DuplicateTypes => new HashSet<ITypeSymbol>(duplicateTypes, SymbolEqualityComparer.Default);
+
+        public bool HasErroneousTypes => conflictingTypes.Any() || duplicateTypes.Any();
 
         public TypeConstraintSystemDiagnostics()
             : this(new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default), new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) { }

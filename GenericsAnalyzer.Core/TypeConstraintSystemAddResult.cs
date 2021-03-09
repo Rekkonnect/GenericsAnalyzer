@@ -8,13 +8,12 @@ namespace GenericsAnalyzer.Core
     {
         private readonly TypeConstraintSystemDiagnostics typeDiagnostics;
 
-        public bool Success { get; }
+        public bool Success => !typeDiagnostics.HasErroneousTypes;
         public ISet<ITypeSymbol> ConflictingTypes => typeDiagnostics.ConflictingTypes;
         public ISet<ITypeSymbol> DuplicateTypes => typeDiagnostics.DuplicateTypes;
 
         public TypeConstraintSystemAddResult(ISet<ITypeSymbol> conflictingTypeSet, ISet<ITypeSymbol> duplicateTypeSet)
         {
-            Success = !conflictingTypeSet.Any();
             typeDiagnostics = new TypeConstraintSystemDiagnostics(conflictingTypeSet, duplicateTypeSet);
         }
 

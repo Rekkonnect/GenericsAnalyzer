@@ -164,7 +164,12 @@ namespace GenericsAnalyzer
                     system.Add(rule.Value, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
                 }
 
-                // Re-iterate over the attributes to find conflicting and duplicate types
+                constraints[i] = system;
+
+                if (!typeDiagnostics.HasErroneousTypes)
+                    continue;
+
+                // Re-iterate over the attributes to mark erroneous types
                 for (int j = 0; j < attributes.Length; j++)
                 {
                     var a = attributes[j];
@@ -188,17 +193,15 @@ namespace GenericsAnalyzer
                         switch (type)
                         {
                             case TypeConstraintSystemDiagnosticType.Conflicting:
-                                Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant);
+                                context.ReportDiagnostic(Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant));
                                 break;
 
                             case TypeConstraintSystemDiagnosticType.Duplicate:
-                                Diagnostics.CreateGA0009(argumentNode, typeConstant);
+                                context.ReportDiagnostic(Diagnostics.CreateGA0009(argumentNode, typeConstant));
                                 break;
                         }
                     }
                 }
-
-                constraints[i] = system;
             }
 
             genericNames[symbol] = constraints;

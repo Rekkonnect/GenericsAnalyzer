@@ -1,13 +1,14 @@
 ﻿using Gu.Roslyn.Asserts;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test
 {
-    public abstract class BaseAnalyzerTests
+    public abstract class BaseDiagnosticTests : IAnalyzerTestFixture
     {
-        protected abstract DiagnosticDescriptor TestedDiagnosticRule { get; }
+        public abstract DiagnosticDescriptor TestedDiagnosticRule { get; }
 
         protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(TestedDiagnosticRule);
 

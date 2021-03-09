@@ -19,6 +19,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Analyzer.Testing.MSTest" Version="1.0.1-beta1.*" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeFix.Testing.MSTest" Version="1.0.1-beta1.*" />
     <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeRefactoring.Testing.MSTest" Version="1.0.1-beta1.*" />
+    <PackageReference Include="SmartAnalyzers.RoslynTestKit" Version="3.0.61" />
   </ItemGroup>
 
   <ItemGroup>

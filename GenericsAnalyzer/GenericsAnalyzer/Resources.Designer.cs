@@ -322,7 +322,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant usage of the attribute; the type &apos;{0}&apos; does not inherit other types.
+        ///   Looks up a localized string similar to Redundant usage of the attribute; the type &apos;{0}&apos; does not inherit other generic types.
         /// </summary>
         internal static string GA0015_MessageFormat {
             get {

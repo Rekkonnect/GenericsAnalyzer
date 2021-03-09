@@ -5,9 +5,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0016_Tests : BaseAnalyzerTests
+    public sealed class GA0016_Tests : BaseDiagnosticTests
     {
-        protected override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0016_Rule;
+        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0016_Rule;
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 

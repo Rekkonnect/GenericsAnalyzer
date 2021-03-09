@@ -5,13 +5,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0014_Tests : BaseAnalyzerTests
+    public sealed class GA0014_Tests : BaseDiagnosticTests
     {
-        protected override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0014_Rule;
+        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0014_Rule;
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
-        // Redundant usage of the attribute
         [TestMethod]
         public void RedundantUsageInFunctionAndDelegate()
         {

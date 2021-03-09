@@ -11,7 +11,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 
         protected override string LanguageName => LanguageNames.CSharp;
 
-        protected override CodeFixProvider CreateProvider() => new InheritBaseTypeUsageConstraintsAttributeRemover();
+        protected override CodeFixProvider CreateProvider() => new RedundantAttributeRemover();
 
         [TestMethod]
         public void RedundantUsageWithCodeFix()
@@ -33,6 +33,36 @@ using GenericsAnalyzer.Core;
 
 delegate void Delegate
 <
+    T
+>(T something);
+";
+
+            TestCodeFix(testCode, fixedCode);
+        }
+        // This is only tested in GA0014 since it's the same code fix
+        [TestMethod]
+        public void AttributeListRedundantUsageWithCodeFix()
+        {
+            var testCode =
+@"
+using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Test.Resources;
+
+delegate void Delegate
+<
+    [Example, [|InheritBaseTypeUsageConstraints|], Example]
+    T
+>(T something);
+";
+
+            var fixedCode =
+@"
+using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Test.Resources;
+
+delegate void Delegate
+<
+    [Example, Example]
     T
 >(T something);
 ";

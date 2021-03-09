@@ -11,7 +11,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 
         protected override string LanguageName => LanguageNames.CSharp;
 
-        protected override CodeFixProvider CreateProvider() => new InheritBaseTypeUsageConstraintsAttributeRemover();
+        protected override CodeFixProvider CreateProvider() => new RedundantAttributeRemover();
 
         [TestMethod]
         public void RedundantUsageWithCodeFix()

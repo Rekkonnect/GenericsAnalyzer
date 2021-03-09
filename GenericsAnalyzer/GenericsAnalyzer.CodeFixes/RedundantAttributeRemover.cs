@@ -1,9 +1,7 @@
-﻿using GenericsAnalyzer.Core;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -13,8 +11,8 @@ using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InheritBaseTypeUsageConstraintsAttributeRemover)), Shared]
-    public class InheritBaseTypeUsageConstraintsAttributeRemover : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RedundantAttributeRemover)), Shared]
+    public class RedundantAttributeRemover : CodeFixProvider
     {
         private ImmutableArray<string> fixableDiagnosticIds = new[]
         {

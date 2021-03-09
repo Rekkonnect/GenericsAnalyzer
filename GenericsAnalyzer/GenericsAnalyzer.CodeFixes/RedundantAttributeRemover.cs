@@ -19,6 +19,7 @@ namespace GenericsAnalyzer
             GA0014_Rule.Id,
             GA0015_Rule.Id,
             GA0016_Rule.Id,
+            GA0018_Rule.Id,
         }.ToImmutableArray();
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds => fixableDiagnosticIds;
@@ -33,22 +34,19 @@ namespace GenericsAnalyzer
         {
             var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 
-            // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
             var diagnostics = context.Diagnostics.Where(d => fixableDiagnosticIds.Contains(d.Id));
 
             foreach (var diagnostic in diagnostics)
             {
-                var diagnosticSpan = diagnostic.Location.SourceSpan;
+                var attributeSyntax = root.FindNode(diagnostic.Location.SourceSpan) as AttributeSyntax;
 
-                var attributeSyntax = root.FindNode(diagnosticSpan) as AttributeSyntax;
+                var codeAction = CodeAction.Create(CodeFixResources.RedundantAttributeRemover_Title, PerformAction, nameof(RedundantAttributeRemover));
+                context.RegisterCodeFix(codeAction, diagnostic);
 
-                // Register a code action that will invoke the fix.
-                context.RegisterCodeFix(
-                    CodeAction.Create(
-                        CodeFixResources.RedundantAttributeRemover_Title,
-                        c => RemoveAttributeAsync(context, attributeSyntax, c),
-                        nameof(CodeFixResources.RedundantAttributeRemover_Title)),
-                    diagnostic);
+                Task<Document> PerformAction(CancellationToken token)
+                {
+                    return RemoveAttributeAsync(context, attributeSyntax, token);
+                }
             }
         }
 

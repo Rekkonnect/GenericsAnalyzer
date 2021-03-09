@@ -23,12 +23,6 @@ namespace GenericsAnalyzer.Test
             RoslynAssert.Diagnostics(GetNewDiagnosticAnalyzerInstance(), ExpectedDiagnostic, testCode);
         }
 
-        protected void AssertCodeFix(string testCode, string expectedFixedCode, CodeFixProvider codeFixProvider)
-        {
-            // How the fucking hell?
-            // Fix.a(
-        }
-
         // No diagnostics expected to show up
         [TestMethod]
         public void EmptyCode()

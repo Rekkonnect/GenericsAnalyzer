@@ -1,7 +1,11 @@
-﻿using Microsoft.CodeAnalysis.CodeFixes;
+﻿using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Test.Resources;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using RoslynTestKit;
 
 namespace GenericsAnalyzer.Test
 {
@@ -19,6 +23,13 @@ namespace GenericsAnalyzer.Test
                     compilationOptions = compilationOptions.WithSpecificDiagnosticOptions(
                         compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
                     solution = solution.WithProjectCompilationOptions(projectId, compilationOptions);
+
+                    // Metadata references - currently the only reason to use RoslynTestKit
+                    solution = solution.AddMetadataReferences(projectId, new[]
+                    {
+                        ReferenceSource.FromAssembly(typeof(IGenericTypeConstraintAttribute).Assembly),
+                        ReferenceSource.FromAssembly(typeof(ExampleAttribute).Assembly),
+                    });
 
                     return solution;
                 });

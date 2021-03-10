@@ -1,15 +1,20 @@
 ﻿using Microsoft.CodeAnalysis;
-using RoslynTestKit;
+using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Diagnostics;
+using System.Threading.Tasks;
 
 namespace GenericsAnalyzer.Test
 {
-    public abstract class BaseCodeFixDiagnosticTests : CodeFixTestFixture, IAnalyzerTestFixture
+    public abstract class BaseCodeFixDiagnosticTests<TAnalyzer, TCodeFix> : IAnalyzerTestFixture
+        where TAnalyzer : DiagnosticAnalyzer, new()
+        where TCodeFix : CodeFixProvider, new()
     {
         public abstract DiagnosticDescriptor TestedDiagnosticRule { get; }
 
-        public void TestCodeFix(string markupCode, string expected, int codeFixIndex = 0)
+        public void TestCodeFix(string markupCode, string expected) => Task.WaitAll(TestCodeFixAsync(markupCode, expected));
+        public async Task TestCodeFixAsync(string markupCode, string expected)
         {
-            TestCodeFix(markupCode, expected, TestedDiagnosticRule.Id, codeFixIndex);
+            await CSharpCodeFixVerifier<TAnalyzer, TCodeFix>.VerifyCodeFixAsync(markupCode, expected);
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
@@ -9,12 +7,10 @@ namespace GenericsAnalyzer.Core
         private readonly TypeConstraintSystemDiagnostics typeDiagnostics;
 
         public bool Success => !typeDiagnostics.HasErroneousTypes;
-        public ISet<ITypeSymbol> ConflictingTypes => typeDiagnostics.ConflictingTypes;
-        public ISet<ITypeSymbol> DuplicateTypes => typeDiagnostics.DuplicateTypes;
 
-        public TypeConstraintSystemAddResult(ISet<ITypeSymbol> conflictingTypeSet, ISet<ITypeSymbol> duplicateTypeSet)
+        public TypeConstraintSystemAddResult(TypeConstraintSystemDiagnostics diagnostics)
         {
-            typeDiagnostics = new TypeConstraintSystemDiagnostics(conflictingTypeSet, duplicateTypeSet);
+            typeDiagnostics = new TypeConstraintSystemDiagnostics(diagnostics);
         }
 
         public void RegisterOnto(TypeConstraintSystemDiagnostics diagnostics)

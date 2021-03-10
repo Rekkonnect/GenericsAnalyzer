@@ -24,17 +24,19 @@ namespace GenericsAnalyzer.Core
         public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
         public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
-            var conflictingTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
-            var duplicateTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
 
             foreach (var t in types)
             {
+                if (typeDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                    continue;
+
                 if (typeConstraintRules.ContainsKey(t))
                 {
                     if (typeConstraintRules[t] == rule)
-                        duplicateTypes.Add(t);
+                        typeDiagnostics.RegisterDuplicateType(t);
                     else
-                        conflictingTypes.Add(t);
+                        typeDiagnostics.RegisterConflictingType(t);
 
                     continue;
                 }
@@ -42,7 +44,7 @@ namespace GenericsAnalyzer.Core
                 typeConstraintRules.Add(t, rule);
             }
 
-            return new TypeConstraintSystemAddResult(conflictingTypes, duplicateTypes);
+            return new TypeConstraintSystemAddResult(typeDiagnostics);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);

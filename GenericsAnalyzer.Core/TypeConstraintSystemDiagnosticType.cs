@@ -3,7 +3,8 @@
     public enum TypeConstraintSystemDiagnosticType
     {
         Valid,
+        Conflicting,
         Duplicate,
-        Conflicting
+        InvalidTypeArgument,
     }
 }

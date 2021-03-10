@@ -21,6 +21,7 @@ namespace GenericsAnalyzer
         {
             GA0001_Rule,
             GA0002_Rule,
+            GA0004_Rule,
             GA0009_Rule,
             GA0014_Rule,
             GA0015_Rule,
@@ -199,6 +200,10 @@ namespace GenericsAnalyzer
                             case TypeConstraintSystemDiagnosticType.Duplicate:
                                 context.ReportDiagnostic(Diagnostics.CreateGA0009(argumentNode, typeConstant));
                                 break;
+
+                            case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0004(argumentNode, typeConstant));
+                                break;
                         }
                     }
                 }
@@ -290,9 +295,9 @@ namespace GenericsAnalyzer
             return false;
         }
 
-        private static IEnumerable<INamedTypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
+        private static IEnumerable<ITypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
         {
-            return data.ConstructorArguments[0].Values.Select(c => c.Value as INamedTypeSymbol);
+            return data.ConstructorArguments[0].Values.Select(c => c.Value as ITypeSymbol);
         }
 
         private static TypeConstraintRule? ParseAttributeRule(AttributeData data)

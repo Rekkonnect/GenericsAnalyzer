@@ -10,17 +10,21 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0001_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
         }
-        public static Diagnostic CreateGA0002(AttributeArgumentSyntax node, ISymbol originalDefinition, ITypeSymbol argumentType)
+        public static Diagnostic CreateGA0002(AttributeArgumentSyntax attributeArgumentSyntaxNode, ISymbol originalDefinition, ITypeSymbol argumentType)
         {
-            return Diagnostic.Create(GA0002_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+            return Diagnostic.Create(GA0002_Rule, attributeArgumentSyntaxNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
         }
-        public static Diagnostic CreateGA0004(AttributeArgumentSyntax node, ITypeSymbol argumentType)
+        public static Diagnostic CreateGA0004(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType)
         {
-            return Diagnostic.Create(GA0004_Rule, node.GetLocation(), argumentType.ToDisplayString());
+            return Diagnostic.Create(GA0004_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());
         }
-        public static Diagnostic CreateGA0009(AttributeArgumentSyntax node, ITypeSymbol argumentType)
+        public static Diagnostic CreateGA0009(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType)
         {
-            return Diagnostic.Create(GA0009_Rule, node.GetLocation(), argumentType.ToDisplayString());
+            return Diagnostic.Create(GA0009_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0012(AttributeSyntax attributeSyntaxNode)
+        {
+            return Diagnostic.Create(GA0012_Rule, attributeSyntaxNode.GetLocation());
         }
         public static Diagnostic CreateGA0014(AttributeSyntax attributeSyntaxNode, ISymbol symbol)
         {

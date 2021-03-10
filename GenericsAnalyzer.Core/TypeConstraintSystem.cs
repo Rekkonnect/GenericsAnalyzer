@@ -21,6 +21,18 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
+        #region Constraint Rule Data
+        // TODO: Create a diagnostics calculator for the system; avoid handling logic in the analyzer itself as it's enumerating the attributes
+
+        public int ConstraintCount(TypeConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value == rule);
+        public int ConstraintCount(ConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value.Rule == rule);
+        public int ConstraintCount(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Count(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+
+        public bool AnyWithConstraint(TypeConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value == rule);
+        public bool AnyWithConstraint(ConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value.Rule == rule);
+        public bool AnyWithConstraint(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Any(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+        #endregion
+
         public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
         public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {

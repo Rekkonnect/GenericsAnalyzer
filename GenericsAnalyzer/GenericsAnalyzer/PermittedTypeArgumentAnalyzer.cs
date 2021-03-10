@@ -23,6 +23,7 @@ namespace GenericsAnalyzer
             GA0002_Rule,
             GA0004_Rule,
             GA0009_Rule,
+            GA0012_Rule,
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
@@ -121,54 +122,56 @@ namespace GenericsAnalyzer
                     var a = attributes[j];
                     var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 
-                    if (a.AttributeClass.Name == nameof(InheritBaseTypeUsageConstraintsAttribute))
+                    if (!AttributeNeedsProcessing(a))
+                        continue;
+
+                    switch (a.AttributeClass.Name)
                     {
-                        if (AnalyzeInheritArgumentAttirbuteUsage(attributeSyntaxNode, symbol, parameter, context))
-                            continue;
-
-                        var type = symbol as INamedTypeSymbol;
-
-                        var inheritedTypes = new List<INamedTypeSymbol>();
-                        var baseType = type.BaseType;
-                        if (baseType != null)
-                            inheritedTypes.Add(baseType);
-                        inheritedTypes.AddRange(type.AllInterfaces);
-
-                        foreach (var inheritedType in inheritedTypes)
+                        case nameof(InheritBaseTypeUsageConstraintsAttribute):
                         {
-                            if (!inheritedType.IsGenericType)
+                            if (AnalyzeInheritArgumentAttirbuteUsage(attributeSyntaxNode, symbol, parameter, context))
                                 continue;
 
-                            // Recursively analyze base type definitions
-                            AnalyzeGenericNameDefinition(context, inheritedType);
+                            var type = symbol as INamedTypeSymbol;
 
-                            var inheritedTypeParameters = inheritedType.TypeParameters;
-                            for (int k = 0; k < inheritedTypeParameters.Length; k++)
-                                if (inheritedTypeParameters[k].Name == parameter.Name)
-                                    system.InheritFrom(inheritedTypeParameters[k], genericNames[inheritedType][k]);
+                            var inheritedTypes = new List<INamedTypeSymbol>();
+                            var baseType = type.BaseType;
+                            if (baseType != null)
+                                inheritedTypes.Add(baseType);
+                            inheritedTypes.AddRange(type.AllInterfaces);
+
+                            foreach (var inheritedType in inheritedTypes)
+                            {
+                                if (!inheritedType.IsGenericType)
+                                    continue;
+
+                                // Recursively analyze base type definitions
+                                AnalyzeGenericNameDefinition(context, inheritedType);
+
+                                var inheritedTypeParameters = inheritedType.TypeParameters;
+                                for (int k = 0; k < inheritedTypeParameters.Length; k++)
+                                    if (inheritedTypeParameters[k].Name == parameter.Name)
+                                        system.InheritFrom(inheritedTypeParameters[k], genericNames[inheritedType][k]);
+                            }
+                            continue;
                         }
-                        continue;
+
+                        case nameof(OnlyPermitSpecifiedTypesAttribute):
+                        {
+                            system.OnlyPermitSpecifiedTypes = true;
+                            continue;
+                        }
                     }
 
-                    if (a.AttributeClass.Name == nameof(OnlyPermitSpecifiedTypesAttribute))
-                    {
-                        system.OnlyPermitSpecifiedTypes = true;
-                        continue;
-                    }
-
-                    var rule = ParseAttributeRule(a);
-                    if (rule is null)
-                        continue;
+                    // It is assured that the analyzer cares about the attribute from the base intreface check
+                    var rule = ParseAttributeRule(a).Value;
 
                     // The arguments will be always stored as an array, regardless of their count
                     // If an error is thrown here, a common cause could be having forgotten to import a namespace
-                    system.Add(rule.Value, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
+                    system.Add(rule, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
                 }
 
                 constraints[i] = system;
-
-                if (!typeDiagnostics.HasErroneousTypes)
-                    continue;
 
                 // Re-iterate over the attributes to mark erroneous types
                 for (int j = 0; j < attributes.Length; j++)
@@ -179,9 +182,24 @@ namespace GenericsAnalyzer
                     if (attributeSyntaxNode is null)
                         continue;
 
-                    // Ensure that the attribute is a valid one
-                    if (ParseAttributeRule(a) is null)
+                    if (!AttributeNeedsProcessing(a))
                         continue;
+
+                    switch (a.AttributeClass.Name)
+                    {
+                        case nameof(InheritBaseTypeUsageConstraintsAttribute):
+                        {
+                            // You will be soon used, don't worry
+                            continue;
+                        }
+
+                        case nameof(OnlyPermitSpecifiedTypesAttribute):
+                        {
+                            if (!system.AnyWithConstraint(ConstraintRule.Permit))
+                                context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
+                            continue;
+                        }
+                    }
 
                     var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
                     var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
@@ -295,6 +313,11 @@ namespace GenericsAnalyzer
             return false;
         }
 
+        private static bool AttributeNeedsProcessing(AttributeData data)
+        {
+            // All attributes are marked with that decorative interface
+            return data.AttributeClass.AllInterfaces.Any(baseInterface => baseInterface.Name == nameof(IGenericTypeConstraintAttribute));
+        }
         private static IEnumerable<ITypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
         {
             return data.ConstructorArguments[0].Values.Select(c => c.Value as ITypeSymbol);

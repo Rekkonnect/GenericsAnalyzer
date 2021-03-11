@@ -12,7 +12,13 @@ namespace GenericsAnalyzer.Core
 
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
 
+        public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public TypeConstraintSystem(ITypeParameterSymbol parameter)
+        {
+            TypeParameter = parameter;
+        }
 
         public void InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
         {
@@ -41,6 +47,9 @@ namespace GenericsAnalyzer.Core
             foreach (var t in types)
             {
                 if (typeDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                    continue;
+
+                if (typeDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
                     continue;
 
                 if (typeConstraintRules.ContainsKey(t))

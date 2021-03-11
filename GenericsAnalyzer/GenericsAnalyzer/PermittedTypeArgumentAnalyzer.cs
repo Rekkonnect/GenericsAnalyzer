@@ -22,6 +22,7 @@ namespace GenericsAnalyzer
             GA0001_Rule,
             GA0002_Rule,
             GA0004_Rule,
+            GA0005_Rule,
             GA0009_Rule,
             GA0012_Rule,
             GA0014_Rule,
@@ -116,7 +117,7 @@ namespace GenericsAnalyzer
                 var parameter = typeParameters[i];
                 var attributes = parameter.GetAttributes();
 
-                var system = new TypeConstraintSystem();
+                var system = new TypeConstraintSystem(parameter);
                 for (int j = 0; j < attributes.Length; j++)
                 {
                     var a = attributes[j];
@@ -221,6 +222,10 @@ namespace GenericsAnalyzer
 
                             case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
                                 context.ReportDiagnostic(Diagnostics.CreateGA0004(argumentNode, typeConstant));
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter));
                                 break;
                         }
                     }

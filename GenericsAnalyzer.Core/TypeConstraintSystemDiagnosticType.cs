@@ -6,5 +6,6 @@
         Conflicting,
         Duplicate,
         InvalidTypeArgument,
+        ConstrainedTypeArgumentSubstitution,
     }
 }

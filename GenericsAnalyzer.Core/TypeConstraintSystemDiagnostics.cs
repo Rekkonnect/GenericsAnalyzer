@@ -12,11 +12,13 @@ namespace GenericsAnalyzer.Core
             { TypeConstraintSystemDiagnosticType.Conflicting, NewSymbolHashSet() },
             { TypeConstraintSystemDiagnosticType.Duplicate, NewSymbolHashSet() },
             { TypeConstraintSystemDiagnosticType.InvalidTypeArgument, NewSymbolHashSet() },
+            { TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution, NewSymbolHashSet() },
         };
 
         private ISet<ITypeSymbol> ConflictingTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Conflicting];
         private ISet<ITypeSymbol> DuplicateTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Duplicate];
         private ISet<ITypeSymbol> InvalidTypeArgumentTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.InvalidTypeArgument];
+        private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution];
 
         public bool HasErroneousTypes
         {
@@ -46,6 +48,7 @@ namespace GenericsAnalyzer.Core
             RegisterConflictingTypes(typeDiagnostics.ConflictingTypes);
             RegisterDuplicateTypes(typeDiagnostics.DuplicateTypes);
             InvalidTypeArgumentTypes.AddRange(typeDiagnostics.InvalidTypeArgumentTypes);
+            ConstrainedTypeArgumentSubstitutionTypes.AddRange(typeDiagnostics.ConstrainedTypeArgumentSubstitutionTypes);
         }
 
         public void RegisterConflictingType(ITypeSymbol type)
@@ -64,6 +67,13 @@ namespace GenericsAnalyzer.Core
             bool invalid = type.IsInvalidTypeArgument();
             if (invalid)
                 InvalidTypeArgumentTypes.Add(type);
+            return invalid;
+        }
+        public bool ConditionallyRegisterConstrainedSubstitutionType(ITypeParameterSymbol typeParameter, ITypeSymbol type)
+        {
+            bool invalid = !typeParameter.IsValidTypeArgumentSubstitution(type);
+            if (invalid)
+                ConstrainedTypeArgumentSubstitutionTypes.Add(type);
             return invalid;
         }
 
@@ -88,6 +98,8 @@ namespace GenericsAnalyzer.Core
                 return TypeConstraintSystemDiagnosticType.Duplicate;
             if (InvalidTypeArgumentTypes.Contains(type))
                 return TypeConstraintSystemDiagnosticType.InvalidTypeArgument;
+            if (ConstrainedTypeArgumentSubstitutionTypes.Contains(type))
+                return TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution;
             return TypeConstraintSystemDiagnosticType.Valid;
         }
 

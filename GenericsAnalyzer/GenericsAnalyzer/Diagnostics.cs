@@ -18,6 +18,10 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0004_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());
         }
+        public static Diagnostic CreateGA0005(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType, ITypeParameterSymbol typeParameter)
+        {
+            return Diagnostic.Create(GA0005_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString(), typeParameter.ToDisplayString());
+        }
         public static Diagnostic CreateGA0009(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType)
         {
             return Diagnostic.Create(GA0009_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());

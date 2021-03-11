@@ -15,6 +15,9 @@ namespace GenericsAnalyzer.Core
         public TypeConstraintRule(TypeConstraintRule other)
             : this(other.TypeReferencePoint, other.Rule) { }
 
+        public static bool operator ==(TypeConstraintRule left, TypeConstraintRule right) => left.Equals(right);
+        public static bool operator !=(TypeConstraintRule left, TypeConstraintRule right) => !left.Equals(right);
+
         public bool Equals(TypeConstraintRule other) => TypeReferencePoint == other.TypeReferencePoint && Rule == other.Rule;
         public override bool Equals(object obj) => obj is TypeConstraintRule rule && Equals(rule);
 

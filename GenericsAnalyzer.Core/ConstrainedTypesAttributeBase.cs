@@ -5,7 +5,7 @@ using System.Linq;
 namespace GenericsAnalyzer.Core
 {
     /// <summary>Denotes that a generic type argument permits the usage of the specified types.</summary>
-    public abstract class ConstrainedTypesAttributeBase : Attribute
+    public abstract class ConstrainedTypesAttributeBase : Attribute, IGenericTypeConstraintAttribute
     {
         private static Type[] constrainedTypeAttributeTypes;
         private static Dictionary<Type, ConstrainedTypesAttributeBase> defaultInstances;

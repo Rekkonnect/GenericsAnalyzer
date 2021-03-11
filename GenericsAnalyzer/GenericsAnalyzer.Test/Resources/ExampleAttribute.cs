@@ -2,6 +2,6 @@
 
 namespace GenericsAnalyzer.Test.Resources
 {
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
     public class ExampleAttribute : Attribute { }
 }

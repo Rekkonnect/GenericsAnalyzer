@@ -10,6 +10,26 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0001_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
         }
+        public static Diagnostic CreateGA0002(AttributeArgumentSyntax attributeArgumentSyntaxNode, ISymbol originalDefinition, ITypeSymbol argumentType)
+        {
+            return Diagnostic.Create(GA0002_Rule, attributeArgumentSyntaxNode.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0004(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType)
+        {
+            return Diagnostic.Create(GA0004_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0005(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType, ITypeParameterSymbol typeParameter)
+        {
+            return Diagnostic.Create(GA0005_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString(), typeParameter.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0009(AttributeArgumentSyntax attributeArgumentSyntaxNode, ITypeSymbol argumentType)
+        {
+            return Diagnostic.Create(GA0009_Rule, attributeArgumentSyntaxNode.GetLocation(), argumentType.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0012(AttributeSyntax attributeSyntaxNode)
+        {
+            return Diagnostic.Create(GA0012_Rule, attributeSyntaxNode.GetLocation());
+        }
         public static Diagnostic CreateGA0014(AttributeSyntax attributeSyntaxNode, ISymbol symbol)
         {
             return Diagnostic.Create(GA0014_Rule, attributeSyntaxNode.GetLocation(), symbol.ToDisplayString());

@@ -12,7 +12,13 @@ namespace GenericsAnalyzer.Core
 
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
 
+        public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public TypeConstraintSystem(ITypeParameterSymbol parameter)
+        {
+            TypeParameter = parameter;
+        }
 
         public void InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
         {
@@ -21,11 +27,45 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
-        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
+        #region Constraint Rule Data
+        // TODO: Create a diagnostics calculator for the system; avoid handling logic in the analyzer itself as it's enumerating the attributes
+
+        public int ConstraintCount(TypeConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value == rule);
+        public int ConstraintCount(ConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value.Rule == rule);
+        public int ConstraintCount(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Count(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+
+        public bool AnyWithConstraint(TypeConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value == rule);
+        public bool AnyWithConstraint(ConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value.Rule == rule);
+        public bool AnyWithConstraint(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Any(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+        #endregion
+
+        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
+            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
+
             foreach (var t in types)
-                typeConstraintRules.AddOrSet(t, rule);
+            {
+                if (typeDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                    continue;
+
+                if (typeDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
+                    continue;
+
+                if (typeConstraintRules.ContainsKey(t))
+                {
+                    if (typeConstraintRules[t] == rule)
+                        typeDiagnostics.RegisterDuplicateType(t);
+                    else
+                        typeDiagnostics.RegisterConflictingType(t);
+
+                    continue;
+                }
+
+                typeConstraintRules.Add(t, rule);
+            }
+
+            return new TypeConstraintSystemAddResult(typeDiagnostics);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);

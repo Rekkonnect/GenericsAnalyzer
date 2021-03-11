@@ -1,20 +1,9 @@
-﻿using GenericsAnalyzer.Core;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using RoslynTestKit;
-using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.CodeFixes;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
-    public abstract class PermittedTypeArgumentAnalyzerCodeFixTests : BaseCodeFixDiagnosticTests
+    public abstract class PermittedTypeArgumentAnalyzerCodeFixTests<TCodeFix> : BaseCodeFixDiagnosticTests<PermittedTypeArgumentAnalyzer, TCodeFix>
+        where TCodeFix : CodeFixProvider, new()
     {
-        private static readonly MetadataReference[] metadataReferences = new[]
-        {
-            ReferenceSource.FromAssembly(typeof(TypeConstraintSystem).Assembly)
-        };
-
-        protected override IReadOnlyCollection<MetadataReference> References => metadataReferences;
-
-        protected sealed override IReadOnlyCollection<DiagnosticAnalyzer> CreateAdditionalAnalyzers() => new DiagnosticAnalyzer[] { new PermittedTypeArgumentAnalyzer() };
     }
 }

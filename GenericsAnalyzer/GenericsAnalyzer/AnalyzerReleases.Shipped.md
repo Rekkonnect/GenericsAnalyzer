@@ -36,3 +36,5 @@ GA0004 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../..
 GA0005 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0005.md)
 GA0009 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0009.md)
 GA0012 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0012.md)
+GA0015 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0015.md)
+GA0016 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0016.md)

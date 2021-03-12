@@ -12,6 +12,4 @@ GA0008 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../.
 GA0010 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0010.md)
 GA0011 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0011.md)
 GA0013 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0013.md)
-GA0015 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0015.md)
-GA0016 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0016.md)
 GA0018 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0018.md)

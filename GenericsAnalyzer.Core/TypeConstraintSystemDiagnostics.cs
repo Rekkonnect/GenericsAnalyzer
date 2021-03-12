@@ -1,5 +1,6 @@
 ﻿using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,13 +8,14 @@ namespace GenericsAnalyzer.Core
 {
     public sealed class TypeConstraintSystemDiagnostics
     {
-        private readonly Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>> erroneousTypes = new Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>>
+        private static readonly TypeConstraintSystemDiagnosticType[] diagnosticTypes;
+
+        static TypeConstraintSystemDiagnostics()
         {
-            { TypeConstraintSystemDiagnosticType.Conflicting, NewSymbolHashSet() },
-            { TypeConstraintSystemDiagnosticType.Duplicate, NewSymbolHashSet() },
-            { TypeConstraintSystemDiagnosticType.InvalidTypeArgument, NewSymbolHashSet() },
-            { TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution, NewSymbolHashSet() },
-        };
+            diagnosticTypes = Enum.GetValues(typeof(TypeConstraintSystemDiagnosticType)).Cast<TypeConstraintSystemDiagnosticType>().ToArray();
+        }
+
+        private readonly Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>> erroneousTypes = new Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>>();
 
         private ISet<ITypeSymbol> ConflictingTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Conflicting];
         private ISet<ITypeSymbol> DuplicateTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Duplicate];
@@ -31,8 +33,14 @@ namespace GenericsAnalyzer.Core
             }
         }
 
-        public TypeConstraintSystemDiagnostics() { }
+        public TypeConstraintSystemDiagnostics()
+        {
+            foreach (var type in diagnosticTypes)
+                if (type != TypeConstraintSystemDiagnosticType.Valid)
+                    erroneousTypes.Add(type, NewSymbolHashSet());
+        }
         public TypeConstraintSystemDiagnostics(TypeConstraintSystemDiagnostics other)
+            : this()
         {
             foreach (var kvp in other.erroneousTypes)
                 erroneousTypes[kvp.Key].AddRange(kvp.Value);
@@ -45,10 +53,21 @@ namespace GenericsAnalyzer.Core
 
         public void RegisterTypes(TypeConstraintSystemDiagnostics typeDiagnostics)
         {
-            RegisterConflictingTypes(typeDiagnostics.ConflictingTypes);
             RegisterDuplicateTypes(typeDiagnostics.DuplicateTypes);
-            InvalidTypeArgumentTypes.AddRange(typeDiagnostics.InvalidTypeArgumentTypes);
-            ConstrainedTypeArgumentSubstitutionTypes.AddRange(typeDiagnostics.ConstrainedTypeArgumentSubstitutionTypes);
+            RegisterConflictingTypes(typeDiagnostics.ConflictingTypes);
+
+            foreach (var kvp in typeDiagnostics.erroneousTypes)
+            {
+                // This should avoid directly adding elements that were previously handled
+                switch (kvp.Key)
+                {
+                    case TypeConstraintSystemDiagnosticType.Conflicting:
+                    case TypeConstraintSystemDiagnosticType.Duplicate:
+                        continue;
+                }
+
+                erroneousTypes[kvp.Key].AddRange(kvp.Value);
+            }
         }
 
         public void RegisterConflictingType(ITypeSymbol type)
@@ -92,15 +111,8 @@ namespace GenericsAnalyzer.Core
 
         public TypeConstraintSystemDiagnosticType GetDiagnosticType(ITypeSymbol type)
         {
-            if (ConflictingTypes.Contains(type))
-                return TypeConstraintSystemDiagnosticType.Conflicting;
-            if (DuplicateTypes.Contains(type))
-                return TypeConstraintSystemDiagnosticType.Duplicate;
-            if (InvalidTypeArgumentTypes.Contains(type))
-                return TypeConstraintSystemDiagnosticType.InvalidTypeArgument;
-            if (ConstrainedTypeArgumentSubstitutionTypes.Contains(type))
-                return TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution;
-            return TypeConstraintSystemDiagnosticType.Valid;
+            // There is no need to check for the key's value because Valid is the default value
+            return erroneousTypes.FirstOrDefault(kvp => kvp.Value.Contains(type)).Key;
         }
 
         private static HashSet<ITypeSymbol> NewSymbolHashSet() => new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);

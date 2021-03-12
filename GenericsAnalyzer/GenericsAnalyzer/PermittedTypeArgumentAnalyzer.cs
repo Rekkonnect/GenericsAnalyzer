@@ -25,6 +25,7 @@ namespace GenericsAnalyzer
             GA0005_Rule,
             GA0009_Rule,
             GA0012_Rule,
+            GA0013_Rule,
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
@@ -173,6 +174,7 @@ namespace GenericsAnalyzer
                 }
 
                 constraints[i] = system;
+                var finiteTypeCount = system.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
                 for (int j = 0; j < attributes.Length; j++)
@@ -196,11 +198,14 @@ namespace GenericsAnalyzer
 
                         case nameof(OnlyPermitSpecifiedTypesAttribute):
                         {
-                            if (!system.AnyWithConstraint(ConstraintRule.Permit))
+                            if (system.HasNoPermittedTypes)
                                 context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
                             continue;
                         }
                     }
+
+                    if (finiteTypeCount == 1)
+                        context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
 
                     var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
                     var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();

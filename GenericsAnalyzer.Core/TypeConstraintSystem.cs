@@ -1,10 +1,14 @@
 ﻿using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
+    // Aliases like that are great
+    using RuleEqualityComparer = Func<KeyValuePair<ITypeSymbol, TypeConstraintRule>, bool>;
+
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
@@ -27,16 +31,46 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        #region Constraint Rule Data
-        // TODO: Create a diagnostics calculator for the system; avoid handling logic in the analyzer itself as it's enumerating the attributes
+        #region Rule Equality Comparer Creators
+        private static RuleEqualityComparer GetRuleEqualityComparer(TypeConstraintRule rule) => kvp => kvp.Value == rule;
+        private static RuleEqualityComparer GetRuleEqualityComparer(ConstraintRule rule) => kvp => kvp.Value.Rule == rule;
+        private static RuleEqualityComparer GetRuleEqualityComparer(TypeConstraintReferencePoint rule) => kvp => kvp.Value.TypeReferencePoint == rule;
+        #endregion
 
-        public int ConstraintCount(TypeConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value == rule);
-        public int ConstraintCount(ConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value.Rule == rule);
-        public int ConstraintCount(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Count(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+        #region Diagnostics
+        public bool HasNoPermittedTypes => OnlyPermitSpecifiedTypes && !typeConstraintRules.Any(GetRuleEqualityComparer(ConstraintRule.Permit));
 
-        public bool AnyWithConstraint(TypeConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value == rule);
-        public bool AnyWithConstraint(ConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value.Rule == rule);
-        public bool AnyWithConstraint(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Any(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+        public int? GetFinitePermittedTypeCount()
+        {
+            if (!OnlyPermitSpecifiedTypes)
+                return null;
+
+            int count = 0;
+
+            foreach (var typeRule in typeConstraintRules)
+            {
+                var type = typeRule.Key;
+                var rule = typeRule.Value;
+
+                if (rule.Rule == ConstraintRule.Prohibit)
+                    continue;
+
+                // There is no need to check whether the rule is a permission
+
+                // Only exact permitted types can make for finite permitted type count
+                if (rule.TypeReferencePoint == TypeConstraintReferencePoint.ExactType)
+                {
+                    if (type is INamedTypeSymbol named && named.IsUnboundGenericTypeSafe())
+                        return null;
+
+                    count++;
+                }
+                else
+                    return null;
+            }
+
+            return count;
+        }
         #endregion
 
         public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
@@ -144,7 +178,7 @@ namespace GenericsAnalyzer.Core
 
             if (type is INamedTypeSymbol namedType)
             {
-                if (namedType.IsGenericType && !namedType.IsUnboundGenericType)
+                if (namedType.IsBoundGenericTypeSafe())
                 {
                     var unbound = namedType.ConstructUnboundGenericType();
                     permission = IsPermitted(unbound, referencePoints);

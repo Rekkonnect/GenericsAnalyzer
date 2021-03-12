@@ -286,7 +286,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The only explicitly permitted type argument for the &apos;{0}&apos; type parameter is &apos;{1}&apos;.
+        ///   Looks up a localized string similar to The type parameter &apos;{0}&apos; only has one explicitly specified permitted type argument (did you forget to mark the permitted type as base?).
         /// </summary>
         internal static string GA0013_MessageFormat {
             get {

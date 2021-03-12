@@ -24,6 +24,8 @@ namespace GenericsAnalyzer
             GA0004_Rule,
             GA0005_Rule,
             GA0009_Rule,
+            GA0010_Rule,
+            GA0011_Rule,
             GA0012_Rule,
             GA0013_Rule,
             GA0014_Rule,
@@ -111,7 +113,6 @@ namespace GenericsAnalyzer
                 return;
 
             var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
-            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
 
             for (int i = 0; i < typeParameters.Length; i++)
             {
@@ -170,10 +171,11 @@ namespace GenericsAnalyzer
 
                     // The arguments will be always stored as an array, regardless of their count
                     // If an error is thrown here, a common cause could be having forgotten to import a namespace
-                    system.Add(rule, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
+                    system.Add(rule, GetConstraintRuleTypeArguments(a));
                 }
 
                 constraints[i] = system;
+                var typeDiagnostics = system.AnalyzeFinalizedSystem();
                 var finiteTypeCount = system.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
@@ -231,6 +233,14 @@ namespace GenericsAnalyzer
 
                             case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
                                 context.ReportDiagnostic(Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter));
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0011(argumentNode, typeConstant));
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0010(argumentNode, typeConstant));
                                 break;
                         }
                     }

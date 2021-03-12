@@ -13,8 +13,10 @@ namespace GenericsAnalyzer.Core
     public class TypeConstraintSystem
     {
         private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
-
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+        private TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
+
+        public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
 
         public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
@@ -71,35 +73,52 @@ namespace GenericsAnalyzer.Core
 
             return count;
         }
+
+        public TypeConstraintSystemDiagnostics AnalyzeFinalizedSystem()
+        {
+            AnalyzeRedundantlyConstrainedTypes();
+            return SystemDiagnostics;
+        }
+
+        private void AnalyzeRedundantlyConstrainedTypes()
+        {
+            //var redundantRule = OnlyPermitSpecifiedTypes ? ConstraintRule.Prohibit : ConstraintRule.Permit;
+            //var filteredRules = typeConstraintRules.Where(GetRuleEqualityComparer(redundantRule));
+            foreach (var rule in typeConstraintRules)
+            {
+                var type = rule.Key;
+                var constraintRule = rule.Value.Rule;
+
+                bool isRedundant = IsPermitted(type, false) == (constraintRule == ConstraintRule.Permit);
+                if (isRedundant)
+                    systemDiagnostics.RegisterRedundantlyConstrainedType(type, constraintRule);
+            }
+        }
         #endregion
 
-        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
-        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
+        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
         {
-            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
-
             foreach (var t in types)
             {
-                if (typeDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                if (systemDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
                     continue;
 
-                if (typeDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
+                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
                     continue;
 
                 if (typeConstraintRules.ContainsKey(t))
                 {
                     if (typeConstraintRules[t] == rule)
-                        typeDiagnostics.RegisterDuplicateType(t);
+                        systemDiagnostics.RegisterDuplicateType(t);
                     else
-                        typeDiagnostics.RegisterConflictingType(t);
+                        systemDiagnostics.RegisterConflictingType(t);
 
                     continue;
                 }
 
                 typeConstraintRules.Add(t, rule);
             }
-
-            return new TypeConstraintSystemAddResult(typeDiagnostics);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
@@ -135,12 +154,13 @@ namespace GenericsAnalyzer.Core
             return SupersetOf(system);
         }
 
-        public bool IsPermitted(ITypeSymbol type)
+        public bool IsPermitted(ITypeSymbol type) => IsPermitted(type, true);
+        private bool IsPermitted(ITypeSymbol type, bool checkInitialType)
         {
             if (type is null)
                 return false;
 
-            var permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
+            var permission = IsPermittedWithUnbound(type, checkInitialType, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
             if (permission != PermissionResult.Unknown)
                 return permission == PermissionResult.Permitted;
 
@@ -149,7 +169,7 @@ namespace GenericsAnalyzer.Core
             {
                 var i = interfaceQueue.Dequeue();
 
-                permission = IsPermittedWithUnbound(i, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(i, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
 
@@ -157,24 +177,28 @@ namespace GenericsAnalyzer.Core
                     interfaceQueue.Enqueue(indirectInterface);
             }
 
-            do
+            type = type.BaseType;
+            while (type != null)
             {
-                permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(type, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
 
                 type = type.BaseType;
             }
-            while (type != null);
 
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private PermissionResult IsPermittedWithUnbound(ITypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
+        private PermissionResult IsPermittedWithUnbound(ITypeSymbol type, bool checkInitialType, params TypeConstraintReferencePoint[] referencePoints)
         {
-            var permission = IsPermitted(type, referencePoints);
-            if (permission != PermissionResult.Unknown)
-                return permission;
+            PermissionResult permission;
+            if (checkInitialType)
+            {
+                permission = IsPermitted(type, referencePoints);
+                if (permission != PermissionResult.Unknown)
+                    return permission;
+            }
 
             if (type is INamedTypeSymbol namedType)
             {

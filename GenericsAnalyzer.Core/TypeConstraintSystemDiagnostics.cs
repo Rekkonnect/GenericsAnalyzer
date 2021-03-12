@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace GenericsAnalyzer.Core
@@ -21,6 +22,8 @@ namespace GenericsAnalyzer.Core
         private ISet<ITypeSymbol> DuplicateTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Duplicate];
         private ISet<ITypeSymbol> InvalidTypeArgumentTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.InvalidTypeArgument];
         private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution];
+        private ISet<ITypeSymbol> RedundantlyPermittedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyPermitted];
+        private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyProhibited];
 
         public bool HasErroneousTypes
         {
@@ -95,12 +98,12 @@ namespace GenericsAnalyzer.Core
                 ConstrainedTypeArgumentSubstitutionTypes.Add(type);
             return invalid;
         }
+        public void RegisterRedundantlyConstrainedType(ITypeSymbol type, ConstraintRule rule) => erroneousTypes[GetDiagnosticType(rule)].Add(type);
+        public void RegisterRedundantlyPermittedType(ITypeSymbol type) => RedundantlyPermittedTypes.Add(type);
+        public void RegisterRedundantlyProhibitedType(ITypeSymbol type) => RedundantlyProhibitedTypes.Add(type);
 
         public void RegisterConflictingTypes(ISet<ITypeSymbol> types)
         {
-            // Syntax idea
-            // RegisterConflictingType foreach in types;
-
             foreach (var type in types)
                 RegisterConflictingType(type);
         }
@@ -116,5 +119,18 @@ namespace GenericsAnalyzer.Core
         }
 
         private static HashSet<ITypeSymbol> NewSymbolHashSet() => new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+
+        private static TypeConstraintSystemDiagnosticType GetDiagnosticType(ConstraintRule rule)
+        {
+            switch (rule)
+            {
+                case ConstraintRule.Permit:
+                    return TypeConstraintSystemDiagnosticType.RedundantlyPermitted;
+                case ConstraintRule.Prohibit:
+                    return TypeConstraintSystemDiagnosticType.RedundantlyProhibited;
+                default:
+                    throw new InvalidEnumArgumentException();
+            }
+        }
     }
 }

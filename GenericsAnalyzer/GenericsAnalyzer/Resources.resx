@@ -175,16 +175,16 @@
     <value>Duplicate type rule</value>
   </data>
   <data name="GA0010_MessageFormat" xml:space="preserve">
-    <value>Redundant explicitly prohibited types; the only permitted types are exactly specified</value>
+    <value>Redundant explicit type prohibition; the type '{0}' is already prohibited based on the system's rules</value>
   </data>
   <data name="GA0010_Title" xml:space="preserve">
-    <value>Redundant explicitly prohibited types</value>
+    <value>Redundant explicit type prohibition</value>
   </data>
   <data name="GA0011_MessageFormat" xml:space="preserve">
-    <value>Redundant explicitly permitted types; no prohibitions or explicit specification for only permitting the specified permitted types via OnlyPermitSpecifiedTypesAttribute</value>
+    <value>Redundant explicit type permission; the type '{0}' is already permitted based on the system's rules</value>
   </data>
   <data name="GA0011_Title" xml:space="preserve">
-    <value>Redundant explicitly permitted types</value>
+    <value>Redundant explicit type permission</value>
   </data>
   <data name="GA0012_MessageFormat" xml:space="preserve">
     <value>Usage of the attribute requires that at least one type is permitted</value>

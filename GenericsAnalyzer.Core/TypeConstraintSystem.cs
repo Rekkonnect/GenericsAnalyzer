@@ -82,8 +82,6 @@ namespace GenericsAnalyzer.Core
 
         private void AnalyzeRedundantlyConstrainedTypes()
         {
-            //var redundantRule = OnlyPermitSpecifiedTypes ? ConstraintRule.Prohibit : ConstraintRule.Permit;
-            //var filteredRules = typeConstraintRules.Where(GetRuleEqualityComparer(redundantRule));
             foreach (var rule in typeConstraintRules)
             {
                 var type = rule.Key;

@@ -11,7 +11,8 @@ using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RedundantAttributeRemover)), Shared]
+    [Shared]
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RedundantAttributeRemover))]
     public class RedundantAttributeRemover : CodeFixProvider
     {
         private ImmutableArray<string> fixableDiagnosticIds = new[]
@@ -26,7 +27,6 @@ namespace GenericsAnalyzer
 
         public sealed override FixAllProvider GetFixAllProvider()
         {
-            // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
             return WellKnownFixAllProviders.BatchFixer;
         }
 

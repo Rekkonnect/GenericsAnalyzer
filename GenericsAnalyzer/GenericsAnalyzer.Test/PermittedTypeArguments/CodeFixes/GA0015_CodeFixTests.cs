@@ -13,8 +13,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class C
 <
     [{|GA0015:InheritBaseTypeUsageConstraints|}]
@@ -26,8 +24,6 @@ class C
 
             var fixedCode =
 @"
-using GenericsAnalyzer.Core;
-
 class C
 <
     T
@@ -36,7 +32,7 @@ class C
 }
 ";
 
-            TestCodeFix(testCode, fixedCode);
+            TestCodeFixWithUsings(testCode, fixedCode);
         }
     }
 }

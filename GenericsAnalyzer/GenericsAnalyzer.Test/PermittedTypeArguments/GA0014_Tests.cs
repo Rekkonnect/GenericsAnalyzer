@@ -16,8 +16,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class A<T> { }
 class C
 <
@@ -41,7 +39,7 @@ delegate void Function
 >();
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
     }
 }

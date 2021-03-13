@@ -1,6 +1,6 @@
 ﻿namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
-    public abstract class RedundantAttributeRemoverCodeFixTests : BaseCodeFixDiagnosticTests<PermittedTypeArgumentAnalyzer, RedundantAttributeRemover>
+    public abstract class RedundantAttributeRemoverCodeFixTests : PermittedTypeArgumentAnalyzerCodeFixTests<RedundantAttributeRemover>
     {
     }
 }

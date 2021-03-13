@@ -7,5 +7,7 @@
         Duplicate,
         InvalidTypeArgument,
         ConstrainedTypeArgumentSubstitution,
+        RedundantlyPermitted,
+        RedundantlyProhibited,
     }
 }

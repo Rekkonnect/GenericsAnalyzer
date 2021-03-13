@@ -4,21 +4,26 @@ namespace GenericsAnalyzer.Core
 {
     public struct TypeConstraintRule : IEquatable<TypeConstraintRule>
     {
-        public TypeConstraintReferencePoint TypeReferencePoint { get; set; }
-        public ConstraintRule Rule { get; set; }
+        public static TypeConstraintRule PermitExactType => new TypeConstraintRule(ConstraintRule.Permit, TypeConstraintReferencePoint.ExactType);
+        public static TypeConstraintRule PermitBaseType => new TypeConstraintRule(ConstraintRule.Permit, TypeConstraintReferencePoint.BaseType);
+        public static TypeConstraintRule ProhibitExactType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.ExactType);
+        public static TypeConstraintRule ProhibitBaseType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.BaseType);
 
-        public TypeConstraintRule(TypeConstraintReferencePoint applicability, ConstraintRule rule)
+        public ConstraintRule Rule { get; set; }
+        public TypeConstraintReferencePoint TypeReferencePoint { get; set; }
+
+        public TypeConstraintRule(ConstraintRule rule, TypeConstraintReferencePoint referecePoint)
         {
-            TypeReferencePoint = applicability;
             Rule = rule;
+            TypeReferencePoint = referecePoint;
         }
         public TypeConstraintRule(TypeConstraintRule other)
-            : this(other.TypeReferencePoint, other.Rule) { }
+            : this(other.Rule, other.TypeReferencePoint) { }
 
         public static bool operator ==(TypeConstraintRule left, TypeConstraintRule right) => left.Equals(right);
         public static bool operator !=(TypeConstraintRule left, TypeConstraintRule right) => !left.Equals(right);
 
-        public bool Equals(TypeConstraintRule other) => TypeReferencePoint == other.TypeReferencePoint && Rule == other.Rule;
+        public bool Equals(TypeConstraintRule other) => Rule == other.Rule && TypeReferencePoint == other.TypeReferencePoint;
         public override bool Equals(object obj) => obj is TypeConstraintRule rule && Equals(rule);
 
         public override int GetHashCode()

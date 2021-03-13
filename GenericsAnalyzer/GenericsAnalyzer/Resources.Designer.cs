@@ -232,7 +232,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly prohibited types; the only permitted types are exactly specified.
+        ///   Looks up a localized string similar to Redundant explicit type prohibition; the type &apos;{0}&apos; is already prohibited based on the system&apos;s rules.
         /// </summary>
         internal static string GA0010_MessageFormat {
             get {
@@ -241,7 +241,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly prohibited types.
+        ///   Looks up a localized string similar to Redundant explicit type prohibition.
         /// </summary>
         internal static string GA0010_Title {
             get {
@@ -250,7 +250,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted types; no prohibitions or explicit specification for only permitting the specified permitted types via OnlyPermitSpecifiedTypesAttribute.
+        ///   Looks up a localized string similar to Redundant explicit type permission; the type &apos;{0}&apos; is already permitted based on the system&apos;s rules.
         /// </summary>
         internal static string GA0011_MessageFormat {
             get {
@@ -259,7 +259,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted types.
+        ///   Looks up a localized string similar to Redundant explicit type permission.
         /// </summary>
         internal static string GA0011_Title {
             get {
@@ -286,7 +286,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The only explicitly permitted type argument for the &apos;{0}&apos; type parameter is &apos;{1}&apos;.
+        ///   Looks up a localized string similar to The type parameter &apos;{0}&apos; only has one explicitly specified permitted type argument (did you forget to mark the permitted type as base?).
         /// </summary>
         internal static string GA0013_MessageFormat {
             get {

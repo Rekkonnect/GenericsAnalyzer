@@ -5,29 +5,25 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0005_Tests : BaseDiagnosticTests
+    public sealed class GA0013_Tests : BaseDiagnosticTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0005_Rule;
+        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0013_Rule;
 
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
-        public void InvalidTypeArguments()
+        public void MultipleConstraints()
         {
             var testCode =
 @"
 using GenericsAnalyzer.Core;
-using System.Collections.Generic;
 
 class C
 <
-    [PermittedTypes(↓typeof(string))]
-    [PermittedBaseTypes(↓typeof(IEnumerable<>))]
-    [PermittedTypes(typeof(IList<int>), typeof(ISet<int>))]
+    [↓PermittedTypes(typeof(int))]
     [OnlyPermitSpecifiedTypes]
     T
 >
-    where T : IEnumerable<int>
 {
 }
 ";

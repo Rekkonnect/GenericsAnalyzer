@@ -1,8 +1,8 @@
 ﻿using Gu.Roslyn.Asserts;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static GenericsAnalyzer.Test.Helpers.UsingsHelpers;
 
 namespace GenericsAnalyzer.Test
 {
@@ -18,16 +18,28 @@ namespace GenericsAnalyzer.Test
         {
             RoslynAssert.Valid(GetNewDiagnosticAnalyzerInstance(), testCode);
         }
+        protected void ValidateCodeWithUsings(string testCode)
+        {
+            ValidateCode(WithUsings(testCode));
+        }
         protected void AssertDiagnostics(string testCode)
         {
             RoslynAssert.Diagnostics(GetNewDiagnosticAnalyzerInstance(), ExpectedDiagnostic, testCode);
         }
+        protected void AssertDiagnosticsWithUsings(string testCode)
+        {
+            AssertDiagnostics(WithUsings(testCode));
+        }
 
-        // No diagnostics expected to show up
         [TestMethod]
         public void EmptyCode()
         {
             ValidateCode(@"");
+        }
+        [TestMethod]
+        public void EmptyCodeWithUsings()
+        {
+            ValidateCode(DefaultNecessaryUsings);
         }
     }
 }

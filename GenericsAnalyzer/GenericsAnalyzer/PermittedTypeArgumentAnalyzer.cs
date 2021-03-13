@@ -24,7 +24,10 @@ namespace GenericsAnalyzer
             GA0004_Rule,
             GA0005_Rule,
             GA0009_Rule,
+            GA0010_Rule,
+            GA0011_Rule,
             GA0012_Rule,
+            GA0013_Rule,
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
@@ -110,7 +113,6 @@ namespace GenericsAnalyzer
                 return;
 
             var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
-            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
 
             for (int i = 0; i < typeParameters.Length; i++)
             {
@@ -169,10 +171,12 @@ namespace GenericsAnalyzer
 
                     // The arguments will be always stored as an array, regardless of their count
                     // If an error is thrown here, a common cause could be having forgotten to import a namespace
-                    system.Add(rule, GetConstraintRuleTypeArguments(a)).RegisterOnto(typeDiagnostics);
+                    system.Add(rule, GetConstraintRuleTypeArguments(a));
                 }
 
                 constraints[i] = system;
+                var typeDiagnostics = system.AnalyzeFinalizedSystem();
+                var finiteTypeCount = system.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
                 for (int j = 0; j < attributes.Length; j++)
@@ -196,11 +200,14 @@ namespace GenericsAnalyzer
 
                         case nameof(OnlyPermitSpecifiedTypesAttribute):
                         {
-                            if (!system.AnyWithConstraint(ConstraintRule.Permit))
+                            if (system.HasNoPermittedTypes)
                                 context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
                             continue;
                         }
                     }
+
+                    if (finiteTypeCount == 1)
+                        context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
 
                     var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
                     var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
@@ -226,6 +233,14 @@ namespace GenericsAnalyzer
 
                             case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
                                 context.ReportDiagnostic(Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter));
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0011(argumentNode, typeConstant));
+                                break;
+
+                            case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0010(argumentNode, typeConstant));
                                 break;
                         }
                     }

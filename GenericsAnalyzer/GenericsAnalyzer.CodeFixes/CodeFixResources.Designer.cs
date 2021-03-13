@@ -61,6 +61,15 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove redundant attribute argument.
+        /// </summary>
+        internal static string RedundantAttributeArgumentRemover_Title {
+            get {
+                return ResourceManager.GetString("RedundantAttributeArgumentRemover_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove redundant attribute.
         /// </summary>
         internal static string RedundantAttributeRemover_Title {

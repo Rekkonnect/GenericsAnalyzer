@@ -1,16 +1,22 @@
 ﻿using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
+    // Aliases like that are great
+    using RuleEqualityComparer = Func<KeyValuePair<ITypeSymbol, TypeConstraintRule>, bool>;
+
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
         private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
-
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+        private TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
+
+        public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
 
         public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
@@ -27,45 +33,92 @@ namespace GenericsAnalyzer.Core
             inheritedTypes.Add(baseTypeParameter);
         }
 
-        #region Constraint Rule Data
-        // TODO: Create a diagnostics calculator for the system; avoid handling logic in the analyzer itself as it's enumerating the attributes
-
-        public int ConstraintCount(TypeConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value == rule);
-        public int ConstraintCount(ConstraintRule rule) => typeConstraintRules.Count(kvp => kvp.Value.Rule == rule);
-        public int ConstraintCount(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Count(kvp => kvp.Value.TypeReferencePoint == referencePoint);
-
-        public bool AnyWithConstraint(TypeConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value == rule);
-        public bool AnyWithConstraint(ConstraintRule rule) => typeConstraintRules.Any(kvp => kvp.Value.Rule == rule);
-        public bool AnyWithConstraint(TypeConstraintReferencePoint referencePoint) => typeConstraintRules.Any(kvp => kvp.Value.TypeReferencePoint == referencePoint);
+        #region Rule Equality Comparer Creators
+        private static RuleEqualityComparer GetRuleEqualityComparer(TypeConstraintRule rule) => kvp => kvp.Value == rule;
+        private static RuleEqualityComparer GetRuleEqualityComparer(ConstraintRule rule) => kvp => kvp.Value.Rule == rule;
+        private static RuleEqualityComparer GetRuleEqualityComparer(TypeConstraintReferencePoint rule) => kvp => kvp.Value.TypeReferencePoint == rule;
         #endregion
 
-        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
-        public TypeConstraintSystemAddResult Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
-        {
-            var typeDiagnostics = new TypeConstraintSystemDiagnostics();
+        #region Diagnostics
+        public bool HasNoPermittedTypes => OnlyPermitSpecifiedTypes && !typeConstraintRules.Any(GetRuleEqualityComparer(ConstraintRule.Permit));
 
-            foreach (var t in types)
+        public int? GetFinitePermittedTypeCount()
+        {
+            if (!OnlyPermitSpecifiedTypes)
+                return null;
+
+            int count = 0;
+
+            foreach (var typeRule in typeConstraintRules)
             {
-                if (typeDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                var type = typeRule.Key;
+                var rule = typeRule.Value;
+
+                if (rule.Rule == ConstraintRule.Prohibit)
                     continue;
 
-                if (typeDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
+                // There is no need to check whether the rule is a permission
+
+                // Only exact permitted types can make for finite permitted type count
+                if (rule.TypeReferencePoint == TypeConstraintReferencePoint.ExactType)
+                {
+                    if (type is INamedTypeSymbol named && named.IsUnboundGenericTypeSafe())
+                        return null;
+
+                    count++;
+                }
+                else
+                    return null;
+            }
+
+            return count;
+        }
+
+        public TypeConstraintSystemDiagnostics AnalyzeFinalizedSystem()
+        {
+            AnalyzeRedundantlyConstrainedTypes();
+            return SystemDiagnostics;
+        }
+
+        private void AnalyzeRedundantlyConstrainedTypes()
+        {
+            //var redundantRule = OnlyPermitSpecifiedTypes ? ConstraintRule.Prohibit : ConstraintRule.Permit;
+            //var filteredRules = typeConstraintRules.Where(GetRuleEqualityComparer(redundantRule));
+            foreach (var rule in typeConstraintRules)
+            {
+                var type = rule.Key;
+                var constraintRule = rule.Value.Rule;
+
+                bool isRedundant = IsPermitted(type, false) == (constraintRule == ConstraintRule.Permit);
+                if (isRedundant)
+                    systemDiagnostics.RegisterRedundantlyConstrainedType(type, constraintRule);
+            }
+        }
+        #endregion
+
+        public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
+        public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
+        {
+            foreach (var t in types)
+            {
+                if (systemDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
+                    continue;
+
+                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
                     continue;
 
                 if (typeConstraintRules.ContainsKey(t))
                 {
                     if (typeConstraintRules[t] == rule)
-                        typeDiagnostics.RegisterDuplicateType(t);
+                        systemDiagnostics.RegisterDuplicateType(t);
                     else
-                        typeDiagnostics.RegisterConflictingType(t);
+                        systemDiagnostics.RegisterConflictingType(t);
 
                     continue;
                 }
 
                 typeConstraintRules.Add(t, rule);
             }
-
-            return new TypeConstraintSystemAddResult(typeDiagnostics);
         }
 
         public bool SupersetOf(TypeConstraintSystem other) => other.SubsetOf(this);
@@ -101,12 +154,13 @@ namespace GenericsAnalyzer.Core
             return SupersetOf(system);
         }
 
-        public bool IsPermitted(ITypeSymbol type)
+        public bool IsPermitted(ITypeSymbol type) => IsPermitted(type, true);
+        private bool IsPermitted(ITypeSymbol type, bool checkInitialType)
         {
             if (type is null)
                 return false;
 
-            var permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
+            var permission = IsPermittedWithUnbound(type, checkInitialType, TypeConstraintReferencePoint.ExactType, TypeConstraintReferencePoint.BaseType);
             if (permission != PermissionResult.Unknown)
                 return permission == PermissionResult.Permitted;
 
@@ -115,7 +169,7 @@ namespace GenericsAnalyzer.Core
             {
                 var i = interfaceQueue.Dequeue();
 
-                permission = IsPermittedWithUnbound(i, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(i, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
 
@@ -123,28 +177,32 @@ namespace GenericsAnalyzer.Core
                     interfaceQueue.Enqueue(indirectInterface);
             }
 
-            do
+            type = type.BaseType;
+            while (type != null)
             {
-                permission = IsPermittedWithUnbound(type, TypeConstraintReferencePoint.BaseType);
+                permission = IsPermittedWithUnbound(type, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
                     return permission == PermissionResult.Permitted;
 
                 type = type.BaseType;
             }
-            while (type != null);
 
             return !OnlyPermitSpecifiedTypes;
         }
 
-        private PermissionResult IsPermittedWithUnbound(ITypeSymbol type, params TypeConstraintReferencePoint[] referencePoints)
+        private PermissionResult IsPermittedWithUnbound(ITypeSymbol type, bool checkInitialType, params TypeConstraintReferencePoint[] referencePoints)
         {
-            var permission = IsPermitted(type, referencePoints);
-            if (permission != PermissionResult.Unknown)
-                return permission;
+            PermissionResult permission;
+            if (checkInitialType)
+            {
+                permission = IsPermitted(type, referencePoints);
+                if (permission != PermissionResult.Unknown)
+                    return permission;
+            }
 
             if (type is INamedTypeSymbol namedType)
             {
-                if (namedType.IsGenericType && !namedType.IsUnboundGenericType)
+                if (namedType.IsBoundGenericTypeSafe())
                 {
                     var unbound = namedType.ConstructUnboundGenericType();
                     permission = IsPermitted(unbound, referencePoints);

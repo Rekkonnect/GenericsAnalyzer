@@ -2,18 +2,12 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using static GenericsAnalyzer.Test.Helpers.UsingsHelpers;
 
 namespace GenericsAnalyzer.Test
 {
     public abstract class BaseDiagnosticTests : IAnalyzerTestFixture
     {
-        private const string usings =
-@"
-using GenericsAnalyzer.Core;
-using System;
-using System.Collections.Generic;
-";
-
         public abstract DiagnosticDescriptor TestedDiagnosticRule { get; }
 
         protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(TestedDiagnosticRule);
@@ -26,7 +20,7 @@ using System.Collections.Generic;
         }
         protected void ValidateCodeWithUsings(string testCode)
         {
-            ValidateCode($"{usings}\n{testCode}");
+            ValidateCode(WithUsings(testCode));
         }
         protected void AssertDiagnostics(string testCode)
         {
@@ -34,7 +28,7 @@ using System.Collections.Generic;
         }
         protected void AssertDiagnosticsWithUsings(string testCode)
         {
-            AssertDiagnostics($"{usings}\n{testCode}");
+            AssertDiagnostics(WithUsings(testCode));
         }
 
         [TestMethod]
@@ -45,7 +39,7 @@ using System.Collections.Generic;
         [TestMethod]
         public void EmptyCodeWithUsings()
         {
-            ValidateCode(usings);
+            ValidateCode(DefaultNecessaryUsings);
         }
     }
 }

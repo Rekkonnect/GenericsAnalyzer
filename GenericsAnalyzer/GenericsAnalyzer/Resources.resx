@@ -156,12 +156,6 @@
   <data name="GA0006_Title" xml:space="preserve">
     <value>Constraint only permits usage of one base bound interface type</value>
   </data>
-  <data name="GA0007_MessageFormat" xml:space="preserve">
-    <value>Redundant explicitly permitted types; the only restrictions are explicit prohibited exact types</value>
-  </data>
-  <data name="GA0007_Title" xml:space="preserve">
-    <value>Redundant explicitly permitted types</value>
-  </data>
   <data name="GA0008_MessageFormat" xml:space="preserve">
     <value>Redundant base type rule; the given base type '{0}' is sealed</value>
   </data>

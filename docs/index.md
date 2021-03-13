@@ -1,5 +1,4 @@
 # Rules
-
 Rule ID                   | Category        | Severity 
 --------------------------|-----------------|----------
 [GA0001](rules/GA0001.md) | API Restriction | Error    
@@ -21,7 +20,6 @@ Rule ID                   | Category        | Severity
 [GA0018](rules/GA0018.md) | Brevity         | Warning  
 
 ## Discontinued Rules
-
 Some rules have been discontinued. They may have been embodied into other rules, whose ID(s) are listed alongside the discontinued ones'.
 
 Rule ID |    Embodied Rule ID(s)
@@ -29,5 +27,4 @@ Rule ID |    Embodied Rule ID(s)
 GA0007  | [GA0011](rules/GA0011.md)
 
 # Groups
-
 [Index](rules/groups/index.md)

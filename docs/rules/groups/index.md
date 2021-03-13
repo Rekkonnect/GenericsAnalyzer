@@ -1,5 +1,4 @@
 # Groups
-
 Group ID        | Type        
 ----------------|-------------
 [DG01](DG01.md) | Distinctive 

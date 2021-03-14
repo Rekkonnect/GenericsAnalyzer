@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -32,13 +31,12 @@ namespace GenericsAnalyzer
 
             foreach (var diagnostic in context.Diagnostics)
             {
-                var syntaxNode = root.FindNode(diagnostic.Location.SourceSpan);
-
                 var codeAction = CodeAction.Create(CodeFixTitle, PerformAction, GetType().Name);
                 context.RegisterCodeFix(codeAction, diagnostic);
 
                 Task<Document> PerformAction(CancellationToken token)
                 {
+                    var syntaxNode = root.FindNode(diagnostic.Location.SourceSpan);
                     return PerformCodeFixActionAsync(context, syntaxNode, token);
                 }
             }

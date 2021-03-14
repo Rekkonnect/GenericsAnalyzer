@@ -26,9 +26,11 @@ namespace GenericsAnalyzer
             SyntaxNode removedNode = syntaxNode;
 
             if ((removedNode.Parent as AttributeArgumentListSyntax).Arguments.Count == 1)
+            {
                 removedNode = removedNode.Parent.Parent;
-            if ((removedNode.Parent as AttributeListSyntax).Attributes.Count == 1)
-                removedNode = removedNode.Parent;
+                if ((removedNode.Parent as AttributeListSyntax).Attributes.Count == 1)
+                    removedNode = removedNode.Parent;
+            }
 
             return await RemoveSyntaxNodeAsync(context, cancellationToken, removedNode);
         }

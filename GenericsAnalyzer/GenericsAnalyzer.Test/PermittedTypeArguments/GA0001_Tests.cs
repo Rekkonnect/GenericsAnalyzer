@@ -16,8 +16,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -31,7 +29,7 @@ class A<T>
 }
 ";
 
-            ValidateCode(testCode);
+            ValidateCodeWithUsings(testCode);
         }
 
         [TestMethod]
@@ -39,8 +37,6 @@ class A<T>
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class Program
 {
     void Run()
@@ -60,7 +56,7 @@ class Program
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -76,7 +72,7 @@ class B<T> : A<T>
 }
 ";
 
-            ValidateCode(testCode);
+            ValidateCodeWithUsings(testCode);
         }
 
         [TestMethod]
@@ -84,8 +80,6 @@ class B<T> : A<T>
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -121,7 +115,7 @@ class A : IA { }
 class B : IB { }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -129,8 +123,6 @@ class B : IB { }
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -159,7 +151,7 @@ class B
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -167,9 +159,6 @@ class B
         {
             var testCode =
 @"
-using System;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -197,7 +186,7 @@ class B
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -205,9 +194,6 @@ class B
         {
             var testCode =
 @"
-using System;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -242,7 +228,7 @@ class C
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -250,9 +236,6 @@ class C
         {
             var testCode =
 @"
-using System;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -275,7 +258,7 @@ class Generic
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -283,9 +266,6 @@ class Generic
         {
             var testCode =
 @"
-using System;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -310,7 +290,7 @@ class Program
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -318,10 +298,6 @@ class Program
         {
             var testCode =
 @"
-using System;
-using System.Collections.Generic;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -352,7 +328,7 @@ class A<T> { }
 class B<T> : A<T> { }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -360,10 +336,6 @@ class B<T> : A<T> { }
         {
             var testCode =
 @"
-using System;
-using System.Collections.Generic;
-using GenericsAnalyzer.Core;
-
 class Program
 {
     static void Main()
@@ -395,7 +367,7 @@ partial class Generic
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
     }
 }

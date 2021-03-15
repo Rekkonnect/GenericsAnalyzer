@@ -178,24 +178,6 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted types; the only restrictions are explicit prohibited exact types.
-        /// </summary>
-        internal static string GA0007_MessageFormat {
-            get {
-                return ResourceManager.GetString("GA0007_MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Redundant explicitly permitted types.
-        /// </summary>
-        internal static string GA0007_Title {
-            get {
-                return ResourceManager.GetString("GA0007_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Redundant base type rule; the given base type &apos;{0}&apos; is sealed.
         /// </summary>
         internal static string GA0008_MessageFormat {

@@ -65,5 +65,35 @@ class C
 
             TestCodeFixWithUsings(testCode, fixedCode);
         }
+        // Also applies to GA0011
+        [TestMethod]
+        public void RedundantlyProhibitedAndValidTypeInAttributeListWithCodeFix()
+        {
+            var testCode =
+@"
+class C
+<
+    [Example, ProhibitedTypes({|GA0010:typeof(long)|}, typeof(List<>)), Example]
+    [ProhibitedBaseTypes(typeof(IComparable<>))]
+    T
+>
+{
+}
+";
+
+            var fixedCode =
+@"
+class C
+<
+    [Example, ProhibitedTypes(typeof(List<>)), Example]
+    [ProhibitedBaseTypes(typeof(IComparable<>))]
+    T
+>
+{
+}
+";
+
+            TestCodeFixWithUsings(testCode, fixedCode);
+        }
     }
 }

@@ -1,6 +1,5 @@
 # Groups
-
-Group ID | Type        |  Documentation
----------|-------------|:--------------:
-DG01     | Distinctive | [Link](DG01.md)
-DG02     | Distinctive | [Link](DG02.md)
+Group ID        | Type        
+----------------|-------------
+[DG01](DG01.md) | Distinctive 
+[DG02](DG01.md) | Distinctive 

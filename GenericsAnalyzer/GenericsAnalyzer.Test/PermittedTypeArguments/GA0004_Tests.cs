@@ -16,8 +16,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class C
 <
     [PermittedTypes(↓typeof(int*), ↓typeof(void))]
@@ -27,7 +25,7 @@ class C
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
     }
 }

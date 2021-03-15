@@ -13,8 +13,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 delegate void Delegate
 <
     [{|GA0014:InheritBaseTypeUsageConstraints|}]
@@ -24,15 +22,13 @@ delegate void Delegate
 
             var fixedCode =
 @"
-using GenericsAnalyzer.Core;
-
 delegate void Delegate
 <
     T
 >(T something);
 ";
 
-            TestCodeFix(testCode, fixedCode);
+            TestCodeFixWithUsings(testCode, fixedCode);
         }
         // This is only tested in GA0014 since it's the same code fix
         [TestMethod]
@@ -40,9 +36,6 @@ delegate void Delegate
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-using GenericsAnalyzer.Test.Resources;
-
 delegate void Delegate
 <
     [Example, {|GA0014:InheritBaseTypeUsageConstraints|}, Example]
@@ -52,9 +45,6 @@ delegate void Delegate
 
             var fixedCode =
 @"
-using GenericsAnalyzer.Core;
-using GenericsAnalyzer.Test.Resources;
-
 delegate void Delegate
 <
     [Example, Example]
@@ -62,7 +52,7 @@ delegate void Delegate
 >(T something);
 ";
 
-            TestCodeFix(testCode, fixedCode);
+            TestCodeFixWithUsings(testCode, fixedCode);
         }
     }
 }

@@ -7,7 +7,6 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 GA0003 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0003.md)
 GA0006 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0006.md)
-GA0007 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0007.md)
 GA0008 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0008.md)
 GA0010 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0010.md)
 GA0011 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0011.md)

@@ -1,5 +1,7 @@
 This analyzer currently provides the ability to restrict a generic type parameter's substituted types through the provided type constraint attributes. They must be directly specified at the generic type parameter.
 
+---
+
 ## Prohibiting Specific Types
 Consider for example the following class:
 ```csharp
@@ -32,6 +34,8 @@ public class C
 >
 ```
 
+---
+
 ## Prohibiting Base Types
 There also is the ability to prohibit any type that inherits the specified prohibited base types. In a similar example, consider the following class:
 ```csharp
@@ -54,6 +58,8 @@ On the following code snippet, the analyzer will emit [GA0001](rules/GA0001.md) 
 ```csharp
 new C<List<int>, int>();
 ```
+
+---
 
 ## Permitting Types
 Prohibitions aside, some types may be excepted from the rules by permitting them to be used. In the previous example:
@@ -79,6 +85,8 @@ As a result, the example code snippet will not emit any errors:
 ```csharp
 new C<List<int>, int>();
 ```
+
+---
 
 ## Only Permitting Specified Types
 On a generic element that only supports a collection of types, there is no need to explicitly prohibit the unsupported types. For example,

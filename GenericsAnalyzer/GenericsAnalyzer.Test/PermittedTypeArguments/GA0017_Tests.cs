@@ -24,7 +24,7 @@ class B<T> : A<T>
 }
 ";
 
-            ValidateCode(testCode);
+            ValidateCodeWithUsings(testCode);
         }
 
         [TestMethod]
@@ -32,8 +32,6 @@ class B<T> : A<T>
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class A
 <
     [ProhibitedBaseTypes(typeof(IA))]
@@ -64,7 +62,7 @@ class A : IA { }
 class B : IB { }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -72,8 +70,6 @@ class B : IB { }
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class A
 <
     [PermittedTypes(typeof(int), typeof(uint))]
@@ -94,7 +90,7 @@ class C<T> : A<↓T>
 }
 ";
 
-            AssertDiagnostics(testCode);
+            AssertDiagnosticsWithUsings(testCode);
         }
 
         [TestMethod]
@@ -102,8 +98,6 @@ class C<T> : A<↓T>
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class A
 <
     [ProhibitedTypes(typeof(string))]
@@ -120,7 +114,7 @@ class B
 }
 ";
 
-            ValidateCode(testCode);
+            ValidateCodeWithUsings(testCode);
         }
 
         [TestMethod]
@@ -128,8 +122,6 @@ class B
         {
             var testCode =
 @"
-using GenericsAnalyzer.Core;
-
 class A
 <
     [PermittedBaseTypes(typeof(ID))]
@@ -153,7 +145,7 @@ interface IC : IBase { }
 interface ID : IC { }
 ";
 
-            ValidateCode(testCode);
+            ValidateCodeWithUsings(testCode);
         }
     }
 }

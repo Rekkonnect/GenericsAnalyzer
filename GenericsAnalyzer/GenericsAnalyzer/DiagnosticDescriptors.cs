@@ -28,7 +28,6 @@ namespace GenericsAnalyzer
         public static readonly DiagnosticDescriptor GA0015_Rule = GetDiagnosticDescriptor(15, BrevityCategory, DiagnosticSeverity.Warning);
         public static readonly DiagnosticDescriptor GA0016_Rule = GetDiagnosticDescriptor(16, BrevityCategory, DiagnosticSeverity.Warning);
         public static readonly DiagnosticDescriptor GA0017_Rule = GetDiagnosticDescriptor(17, APIRestrictionsCategory, DiagnosticSeverity.Error);
-        public static readonly DiagnosticDescriptor GA0018_Rule = GetDiagnosticDescriptor(18, BrevityCategory, DiagnosticSeverity.Warning);
         #endregion
 
         #region Diagnotsic Descriptor Construction

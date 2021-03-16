@@ -18,7 +18,6 @@ namespace GenericsAnalyzer
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
-            GA0018_Rule,
         };
 
         protected override string CodeFixTitle => CodeFixResources.RedundantAttributeRemover_Title;

@@ -9,6 +9,8 @@ namespace GenericsAnalyzer.Core
         public static TypeConstraintRule ProhibitExactType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.ExactType);
         public static TypeConstraintRule ProhibitBaseType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.BaseType);
 
+        public static TypeConstraintRule[] AllValidRules => new[] { PermitExactType, PermitBaseType, ProhibitExactType, ProhibitBaseType };
+
         public ConstraintRule Rule { get; set; }
         public TypeConstraintReferencePoint TypeReferencePoint { get; set; }
 

@@ -16,10 +16,27 @@ namespace GenericsAnalyzer.Core
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
         private TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
 
+        private Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> cachedTypeConstraintsByRule;
+
         public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
 
         public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> TypeConstraintsByRule
+        {
+            get
+            {
+                var result = new Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>>();
+                foreach (var rule in TypeConstraintRule.AllValidRules)
+                    result.Add(rule, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+                
+                foreach (var r in typeConstraintRules)
+                    result[r.Value].Add(r.Key);
+
+                return result;
+            }
+        }
 
         public TypeConstraintSystem(ITypeParameterSymbol parameter)
         {
@@ -76,8 +93,43 @@ namespace GenericsAnalyzer.Core
 
         public TypeConstraintSystemDiagnostics AnalyzeFinalizedSystem()
         {
+            cachedTypeConstraintsByRule = TypeConstraintsByRule;
             AnalyzeRedundantlyConstrainedTypes();
+            AnalyzeConstraintClauseMovability();
             return SystemDiagnostics;
+        }
+
+        private void AnalyzeConstraintClauseMovability()
+        {
+            if (!OnlyPermitSpecifiedTypes)
+                return;
+
+            var symbol = cachedTypeConstraintsByRule[TypeConstraintRule.PermitBaseType].OnlyOrDefault();
+            if (symbol is null)
+                return;
+
+            if (!(symbol is INamedTypeSymbol named))
+                return;
+
+            switch (named.TypeKind)
+            {
+                case TypeKind.Class when !named.IsSealed:
+                case TypeKind.Interface:
+                    break;
+                default:
+                    return;
+            }
+
+            if (named.IsUnboundGenericTypeSafe())
+                return;
+
+            foreach (var type in cachedTypeConstraintsByRule[TypeConstraintRule.PermitExactType])
+            {
+                if (!type.GetAllBaseTypesAndInterfaces().Contains(named, SymbolEqualityComparer.Default))
+                    return;
+            }
+
+            systemDiagnostics.RegisterReducableToConstraintClauseType(named);
         }
 
         private void AnalyzeRedundantlyConstrainedTypes()

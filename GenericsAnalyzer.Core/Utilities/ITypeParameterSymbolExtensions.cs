@@ -38,7 +38,7 @@ namespace GenericsAnalyzer.Core.Utilities
                 if (!typeArgument.IsNotNull())
                     return false;
 
-            var set = new HashSet<ITypeSymbol>(typeArgument.GetAllBaseTypes(), SymbolEqualityComparer.Default);
+            var set = new HashSet<ITypeSymbol>(typeArgument.GetAllBaseTypesAndInterfaces(), SymbolEqualityComparer.Default);
             foreach (var constraintType in symbol.ConstraintTypes)
             {
                 if (constraintType is ITypeParameterSymbol typeParameterConstraint)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GenericsAnalyzer.Core.Utilities
 {
@@ -25,6 +26,25 @@ namespace GenericsAnalyzer.Core.Utilities
 
         public static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(this ITypeSymbol symbol)
         {
+            var currentType = symbol;
+            while (currentType != null)
+            {
+                var baseType = currentType.BaseType;
+                if (baseType != null)
+                    yield return baseType;
+                currentType = baseType;
+            }
+        }
+        public static IEnumerable<INamedTypeSymbol> GetAllBaseTypesAndInterfaces(this ITypeSymbol symbol)
+        {
+            return GetAllBaseTypes(symbol).Concat(symbol.AllInterfaces);
+        }
+        public static IEnumerable<INamedTypeSymbol> GetAllBaseTypesAndDirectInterfaces(this ITypeSymbol symbol)
+        {
+            return GetAllBaseTypes(symbol).Concat(symbol.Interfaces);
+        }
+        public static IEnumerable<INamedTypeSymbol> GetBaseTypeAndInterfaces(this ITypeSymbol symbol)
+        {
             var baseType = symbol.BaseType;
             if (baseType != null)
                 yield return baseType;
@@ -32,7 +52,7 @@ namespace GenericsAnalyzer.Core.Utilities
             foreach (var baseInterface in symbol.AllInterfaces)
                 yield return baseInterface;
         }
-        public static IEnumerable<INamedTypeSymbol> GetAllDirectBaseTypes(this ITypeSymbol symbol)
+        public static IEnumerable<INamedTypeSymbol> GetBaseTypeAndDirectInterfaces(this ITypeSymbol symbol)
         {
             var baseType = symbol.BaseType;
             if (baseType != null)

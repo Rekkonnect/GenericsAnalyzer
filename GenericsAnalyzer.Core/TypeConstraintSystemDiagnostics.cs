@@ -24,6 +24,7 @@ namespace GenericsAnalyzer.Core
         private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution];
         private ISet<ITypeSymbol> RedundantlyPermittedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyPermitted];
         private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyProhibited];
+        private ISet<ITypeSymbol> ReducableToConstraintClauseTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ReducableToConstraintClause];
 
         public bool HasErroneousTypes
         {
@@ -98,6 +99,7 @@ namespace GenericsAnalyzer.Core
                 ConstrainedTypeArgumentSubstitutionTypes.Add(type);
             return invalid;
         }
+        public void RegisterReducableToConstraintClauseType(INamedTypeSymbol type) => ReducableToConstraintClauseTypes.Add(type);
         public void RegisterRedundantlyConstrainedType(ITypeSymbol type, ConstraintRule rule) => erroneousTypes[GetDiagnosticType(rule)].Add(type);
         public void RegisterRedundantlyPermittedType(ITypeSymbol type) => RedundantlyPermittedTypes.Add(type);
         public void RegisterRedundantlyProhibitedType(ITypeSymbol type) => RedundantlyProhibitedTypes.Add(type);

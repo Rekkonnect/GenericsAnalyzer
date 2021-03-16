@@ -17,12 +17,16 @@ namespace GenericsAnalyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
     {
+        // This needs to be better abstracted instead of requiring be hardcoded
         private static readonly ImmutableArray<DiagnosticDescriptor> supportedDiagnostics = new[]
         {
             GA0001_Rule,
             GA0002_Rule,
+            GA0003_Rule,
             GA0004_Rule,
             GA0005_Rule,
+            GA0006_Rule,
+            GA0008_Rule,
             GA0009_Rule,
             GA0010_Rule,
             GA0011_Rule,
@@ -170,7 +174,9 @@ namespace GenericsAnalyzer
                     var rule = ParseAttributeRule(a).Value;
 
                     // The arguments will be always stored as an array, regardless of their count
-                    // If an error is thrown here, a common cause could be having forgotten to import a namespace
+                    // If an error is thrown here, common causes could be:
+                    // - having forgotten to import a namespace
+                    // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
                     system.Add(rule, GetConstraintRuleTypeArguments(a));
                 }
 
@@ -242,6 +248,10 @@ namespace GenericsAnalyzer
                             case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
                                 context.ReportDiagnostic(Diagnostics.CreateGA0010(argumentNode, typeConstant));
                                 break;
+
+                            case TypeConstraintSystemDiagnosticType.ReducableToConstraintClause:
+                                context.ReportDiagnostic(Diagnostics.CreateGA0006(argumentNode));
+                                break;
                         }
                     }
                 }
@@ -304,7 +314,7 @@ namespace GenericsAnalyzer
                 return true;
             }
 
-            var allBaseTypes = type.GetAllDirectBaseTypes().ToImmutableArray();
+            var allBaseTypes = type.GetBaseTypeAndDirectInterfaces().ToImmutableArray();
             var allGenericBaseTypes = allBaseTypes.Where(t => t.IsGenericType).ToImmutableArray();
 
             if (!allGenericBaseTypes.Any())

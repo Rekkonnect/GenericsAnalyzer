@@ -9,5 +9,6 @@
         ConstrainedTypeArgumentSubstitution,
         RedundantlyPermitted,
         RedundantlyProhibited,
+        ReducableToConstraintClause,
     }
 }

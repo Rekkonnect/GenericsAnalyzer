@@ -19,7 +19,8 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
 class C
 <
     [PermittedTypes(↓typeof(string))]
-    [PermittedBaseTypes(↓typeof(IEnumerable<>))]
+    [PermittedBaseTypes(typeof(IEnumerable<>))]
+    [PermittedBaseTypes(↓typeof(List<>))]
     [PermittedTypes(typeof(IList<int>), typeof(ISet<int>))]
     [OnlyPermitSpecifiedTypes]
     T

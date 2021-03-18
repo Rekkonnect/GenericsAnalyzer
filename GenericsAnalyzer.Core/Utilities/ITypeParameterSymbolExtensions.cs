@@ -11,9 +11,17 @@ namespace GenericsAnalyzer.Core.Utilities
             return (ISymbol)symbol.DeclaringType ?? symbol.DeclaringMethod;
         }
 
-        public static bool IsValidTypeArgumentSubstitution(this ITypeParameterSymbol symbol, ITypeSymbol typeArgument)
+        /// <summary>Evaluates whether a given type arugment can substitute a parameter symbol, given its constraints. If the constraints also include other type parameters, this function will be recursively called for each type parameter type constraint, while only taking the declared constraints into account.</summary>
+        /// <param name="typeParameter">The type parameter that is evaluted as being substituted.</param>
+        /// <param name="typeArgument">The type argument that is evaluted as substituting the type parameter.</param>
+        /// <param name="evaluateAsBase">Determines whether the evaluated type argument will not be considered a direct substitution. If <see langword="true"/>, if the type argument is an interface, <see langword="true"/> is returned immediately.</param>
+        /// <returns><see langword="true"/> if the given type argument is a valid direct or indirect substitution for the given type parameter symbol, otherwise <see langword="false"/>.</returns>
+        public static bool IsValidTypeArgumentSubstitution(this ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, bool evaluateAsBase)
         {
-            if (symbol.HasConstructorConstraint)
+            if (evaluateAsBase && typeArgument.TypeKind is TypeKind.Interface)
+                return true;
+
+            if (typeParameter.HasConstructorConstraint)
             {
                 if (!(typeArgument is INamedTypeSymbol namedTypeArgument))
                     return false;
@@ -22,38 +30,43 @@ namespace GenericsAnalyzer.Core.Utilities
                     return false;
             }
 
-            if (symbol.HasReferenceTypeConstraint)
+            if (typeParameter.HasReferenceTypeConstraint)
                 if (!typeArgument.IsReferenceType)
                     return false;
 
-            if (symbol.HasUnmanagedTypeConstraint)
+            if (typeParameter.HasUnmanagedTypeConstraint)
                 if (!typeArgument.IsUnmanagedType)
                     return false;
 
-            if (symbol.HasValueTypeConstraint)
+            if (typeParameter.HasValueTypeConstraint)
                 if (!typeArgument.IsValueType)
                     return false;
 
-            if (symbol.HasNotNullConstraint)
+            if (typeParameter.HasNotNullConstraint)
                 if (!typeArgument.IsNotNull())
                     return false;
 
-            var set = new HashSet<ITypeSymbol>(typeArgument.GetAllBaseTypesAndInterfaces(), SymbolEqualityComparer.Default);
-            foreach (var constraintType in symbol.ConstraintTypes)
+            var baseTypeSet = new HashSet<ITypeSymbol>(typeArgument.GetAllBaseTypesAndInterfaces(), SymbolEqualityComparer.Default);
+            foreach (var constraintType in typeParameter.ConstraintTypes)
             {
                 if (constraintType is ITypeParameterSymbol typeParameterConstraint)
                 {
-                    // This can only check for whether the provided type meets the other type parameter's constraint;
-                    // but cannot check whether it can be valid in context. The check is atomic to each type parameter
-                    // per call of this function, each type argument substitution should mind the context within itself
-                    // for type argument validity.
-                    if (!IsValidTypeArgumentSubstitution(typeParameterConstraint, typeArgument))
+                    /*
+                     * This can only check for whether the provided type meets the other type parameter's constraint;
+                     * but cannot check whether it can be valid in context. The check is atomic to each type parameter
+                     * per call of this function, each type argument substitution should mind the context within itself
+                     * for type argument validity.
+                     */
+                    if (!IsValidTypeArgumentSubstitution(typeParameterConstraint, typeArgument, evaluateAsBase))
                         return false;
+
+                    continue;
                 }
-                else if (!set.Contains(constraintType))
+
+                if (!baseTypeSet.Contains(constraintType))
                     return false;
             }
-            
+
             return true;
         }
     }

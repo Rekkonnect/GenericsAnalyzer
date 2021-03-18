@@ -154,7 +154,7 @@ namespace GenericsAnalyzer.Core
                 if (systemDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
                     continue;
 
-                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
+                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t, rule.TypeReferencePoint is TypeConstraintReferencePoint.BaseType))
                     continue;
 
                 if (typeConstraintRules.ContainsKey(t))

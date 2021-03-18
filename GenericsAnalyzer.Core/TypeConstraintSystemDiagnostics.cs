@@ -92,9 +92,9 @@ namespace GenericsAnalyzer.Core
                 InvalidTypeArgumentTypes.Add(type);
             return invalid;
         }
-        public bool ConditionallyRegisterConstrainedSubstitutionType(ITypeParameterSymbol typeParameter, ITypeSymbol type)
+        public bool ConditionallyRegisterConstrainedSubstitutionType(ITypeParameterSymbol typeParameter, ITypeSymbol type, bool evaluateAsBase)
         {
-            bool invalid = !typeParameter.IsValidTypeArgumentSubstitution(type);
+            bool invalid = !typeParameter.IsValidTypeArgumentSubstitution(type, evaluateAsBase);
             if (invalid)
                 ConstrainedTypeArgumentSubstitutionTypes.Add(type);
             return invalid;

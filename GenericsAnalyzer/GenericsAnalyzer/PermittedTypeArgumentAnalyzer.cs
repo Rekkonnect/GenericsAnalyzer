@@ -252,7 +252,7 @@ namespace GenericsAnalyzer
                                 case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
                                     return Diagnostics.CreateGA0010(argumentNode, typeConstant);
 
-                                case TypeConstraintSystemDiagnosticType.ReducableToConstraintClause:
+                                case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
                                     return Diagnostics.CreateGA0006(argumentNode);
                             }
                             return null;

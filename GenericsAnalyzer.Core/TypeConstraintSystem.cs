@@ -129,7 +129,7 @@ namespace GenericsAnalyzer.Core
                     return;
             }
 
-            systemDiagnostics.RegisterReducableToConstraintClauseType(named);
+            systemDiagnostics.RegisterReducibleToConstraintClauseType(named);
         }
 
         private void AnalyzeRedundantlyConstrainedTypes()

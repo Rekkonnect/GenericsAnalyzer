@@ -10,5 +10,6 @@
         RedundantlyPermitted,
         RedundantlyProhibited,
         ReducibleToConstraintClause,
+        RedundantBaseTypeRule,
     }
 }

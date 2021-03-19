@@ -224,13 +224,13 @@ namespace GenericsAnalyzer
 
                         var type = typeDiagnostics.GetDiagnosticType(typeConstant);
 
-                        var diagnostic = GetReportDiagnostic();
+                        var diagnostic = CreateReportDiagnostic();
                         if (!(diagnostic is null))
                             context.ReportDiagnostic(diagnostic);
 
                         // "Using a non-static local function is fine."
                         //                              -- Rekkon, 2021
-                        Diagnostic GetReportDiagnostic()
+                        Diagnostic CreateReportDiagnostic()
                         {
                             switch (type)
                             {
@@ -254,6 +254,9 @@ namespace GenericsAnalyzer
 
                                 case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
                                     return Diagnostics.CreateGA0006(argumentNode);
+
+                                case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
+                                    return Diagnostics.CreateGA0008(argumentNode, typeConstant);
                             }
                             return null;
                         }

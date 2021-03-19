@@ -167,7 +167,12 @@ namespace GenericsAnalyzer.Core
                     continue;
                 }
 
-                typeConstraintRules.Add(t, rule);
+                var localRule = rule;
+
+                if (systemDiagnostics.ConditionallyRegisterRedundantBaseTypeRuleType(t, rule))
+                    localRule.TypeReferencePoint = TypeConstraintReferencePoint.ExactType;
+
+                typeConstraintRules.Add(t, localRule);
             }
         }
 

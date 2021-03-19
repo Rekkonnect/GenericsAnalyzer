@@ -51,12 +51,12 @@ namespace GenericsAnalyzer.Core.Utilities
             {
                 if (constraintType is ITypeParameterSymbol typeParameterConstraint)
                 {
-                    /*
+                    /*\
                      * This can only check for whether the provided type meets the other type parameter's constraint;
                      * but cannot check whether it can be valid in context. The check is atomic to each type parameter
                      * per call of this function, each type argument substitution should mind the context within itself
                      * for type argument validity.
-                     */
+                    \*/
                     if (!IsValidTypeArgumentSubstitution(typeParameterConstraint, typeArgument, evaluateAsBase))
                         return false;
 

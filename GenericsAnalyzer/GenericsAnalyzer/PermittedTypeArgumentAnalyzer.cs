@@ -223,35 +223,39 @@ namespace GenericsAnalyzer
                         var argumentNode = argumentNodes[argumentIndex];
 
                         var type = typeDiagnostics.GetDiagnosticType(typeConstant);
-                        switch (type)
+
+                        var diagnostic = GetReportDiagnostic();
+                        if (!(diagnostic is null))
+                            context.ReportDiagnostic(diagnostic);
+
+                        // "Using a non-static local function is fine."
+                        //                              -- Rekkon, 2021
+                        Diagnostic GetReportDiagnostic()
                         {
-                            case TypeConstraintSystemDiagnosticType.Conflicting:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant));
-                                break;
+                            switch (type)
+                            {
+                                case TypeConstraintSystemDiagnosticType.Conflicting:
+                                    return Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.Duplicate:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0009(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.Duplicate:
+                                    return Diagnostics.CreateGA0009(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0004(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
+                                    return Diagnostics.CreateGA0004(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
+                                    return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
 
-                            case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0011(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                    return Diagnostics.CreateGA0011(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0010(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                    return Diagnostics.CreateGA0010(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.ReducableToConstraintClause:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0006(argumentNode));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.ReducableToConstraintClause:
+                                    return Diagnostics.CreateGA0006(argumentNode);
+                            }
+                            return null;
                         }
                     }
                 }

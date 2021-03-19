@@ -61,6 +61,15 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Move type constrraint to constraint clause.
+        /// </summary>
+        internal static string ConstraintClauseTypeConstraintPlacer_Title {
+            get {
+                return ResourceManager.GetString("ConstraintClauseTypeConstraintPlacer_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove redundant attribute argument.
         /// </summary>
         internal static string RedundantAttributeArgumentRemover_Title {
@@ -75,6 +84,15 @@ namespace GenericsAnalyzer {
         internal static string RedundantAttributeRemover_Title {
             get {
                 return ResourceManager.GetString("RedundantAttributeRemover_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Convert base type rule to exact type rule.
+        /// </summary>
+        internal static string RedundantBaseTypeRuleConverter_Title {
+            get {
+                return ResourceManager.GetString("RedundantBaseTypeRuleConverter_Title", resourceCulture);
             }
         }
     }

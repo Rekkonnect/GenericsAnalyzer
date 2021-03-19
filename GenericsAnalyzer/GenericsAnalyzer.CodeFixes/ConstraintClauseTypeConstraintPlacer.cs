@@ -4,11 +4,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
 using System.Threading;
@@ -26,7 +23,7 @@ namespace GenericsAnalyzer
             GA0006_Rule
         };
 
-        protected override string CodeFixTitle => CodeFixResources.RedundantAttributeArgumentRemover_Title;
+        protected override string CodeFixTitle => CodeFixResources.ConstraintClauseTypeConstraintPlacer_Title;
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
@@ -114,12 +111,14 @@ namespace GenericsAnalyzer
             var remainingConstraintAttributes = newDocumentTypeParameter.AttributeLists.SelectMany(list => list.Attributes)
                 .Where(a => semanticModel.GetTypeInfo(a).Type.AllInterfaces.Any(i => i.Name == nameof(IGenericTypeConstraintAttribute))).ToArray();
 
+            var remainingPermissionConstraintAttributes = remainingConstraintAttributes.Where(a => a.GetAttributeIdentifierString().StartsWith("Permitted"));
+
             // There will always be at least OnlyPermitSpecifiedTypes, therefore it will remain if there's other attributes that contribute to the constraint system
-            if (remainingConstraintAttributes.Length > 1)
+            if (remainingPermissionConstraintAttributes.Any())
                 return document;
 
             // If this throws, a unit test for the rule should have failed beforehand
-            var remainingRemovedAttribute = remainingConstraintAttributes[0];
+            var remainingRemovedAttribute = remainingConstraintAttributes.First(a => nameof(OnlyPermitSpecifiedTypesAttribute).StartsWith(a.GetAttributeIdentifierString()));
             document = await RemoveAttributeAsync(document, remainingRemovedAttribute, cancellationToken);
 
             return document;

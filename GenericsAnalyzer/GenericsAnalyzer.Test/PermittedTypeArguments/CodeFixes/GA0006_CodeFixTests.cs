@@ -46,6 +46,95 @@ class C : B { }
             TestCodeFixWithUsings(testCode, fixedCode);
         }
         [TestMethod]
+        public void ReducibleConstraintMultipleConstraintAttributes()
+        {
+            var testCode =
+@"
+class Test
+<
+    [ProhibitedTypes(typeof(C))]
+    [PermittedBaseTypes({|GA0006:typeof(B)|})]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+    where T : A
+{
+}
+
+class A { }
+class B : A { }
+class C : B { }
+";
+
+            var fixedCode =
+@"
+class Test
+<
+    [ProhibitedTypes(typeof(C))]
+    T
+>
+    where T : B
+{
+}
+
+class A { }
+class B : A { }
+class C : B { }
+";
+
+            TestCodeFixWithUsings(testCode, fixedCode);
+        }
+        [TestMethod]
+        public void ReducibleConstraintMoreTypePermissionAttributes()
+        {
+            var testCode =
+@"
+#pragma warning disable GA0010
+#pragma warning disable GA0013
+
+class Test
+<
+    [PermittedBaseTypes({|GA0006:typeof(IB)|})]
+    [PermittedTypes(typeof(ID))]
+    [ProhibitedBaseTypes(typeof(IC))]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+    where T : IA
+{
+}
+
+interface IA { }
+interface IB : IA { }
+interface IC : IB { }
+interface ID : IC { }
+";
+
+            var fixedCode =
+@"
+#pragma warning disable GA0010
+#pragma warning disable GA0013
+
+class Test
+<
+    [PermittedTypes(typeof(ID))]
+    [ProhibitedBaseTypes(typeof(IC))]
+    [OnlyPermitSpecifiedTypes]
+    T
+>
+    where T : IA, IB
+{
+}
+
+interface IA { }
+interface IB : IA { }
+interface IC : IB { }
+interface ID : IC { }
+";
+
+            TestCodeFixWithUsings(testCode, fixedCode);
+        }
+        [TestMethod]
         public void ReducibleConstraintInterfaceAndClass()
         {
             var testCode =

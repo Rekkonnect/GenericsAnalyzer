@@ -17,12 +17,16 @@ namespace GenericsAnalyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
     {
+        // This needs to be better abstracted instead of requiring be hardcoded
         private static readonly ImmutableArray<DiagnosticDescriptor> supportedDiagnostics = new[]
         {
             GA0001_Rule,
             GA0002_Rule,
+            GA0003_Rule,
             GA0004_Rule,
             GA0005_Rule,
+            GA0006_Rule,
+            GA0008_Rule,
             GA0009_Rule,
             GA0010_Rule,
             GA0011_Rule,
@@ -170,7 +174,9 @@ namespace GenericsAnalyzer
                     var rule = ParseAttributeRule(a).Value;
 
                     // The arguments will be always stored as an array, regardless of their count
-                    // If an error is thrown here, a common cause could be having forgotten to import a namespace
+                    // If an error is thrown here, common causes could be:
+                    // - having forgotten to import a namespace
+                    // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
                     system.Add(rule, GetConstraintRuleTypeArguments(a));
                 }
 
@@ -217,31 +223,45 @@ namespace GenericsAnalyzer
                         var argumentNode = argumentNodes[argumentIndex];
 
                         var type = typeDiagnostics.GetDiagnosticType(typeConstant);
-                        switch (type)
+
+                        var diagnostic = CreateReportDiagnostic();
+                        if (!(diagnostic is null))
+                            context.ReportDiagnostic(diagnostic);
+
+                        // "Using a non-static local function is fine."
+                        //                              -- Rekkon, 2021
+                        Diagnostic CreateReportDiagnostic()
                         {
-                            case TypeConstraintSystemDiagnosticType.Conflicting:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant));
-                                break;
+                            switch (type)
+                            {
+                                case TypeConstraintSystemDiagnosticType.Conflicting:
+                                    return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.Duplicate:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0009(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.Duplicate:
+                                    return Diagnostics.CreateGA0009(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0004(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
+                                    return Diagnostics.CreateGA0004(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
+                                    return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
 
-                            case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0011(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                    return Diagnostics.CreateGA0011(argumentNode, typeConstant);
 
-                            case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
-                                context.ReportDiagnostic(Diagnostics.CreateGA0010(argumentNode, typeConstant));
-                                break;
+                                case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                    return Diagnostics.CreateGA0010(argumentNode, typeConstant);
+
+                                case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
+                                    return Diagnostics.CreateGA0006(argumentNode);
+
+                                case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
+                                    return Diagnostics.CreateGA0008(argumentNode, typeConstant);
+
+                                case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
+                                    return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
+                            }
+                            return null;
                         }
                     }
                 }
@@ -304,7 +324,7 @@ namespace GenericsAnalyzer
                 return true;
             }
 
-            var allBaseTypes = type.GetAllDirectBaseTypes().ToImmutableArray();
+            var allBaseTypes = type.GetBaseTypeAndDirectInterfaces().ToImmutableArray();
             var allGenericBaseTypes = allBaseTypes.Where(t => t.IsGenericType).ToImmutableArray();
 
             if (!allGenericBaseTypes.Any())

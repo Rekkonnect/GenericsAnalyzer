@@ -24,6 +24,9 @@ namespace GenericsAnalyzer.Core
         private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution];
         private ISet<ITypeSymbol> RedundantlyPermittedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyPermitted];
         private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyProhibited];
+        private ISet<ITypeSymbol> ReducibleToConstraintClauseTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause];
+        private ISet<ITypeSymbol> RedundantBaseTypeRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule];
+        private ISet<ITypeSymbol> RedundantBoundUnboundRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule];
 
         public bool HasErroneousTypes
         {
@@ -73,6 +76,7 @@ namespace GenericsAnalyzer.Core
             }
         }
 
+        // Talk about a clusterfuck
         public void RegisterConflictingType(ITypeSymbol type)
         {
             if (DuplicateTypes.Contains(type))
@@ -91,16 +95,30 @@ namespace GenericsAnalyzer.Core
                 InvalidTypeArgumentTypes.Add(type);
             return invalid;
         }
-        public bool ConditionallyRegisterConstrainedSubstitutionType(ITypeParameterSymbol typeParameter, ITypeSymbol type)
+        public bool ConditionallyRegisterConstrainedSubstitutionType(ITypeParameterSymbol typeParameter, ITypeSymbol type, bool evaluateAsBase)
         {
-            bool invalid = !typeParameter.IsValidTypeArgumentSubstitution(type);
+            bool invalid = !typeParameter.IsValidTypeArgumentSubstitution(type, evaluateAsBase);
             if (invalid)
                 ConstrainedTypeArgumentSubstitutionTypes.Add(type);
             return invalid;
         }
+        public bool ConditionallyRegisterRedundantBaseTypeRuleType(ITypeSymbol type, TypeConstraintRule constraintRule)
+        {
+            bool redundant = constraintRule.TypeReferencePoint is TypeConstraintReferencePoint.BaseType && type.IsSealed;
+            if (redundant)
+                RedundantBaseTypeRuleTypes.Add(type);
+            return redundant;
+        }
+        public void RegisterReducibleToConstraintClauseType(INamedTypeSymbol type) => ReducibleToConstraintClauseTypes.Add(type);
         public void RegisterRedundantlyConstrainedType(ITypeSymbol type, ConstraintRule rule) => erroneousTypes[GetDiagnosticType(rule)].Add(type);
         public void RegisterRedundantlyPermittedType(ITypeSymbol type) => RedundantlyPermittedTypes.Add(type);
         public void RegisterRedundantlyProhibitedType(ITypeSymbol type) => RedundantlyProhibitedTypes.Add(type);
+        public void RegisterRedundantBoundUnboundRuleType(INamedTypeSymbol type)
+        {
+            RedundantlyPermittedTypes.Remove(type);
+            RedundantlyProhibitedTypes.Remove(type);
+            RedundantBoundUnboundRuleTypes.Add(type);
+        }
 
         public void RegisterConflictingTypes(ISet<ITypeSymbol> types)
         {

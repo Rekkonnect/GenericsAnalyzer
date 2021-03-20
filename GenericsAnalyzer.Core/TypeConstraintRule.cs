@@ -9,6 +9,8 @@ namespace GenericsAnalyzer.Core
         public static TypeConstraintRule ProhibitExactType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.ExactType);
         public static TypeConstraintRule ProhibitBaseType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.BaseType);
 
+        public static TypeConstraintRule[] AllValidRules => new[] { PermitExactType, PermitBaseType, ProhibitExactType, ProhibitBaseType };
+
         public ConstraintRule Rule { get; set; }
         public TypeConstraintReferencePoint TypeReferencePoint { get; set; }
 
@@ -19,6 +21,20 @@ namespace GenericsAnalyzer.Core
         }
         public TypeConstraintRule(TypeConstraintRule other)
             : this(other.Rule, other.TypeReferencePoint) { }
+
+        public bool FullySatisfies(TypeConstraintRule other)
+        {
+            if (this == other)
+                return true;
+
+            if (Rule != other.Rule)
+                return false;
+
+            if (other.TypeReferencePoint != TypeConstraintReferencePoint.ExactType)
+                return false;
+
+            return true;
+        }
 
         public static bool operator ==(TypeConstraintRule left, TypeConstraintRule right) => left.Equals(right);
         public static bool operator !=(TypeConstraintRule left, TypeConstraintRule right) => !left.Equals(right);

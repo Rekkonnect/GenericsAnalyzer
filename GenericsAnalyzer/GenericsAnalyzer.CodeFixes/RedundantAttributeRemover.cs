@@ -18,18 +18,13 @@ namespace GenericsAnalyzer
             GA0014_Rule,
             GA0015_Rule,
             GA0016_Rule,
-            GA0018_Rule,
         };
 
         protected override string CodeFixTitle => CodeFixResources.RedundantAttributeRemover_Title;
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
-            SyntaxNode removedNode = syntaxNode;
-            if ((removedNode.Parent as AttributeListSyntax).Attributes.Count == 1)
-                removedNode = removedNode.Parent;
-
-            return await RemoveSyntaxNodeAsync(context, cancellationToken, removedNode);
+            return await RemoveAttributeAsync(context, syntaxNode as AttributeSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
         }
     }
 }

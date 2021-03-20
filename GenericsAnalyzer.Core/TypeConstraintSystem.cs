@@ -16,10 +16,27 @@ namespace GenericsAnalyzer.Core
         private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
         private TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
 
+        private Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> cachedTypeConstraintsByRule;
+
         public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
 
         public ITypeParameterSymbol TypeParameter { get; }
         public bool OnlyPermitSpecifiedTypes { get; set; }
+
+        public Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> TypeConstraintsByRule
+        {
+            get
+            {
+                var result = new Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>>();
+                foreach (var rule in TypeConstraintRule.AllValidRules)
+                    result.Add(rule, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+                
+                foreach (var r in typeConstraintRules)
+                    result[r.Value].Add(r.Key);
+
+                return result;
+            }
+        }
 
         public TypeConstraintSystem(ITypeParameterSymbol parameter)
         {
@@ -76,8 +93,44 @@ namespace GenericsAnalyzer.Core
 
         public TypeConstraintSystemDiagnostics AnalyzeFinalizedSystem()
         {
+            cachedTypeConstraintsByRule = TypeConstraintsByRule;
             AnalyzeRedundantlyConstrainedTypes();
+            AnalyzeConstraintClauseMovability();
+            AnalyzeRedundantBoundUnboundRuleTypes();
             return SystemDiagnostics;
+        }
+
+        private void AnalyzeConstraintClauseMovability()
+        {
+            if (!OnlyPermitSpecifiedTypes)
+                return;
+
+            var symbol = cachedTypeConstraintsByRule[TypeConstraintRule.PermitBaseType].OnlyOrDefault();
+            if (symbol is null)
+                return;
+
+            if (!(symbol is INamedTypeSymbol named))
+                return;
+
+            switch (named.TypeKind)
+            {
+                case TypeKind.Class when !named.IsSealed:
+                case TypeKind.Interface:
+                    break;
+                default:
+                    return;
+            }
+
+            if (named.IsUnboundGenericTypeSafe())
+                return;
+
+            foreach (var type in cachedTypeConstraintsByRule[TypeConstraintRule.PermitExactType])
+            {
+                if (!type.GetAllBaseTypesAndInterfaces().Contains(named, SymbolEqualityComparer.Default))
+                    return;
+            }
+
+            systemDiagnostics.RegisterReducibleToConstraintClauseType(named);
         }
 
         private void AnalyzeRedundantlyConstrainedTypes()
@@ -92,6 +145,30 @@ namespace GenericsAnalyzer.Core
                     systemDiagnostics.RegisterRedundantlyConstrainedType(type, constraintRule);
             }
         }
+
+        private void AnalyzeRedundantBoundUnboundRuleTypes()
+        {
+            foreach (var rule in typeConstraintRules)
+            {
+                var type = rule.Key;
+
+                if (!(type is INamedTypeSymbol named))
+                    continue;
+
+                if (!named.IsBoundGenericTypeSafe())
+                    continue;
+
+                var unbound = named.ConstructUnboundGenericType();
+                if (!typeConstraintRules.ContainsKey(unbound))
+                    continue;
+
+                var boundConstraintRule = rule.Value;
+                var unboundConstraintRule = typeConstraintRules[unbound];
+
+                if (unboundConstraintRule.FullySatisfies(boundConstraintRule))
+                    systemDiagnostics.RegisterRedundantBoundUnboundRuleType(named);
+            }
+        }
         #endregion
 
         public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
@@ -102,7 +179,7 @@ namespace GenericsAnalyzer.Core
                 if (systemDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
                     continue;
 
-                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t))
+                if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t, rule.TypeReferencePoint is TypeConstraintReferencePoint.BaseType))
                     continue;
 
                 if (typeConstraintRules.ContainsKey(t))
@@ -115,7 +192,12 @@ namespace GenericsAnalyzer.Core
                     continue;
                 }
 
-                typeConstraintRules.Add(t, rule);
+                var localRule = rule;
+
+                if (systemDiagnostics.ConditionallyRegisterRedundantBaseTypeRuleType(t, rule))
+                    localRule.TypeReferencePoint = TypeConstraintReferencePoint.ExactType;
+
+                typeConstraintRules.Add(t, localRule);
             }
         }
 

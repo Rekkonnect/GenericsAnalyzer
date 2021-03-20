@@ -15,6 +15,7 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
+            GA0003_Rule,
             GA0010_Rule,
             GA0011_Rule,
         };
@@ -23,16 +24,7 @@ namespace GenericsAnalyzer
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
-            SyntaxNode removedNode = syntaxNode;
-
-            if ((removedNode.Parent as AttributeArgumentListSyntax).Arguments.Count == 1)
-            {
-                removedNode = removedNode.Parent.Parent;
-                if ((removedNode.Parent as AttributeListSyntax).Attributes.Count == 1)
-                    removedNode = removedNode.Parent;
-            }
-
-            return await RemoveSyntaxNodeAsync(context, cancellationToken, removedNode);
+            return await RemoveAttributeArgumentAsync(context, syntaxNode as AttributeArgumentSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
         }
     }
 }

@@ -10,7 +10,7 @@
   <PropertyGroup>
     <PackageId>GenericsAnalyzer</PackageId>
     <Authors>Alex Kalfakakos</Authors>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageVersion>1.1.0</PackageVersion>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>

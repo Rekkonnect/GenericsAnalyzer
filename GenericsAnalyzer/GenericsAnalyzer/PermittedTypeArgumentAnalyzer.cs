@@ -235,7 +235,7 @@ namespace GenericsAnalyzer
                             switch (type)
                             {
                                 case TypeConstraintSystemDiagnosticType.Conflicting:
-                                    return Diagnostics.CreateGA0002(argumentNode, symbol, typeConstant);
+                                    return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
 
                                 case TypeConstraintSystemDiagnosticType.Duplicate:
                                     return Diagnostics.CreateGA0009(argumentNode, typeConstant);
@@ -257,6 +257,9 @@ namespace GenericsAnalyzer
 
                                 case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
                                     return Diagnostics.CreateGA0008(argumentNode, typeConstant);
+
+                                case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
+                                    return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
                             }
                             return null;
                         }

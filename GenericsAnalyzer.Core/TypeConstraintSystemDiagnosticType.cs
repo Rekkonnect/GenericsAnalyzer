@@ -11,5 +11,6 @@
         RedundantlyProhibited,
         ReducibleToConstraintClause,
         RedundantBaseTypeRule,
+        RedundantBoundUnboundRule,
     }
 }

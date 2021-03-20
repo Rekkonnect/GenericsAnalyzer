@@ -96,6 +96,7 @@ namespace GenericsAnalyzer.Core
             cachedTypeConstraintsByRule = TypeConstraintsByRule;
             AnalyzeRedundantlyConstrainedTypes();
             AnalyzeConstraintClauseMovability();
+            AnalyzeRedundantBoundUnboundRuleTypes();
             return SystemDiagnostics;
         }
 
@@ -142,6 +143,30 @@ namespace GenericsAnalyzer.Core
                 bool isRedundant = IsPermitted(type, false) == (constraintRule == ConstraintRule.Permit);
                 if (isRedundant)
                     systemDiagnostics.RegisterRedundantlyConstrainedType(type, constraintRule);
+            }
+        }
+
+        private void AnalyzeRedundantBoundUnboundRuleTypes()
+        {
+            foreach (var rule in typeConstraintRules)
+            {
+                var type = rule.Key;
+
+                if (!(type is INamedTypeSymbol named))
+                    continue;
+
+                if (!named.IsBoundGenericTypeSafe())
+                    continue;
+
+                var unbound = named.ConstructUnboundGenericType();
+                if (!typeConstraintRules.ContainsKey(unbound))
+                    continue;
+
+                var boundConstraintRule = rule.Value;
+                var unboundConstraintRule = typeConstraintRules[unbound];
+
+                if (unboundConstraintRule.FullySatisfies(boundConstraintRule))
+                    systemDiagnostics.RegisterRedundantBoundUnboundRuleType(named);
             }
         }
         #endregion

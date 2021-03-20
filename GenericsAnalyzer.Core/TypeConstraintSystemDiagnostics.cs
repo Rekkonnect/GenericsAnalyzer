@@ -26,6 +26,7 @@ namespace GenericsAnalyzer.Core
         private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyProhibited];
         private ISet<ITypeSymbol> ReducibleToConstraintClauseTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause];
         private ISet<ITypeSymbol> RedundantBaseTypeRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule];
+        private ISet<ITypeSymbol> RedundantBoundUnboundRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule];
 
         public bool HasErroneousTypes
         {
@@ -112,6 +113,12 @@ namespace GenericsAnalyzer.Core
         public void RegisterRedundantlyConstrainedType(ITypeSymbol type, ConstraintRule rule) => erroneousTypes[GetDiagnosticType(rule)].Add(type);
         public void RegisterRedundantlyPermittedType(ITypeSymbol type) => RedundantlyPermittedTypes.Add(type);
         public void RegisterRedundantlyProhibitedType(ITypeSymbol type) => RedundantlyProhibitedTypes.Add(type);
+        public void RegisterRedundantBoundUnboundRuleType(INamedTypeSymbol type)
+        {
+            RedundantlyPermittedTypes.Remove(type);
+            RedundantlyProhibitedTypes.Remove(type);
+            RedundantBoundUnboundRuleTypes.Add(type);
+        }
 
         public void RegisterConflictingTypes(ISet<ITypeSymbol> types)
         {

@@ -16,6 +16,8 @@ namespace GenericsAnalyzer
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
             GA0003_Rule,
+            GA0004_Rule,
+            GA0005_Rule,
             GA0010_Rule,
             GA0011_Rule,
         };

@@ -1,10 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 
 namespace GenericsAnalyzer
 {
@@ -73,6 +72,10 @@ namespace GenericsAnalyzer
             }
         }
 
+        public static IDictionary<Type, ImmutableArray<DiagnosticDescriptor>> GetDiagnosticDescriptorsByAnalyzersImmutable()
+        {
+            return analyzerGroupedDiagnostics.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToImmutableArray());
+        }
         public static ISet<DiagnosticDescriptor> GetDiagnosticDescriptors(Type diagnosticAnalyzerType)
         {
             analyzerGroupedDiagnostics.TryGetValue(diagnosticAnalyzerType, out var set);

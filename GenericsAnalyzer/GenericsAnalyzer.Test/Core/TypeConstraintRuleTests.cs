@@ -11,7 +11,9 @@ namespace GenericsAnalyzer.Test.Core
         [TestMethod]
         public void FullySatisfiesTest()
         {
-            Assert.IsTrue(PermitBaseType.FullySatisfies(PermitBaseType));
+            foreach (var valid in AllValidRules)
+                Assert.IsTrue(valid.FullySatisfies(valid));
+
             Assert.IsTrue(PermitBaseType.FullySatisfies(PermitExactType));
             Assert.IsTrue(ProhibitBaseType.FullySatisfies(ProhibitExactType));
 

@@ -11,7 +11,7 @@
     <PackageId>GenericsAnalyzer</PackageId>
     <Authors>Alex Kalfakakos</Authors>
     <Version>1.1.1</Version>
-    <PackageVersion>1.1.0</PackageVersion>
+    <PackageVersion>1.1.1</PackageVersion>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>A Roslyn analyzer that empowers usage of generics through attributes.</Description>

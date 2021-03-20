@@ -46,15 +46,15 @@ namespace GenericsAnalyzer
         #region Document
         // TODO: Migrate as extensions to not require relying on this class
         // Inconsistent signatures detected
-        protected async Task<Document> RemoveAttributeAsync(Document document, AttributeSyntax attributeSyntax, CancellationToken cancellationToken)
+        protected async Task<Document> RemoveAttributeAsync(Document document, AttributeSyntax attributeSyntax, CancellationToken cancellationToken, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
         {
             SyntaxNode removedNode = attributeSyntax;
             if ((removedNode.Parent as AttributeListSyntax).Attributes.Count == 1)
                 removedNode = removedNode.Parent;
 
-            return await RemoveSyntaxNodeAsync(document, cancellationToken, removedNode);
+            return await RemoveSyntaxNodeAsync(document, cancellationToken, removedNode, options);
         }
-        protected async Task<Document> RemoveAttributeArgumentAsync(Document document, AttributeArgumentSyntax attributeArgumentSyntax, CancellationToken cancellationToken)
+        protected async Task<Document> RemoveAttributeArgumentAsync(Document document, AttributeArgumentSyntax attributeArgumentSyntax, CancellationToken cancellationToken, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
         {
             SyntaxNode removedNode = attributeArgumentSyntax;
 
@@ -65,13 +65,13 @@ namespace GenericsAnalyzer
                     removedNode = removedNode.Parent;
             }
 
-            return await RemoveSyntaxNodeAsync(document, cancellationToken, removedNode);
+            return await RemoveSyntaxNodeAsync(document, cancellationToken, removedNode, options);
         }
 
-        protected async Task<Document> RemoveSyntaxNodeAsync(Document document, CancellationToken cancellationToken, SyntaxNode removedNode)
+        protected async Task<Document> RemoveSyntaxNodeAsync(Document document, CancellationToken cancellationToken, SyntaxNode removedNode, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken);
-            return document.WithSyntaxRoot(root.RemoveNode(removedNode, SyntaxRemoveOptions.KeepNoTrivia));
+            return document.WithSyntaxRoot(root.RemoveNode(removedNode, options));
         }
         protected async Task<Document> InsertSyntaxNodesAfterAsync(Document document, CancellationToken cancellationToken, SyntaxNode referenceNode, IEnumerable<SyntaxNode> insertedNodes)
         {
@@ -88,6 +88,11 @@ namespace GenericsAnalyzer
             var root = await document.GetSyntaxRootAsync(cancellationToken);
             return document.WithSyntaxRoot(root.ReplaceNode(oldNode, insertedNodes));
         }
+        protected async Task<Document> ReplaceNodeAsync(Document document, CancellationToken cancellationToken, SyntaxNode oldNode, SyntaxNode insertedNode)
+        {
+            var root = await document.GetSyntaxRootAsync(cancellationToken);
+            return document.WithSyntaxRoot(root.ReplaceNode(oldNode, insertedNode));
+        }
 
         protected async Task<Document> InsertSyntaxNodesAfterAsync(Document document, CancellationToken cancellationToken, SyntaxNode referenceNode, params SyntaxNode[] insertedNodes)
             => await InsertSyntaxNodesAfterAsync(document, cancellationToken, referenceNode, (IEnumerable<SyntaxNode>)insertedNodes);
@@ -98,13 +103,13 @@ namespace GenericsAnalyzer
         #endregion
 
         #region Context
-        protected async Task<Document> RemoveAttributeAsync(CodeFixContext context, AttributeSyntax attributeSyntax, CancellationToken cancellationToken)
-            => await RemoveAttributeAsync(context.Document, attributeSyntax, cancellationToken);
-        protected async Task<Document> RemoveAttributeArgumentAsync(CodeFixContext context, AttributeArgumentSyntax attributeArgumentSyntax, CancellationToken cancellationToken)
-            => await RemoveAttributeArgumentAsync(context.Document, attributeArgumentSyntax, cancellationToken);
+        protected async Task<Document> RemoveAttributeAsync(CodeFixContext context, AttributeSyntax attributeSyntax, CancellationToken cancellationToken, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
+            => await RemoveAttributeAsync(context.Document, attributeSyntax, cancellationToken, options);
+        protected async Task<Document> RemoveAttributeArgumentAsync(CodeFixContext context, AttributeArgumentSyntax attributeArgumentSyntax, CancellationToken cancellationToken, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
+            => await RemoveAttributeArgumentAsync(context.Document, attributeArgumentSyntax, cancellationToken, options);
 
-        protected async Task<Document> RemoveSyntaxNodeAsync(CodeFixContext context, CancellationToken cancellationToken, SyntaxNode removedNode)
-            => await RemoveSyntaxNodeAsync(context.Document, cancellationToken, removedNode);
+        protected async Task<Document> RemoveSyntaxNodeAsync(CodeFixContext context, CancellationToken cancellationToken, SyntaxNode removedNode, SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia)
+            => await RemoveSyntaxNodeAsync(context.Document, cancellationToken, removedNode, options);
         protected async Task<Document> InsertSyntaxNodesAfterAsync(CodeFixContext context, CancellationToken cancellationToken, SyntaxNode referenceNode, IEnumerable<SyntaxNode> insertedNodes)
             => await InsertSyntaxNodesAfterAsync(context.Document, cancellationToken, referenceNode, insertedNodes);
         protected async Task<Document> InsertSyntaxNodesBeforeAsync(CodeFixContext context, CancellationToken cancellationToken, SyntaxNode referenceNode, IEnumerable<SyntaxNode> insertedNodes)

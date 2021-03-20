@@ -97,7 +97,7 @@ namespace GenericsAnalyzer
             var argumentNode = root.FindNode(originalArgumentNodeSpan);
 
             var oldDocument = document;
-            document = await RemoveAttributeArgumentAsync(document, argumentNode as AttributeArgumentSyntax, cancellationToken);
+            document = await RemoveAttributeArgumentAsync(document, argumentNode as AttributeArgumentSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
             semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             root = await document.GetSyntaxRootAsync(cancellationToken);
 
@@ -119,7 +119,7 @@ namespace GenericsAnalyzer
 
             // If this throws, a unit test for the rule should have failed beforehand
             var remainingRemovedAttribute = remainingConstraintAttributes.First(a => nameof(OnlyPermitSpecifiedTypesAttribute).StartsWith(a.GetAttributeIdentifierString()));
-            document = await RemoveAttributeAsync(document, remainingRemovedAttribute, cancellationToken);
+            document = await RemoveAttributeAsync(document, remainingRemovedAttribute, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
 
             return document;
         }

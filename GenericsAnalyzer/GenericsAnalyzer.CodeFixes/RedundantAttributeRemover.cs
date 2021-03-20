@@ -24,7 +24,7 @@ namespace GenericsAnalyzer
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
-            return await RemoveAttributeAsync(context, syntaxNode as AttributeSyntax, cancellationToken);
+            return await RemoveAttributeAsync(context, syntaxNode as AttributeSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
         }
     }
 }

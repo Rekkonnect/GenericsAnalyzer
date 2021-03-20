@@ -1,4 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 
 namespace GenericsAnalyzer
 {
@@ -12,29 +18,72 @@ namespace GenericsAnalyzer
         #endregion
 
         #region Rules
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0001_Rule = GetDiagnosticDescriptor(1, APIRestrictionsCategory, DiagnosticSeverity.Error);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0002_Rule = GetDiagnosticDescriptor(2, ValidityCategory, DiagnosticSeverity.Error);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0003_Rule = GetDiagnosticDescriptor(3, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0004_Rule = GetDiagnosticDescriptor(4, ValidityCategory, DiagnosticSeverity.Error);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0005_Rule = GetDiagnosticDescriptor(5, ValidityCategory, DiagnosticSeverity.Error);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0006_Rule = GetDiagnosticDescriptor(6, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0008_Rule = GetDiagnosticDescriptor(8, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0009_Rule = GetDiagnosticDescriptor(9, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0010_Rule = GetDiagnosticDescriptor(10, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0011_Rule = GetDiagnosticDescriptor(11, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0012_Rule = GetDiagnosticDescriptor(12, ValidityCategory, DiagnosticSeverity.Error);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0013_Rule = GetDiagnosticDescriptor(13, DesignCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0014_Rule = GetDiagnosticDescriptor(14, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0015_Rule = GetDiagnosticDescriptor(15, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0016_Rule = GetDiagnosticDescriptor(16, BrevityCategory, DiagnosticSeverity.Warning);
+        [DiagnosticSupported(typeof(PermittedTypeArgumentAnalyzer))]
         public static readonly DiagnosticDescriptor GA0017_Rule = GetDiagnosticDescriptor(17, APIRestrictionsCategory, DiagnosticSeverity.Error);
         #endregion
+
+        private static readonly Dictionary<Type, HashSet<DiagnosticDescriptor>> analyzerGroupedDiagnostics = new Dictionary<Type, HashSet<DiagnosticDescriptor>>();
+
+        static DiagnosticDescriptors()
+        {
+            var fields = typeof(DiagnosticDescriptors).GetFields();
+            foreach (var f in fields)
+            {
+                var type = f.GetCustomAttribute<DiagnosticSupportedAttribute>()?.DiagnosticAnalyzerType;
+                if (type is null)
+                    continue;
+
+                HashSet<DiagnosticDescriptor> set;
+                if (analyzerGroupedDiagnostics.ContainsKey(type))
+                    set = analyzerGroupedDiagnostics[type];
+                else
+                    analyzerGroupedDiagnostics.Add(type, set = new HashSet<DiagnosticDescriptor>());
+
+                set.Add(f.GetValue(null) as DiagnosticDescriptor);
+            }
+        }
+
+        public static ISet<DiagnosticDescriptor> GetDiagnosticDescriptors(Type diagnosticAnalyzerType)
+        {
+            analyzerGroupedDiagnostics.TryGetValue(diagnosticAnalyzerType, out var set);
+            return new HashSet<DiagnosticDescriptor>(set);
+        }
 
         #region Diagnotsic Descriptor Construction
         private const string baseRuleDocsURL = "https://github.com/AlFasGD/GenericsAnalyzer/blob/master/docs/rules";
 
-        public static string GetHelpLinkURI(int id) => $"{baseRuleDocsURL}/{GetDiagnosticID(id)}.md";
-        public static string GetDiagnosticID(int id) => $"GA{id:0000}";
+        private static string GetHelpLinkURI(int id) => $"{baseRuleDocsURL}/{GetDiagnosticID(id)}.md";
+        private static string GetDiagnosticID(int id) => $"GA{id:0000}";
 
         private static DiagnosticDescriptor GetDiagnosticDescriptor(int id, string category, DiagnosticSeverity severity)
         {

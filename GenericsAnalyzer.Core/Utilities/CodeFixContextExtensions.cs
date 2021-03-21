@@ -9,23 +9,32 @@ namespace GenericsAnalyzer.Core.Utilities
 {
     public static class CodeFixContextExtensions
     {
-        public static async Task<Document> RemoveAttributeAsync
+        public static async Task<Document> RemoveAttributeCleanAsync
         (
             this CodeFixContext context,
             AttributeSyntax attributeSyntax,
             SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia,
             CancellationToken cancellationToken = default
         )
-            => await context.Document.RemoveAttributeAsync(attributeSyntax, options, cancellationToken);
+            => await context.Document.RemoveAttributeCleanAsync(attributeSyntax, options, cancellationToken);
 
-        public static async Task<Document> RemoveAttributeArgumentAsync
+        public static async Task<Document> RemoveAttributeArgumentCleanAsync
         (
             this CodeFixContext context,
             AttributeArgumentSyntax attributeArgumentSyntax,
             SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia,
             CancellationToken cancellationToken = default
         )
-            => await context.Document.RemoveAttributeArgumentAsync(attributeArgumentSyntax, options, cancellationToken);
+            => await context.Document.RemoveAttributeArgumentCleanAsync(attributeArgumentSyntax, options, cancellationToken);
+
+        public static async Task<Document> RemoveAttributeArgumentsCleanAsync
+        (
+            this CodeFixContext context,
+            IEnumerable<AttributeArgumentSyntax> attributeArgumentNodes,
+            SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia,
+            CancellationToken cancellationToken = default
+        )
+            => await context.Document.RemoveAttributeArgumentsCleanAsync(attributeArgumentNodes, options, cancellationToken);
 
         public static async Task<Document> RemoveSyntaxNodeAsync
         (

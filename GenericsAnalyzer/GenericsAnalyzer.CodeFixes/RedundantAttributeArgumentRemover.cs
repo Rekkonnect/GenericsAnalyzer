@@ -17,6 +17,8 @@ namespace GenericsAnalyzer
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
             GA0003_Rule,
+            GA0004_Rule,
+            GA0005_Rule,
             GA0010_Rule,
             GA0011_Rule,
         };
@@ -25,7 +27,7 @@ namespace GenericsAnalyzer
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
-            return await context.RemoveAttributeArgumentAsync(syntaxNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
+            return await context.RemoveAttributeArgumentCleanAsync(syntaxNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
         }
     }
 }

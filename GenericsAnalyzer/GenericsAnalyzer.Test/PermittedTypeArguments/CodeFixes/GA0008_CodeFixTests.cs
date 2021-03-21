@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
     [TestClass]
-    [Ignore("The resulting document when performing the operation is correct, however asserions fail")]
+    [Ignore("Resulting document's indentation is somehow altered during assertion")]
     public class GA0008_CodeFixTests : RedundantBaseTypeRuleConverterCodeFixTests
     {
         public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0008_Rule;

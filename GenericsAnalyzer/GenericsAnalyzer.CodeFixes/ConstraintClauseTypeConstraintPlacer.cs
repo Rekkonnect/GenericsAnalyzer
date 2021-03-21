@@ -97,7 +97,7 @@ namespace GenericsAnalyzer
             var argumentNode = root.FindNode(originalArgumentNodeSpan);
 
             var oldDocument = document;
-            document = await document.RemoveAttributeArgumentAsync(argumentNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
+            document = await document.RemoveAttributeArgumentCleanAsync(argumentNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
             semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             root = await document.GetSyntaxRootAsync(cancellationToken);
 
@@ -109,7 +109,7 @@ namespace GenericsAnalyzer
             var newDocumentTypeParameter = typeParameters.First(t => t.Identifier.ValueText == typeParameter.Identifier.ValueText);
 
             var remainingConstraintAttributes = newDocumentTypeParameter.AttributeLists.SelectMany(list => list.Attributes)
-                .Where(a => semanticModel.GetTypeInfo(a).Type.AllInterfaces.Any(i => i.Name == nameof(IGenericTypeConstraintAttribute))).ToArray();
+                .Where(a => a.IsGenericConstraintAttribute(semanticModel)).ToArray();
 
             var remainingPermissionConstraintAttributes = remainingConstraintAttributes.Where(a => a.GetAttributeIdentifierString().StartsWith("Permitted"));
 
@@ -119,7 +119,7 @@ namespace GenericsAnalyzer
 
             // If this throws, a unit test for the rule should have failed beforehand
             var remainingRemovedAttribute = remainingConstraintAttributes.First(a => nameof(OnlyPermitSpecifiedTypesAttribute).StartsWith(a.GetAttributeIdentifierString()));
-            document = await document.RemoveAttributeAsync(remainingRemovedAttribute, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
+            document = await document.RemoveAttributeCleanAsync(remainingRemovedAttribute, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
 
             return document;
         }

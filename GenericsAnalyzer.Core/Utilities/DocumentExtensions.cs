@@ -66,6 +66,18 @@ namespace GenericsAnalyzer.Core.Utilities
             return document.WithSyntaxRoot(root.RemoveNode(removedNode, options));
         }
 
+        public static async Task<Document> RemoveSyntaxNodesAsync
+        (
+            this Document document,
+            IEnumerable<SyntaxNode> removedNodes,
+            SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia,
+            CancellationToken cancellationToken = default
+        )
+        {
+            var root = await document.GetSyntaxRootAsync(cancellationToken);
+            return document.WithSyntaxRoot(root.RemoveNodes(removedNodes, options));
+        }
+
         public static async Task<Document> InsertSyntaxNodesAfterAsync
         (
             this Document document,

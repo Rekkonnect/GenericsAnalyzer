@@ -36,6 +36,15 @@ namespace GenericsAnalyzer.Core.Utilities
         )
             => await context.Document.RemoveSyntaxNodeAsync(removedNode, options, cancellationToken);
 
+        public static async Task<Document> RemoveSyntaxNodesAsync
+        (
+            this CodeFixContext context,
+            IEnumerable<SyntaxNode> removedNodes,
+            SyntaxRemoveOptions options = SyntaxRemoveOptions.KeepExteriorTrivia,
+            CancellationToken cancellationToken = default
+        )
+            => await context.Document.RemoveSyntaxNodesAsync(removedNodes, options, cancellationToken);
+
         public static async Task<Document> InsertSyntaxNodesAfterAsync
         (
             this CodeFixContext context,

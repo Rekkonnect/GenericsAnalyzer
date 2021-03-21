@@ -19,15 +19,6 @@ namespace GenericsAnalyzer.Core
         public GenericTypeConstraintInfo(INamedTypeSymbol typeSymbol)
             : this(typeSymbol.Arity) { }
 
-        public bool IsPermitted(int index, ITypeSymbol type)
-        {
-            return this[index].IsPermitted(type);
-        }
-        public bool IsPermitted(ITypeParameterSymbol typeParameter, ITypeSymbol type)
-        {
-            return this[typeParameter].IsPermitted(type);
-        }
-
         public TypeConstraintSystem this[int index]
         {
             get => systems[index];

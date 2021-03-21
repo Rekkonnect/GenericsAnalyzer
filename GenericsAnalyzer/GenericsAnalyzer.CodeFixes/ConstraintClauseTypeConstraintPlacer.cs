@@ -87,22 +87,22 @@ namespace GenericsAnalyzer
                 // with attributes in multiple lines is not expected
                 var newConstraintClauseList = constraintClauses.Insert(insertionIndex, newConstraintClause);
                 var replacedConstriantClauseNode = memberDeclarationSyntax.WithConstraintClauses(newConstraintClauseList);
-                document = await ReplaceNodeAsync(document, cancellationToken, memberDeclarationSyntax, replacedConstriantClauseNode);
+                document = await document.ReplaceNodeAsync(memberDeclarationSyntax, replacedConstriantClauseNode, cancellationToken);
             }
             else
-                document = await ReplaceNodeAsync(document, cancellationToken, oldConstraintClause, newConstraintClause);
+                document = await document.ReplaceNodeAsync(oldConstraintClause, newConstraintClause, cancellationToken);
 
             // Remove the attribute that referred to the type constraint that was placed to the constraint clause
             var root = await document.GetSyntaxRootAsync(cancellationToken);
             var argumentNode = root.FindNode(originalArgumentNodeSpan);
 
             var oldDocument = document;
-            document = await RemoveAttributeArgumentAsync(document, argumentNode as AttributeArgumentSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
+            document = await document.RemoveAttributeArgumentAsync(argumentNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
             semanticModel = await document.GetSemanticModelAsync(cancellationToken);
             root = await document.GetSyntaxRootAsync(cancellationToken);
 
             // Also remove the remaining OnlyPermitSpecifiedTypes if there are no other type constraint attributes
-            var difference = await DocumentUtilities.GetLengthDifference(oldDocument, document, cancellationToken);
+            var difference = await document.LengthDifferenceFrom(oldDocument, cancellationToken);
 
             var newMemberDeclarationNode = root.FindNode(new TextSpan(originalMemberDeclarationSpan.Start, originalMemberDeclarationSpan.Length + difference)) as MemberDeclarationSyntax;
             var typeParameters = newMemberDeclarationNode.GetTypeParameterList().Parameters;
@@ -119,7 +119,7 @@ namespace GenericsAnalyzer
 
             // If this throws, a unit test for the rule should have failed beforehand
             var remainingRemovedAttribute = remainingConstraintAttributes.First(a => nameof(OnlyPermitSpecifiedTypesAttribute).StartsWith(a.GetAttributeIdentifierString()));
-            document = await RemoveAttributeAsync(document, remainingRemovedAttribute, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
+            document = await document.RemoveAttributeAsync(remainingRemovedAttribute, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
 
             return document;
         }

@@ -365,23 +365,5 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0017_Title", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Redundant type constraint attribute; no types are assigned the given rule.
-        /// </summary>
-        internal static string GA0018_MessageFormat {
-            get {
-                return ResourceManager.GetString("GA0018_MessageFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Redundant type constraint attribute.
-        /// </summary>
-        internal static string GA0018_Title {
-            get {
-                return ResourceManager.GetString("GA0018_Title", resourceCulture);
-            }
-        }
     }
 }

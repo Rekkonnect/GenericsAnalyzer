@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using GenericsAnalyzer.Core.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace GenericsAnalyzer
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
-            return await RemoveAttributeAsync(context, syntaxNode as AttributeSyntax, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
+            return await context.RemoveAttributeAsync(syntaxNode as AttributeSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
         }
     }
 }

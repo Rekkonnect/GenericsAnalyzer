@@ -57,8 +57,8 @@ namespace GenericsAnalyzer
 
             // Remove the original argument from the attribute
             var oldDocument = document;
-            document = await RemoveAttributeArgumentAsync(document, attributeArgumentNode, cancellationToken, SyntaxRemoveOptions.KeepNoTrivia);
-            int difference = await DocumentUtilities.GetLengthDifference(oldDocument, document, cancellationToken);
+            document = await document.RemoveAttributeArgumentAsync(attributeArgumentNode, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
+            int difference = await document.LengthDifferenceFrom(oldDocument, cancellationToken);
 
             var root = await document.GetSyntaxRootAsync(cancellationToken);
 
@@ -69,8 +69,7 @@ namespace GenericsAnalyzer
             var newTypeParameterNode = typeParameterNode.WithAttributeLists(lists);
 
             // The resulting document is correct, the asserions are wrong
-            // 
-            return document = await ReplaceNodeAsync(document, cancellationToken, typeParameterNode, newTypeParameterNode);
+            return document = await document.ReplaceNodeAsync(typeParameterNode, newTypeParameterNode, cancellationToken);
         }
     }
 }

@@ -24,6 +24,14 @@ namespace GenericsAnalyzer.Core.Utilities
             return symbol.NullableAnnotation == NullableAnnotation.Annotated;
         }
 
+        public static bool Inherits(this ITypeSymbol symbol, INamedTypeSymbol other)
+        {
+            if (other.TypeKind == TypeKind.Interface)
+                return symbol.AllInterfaces.Contains(other);
+
+            return symbol.GetAllBaseTypes().Contains(other, SymbolEqualityComparer.Default);
+        }
+
         public static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(this ITypeSymbol symbol)
         {
             var currentType = symbol;

@@ -23,6 +23,8 @@ namespace GenericsAnalyzer
 
         protected override string CodeFixTitle => CodeFixResources.RedundantBaseTypeRuleConverter_Title;
 
+        public override FixAllProvider GetFixAllProvider() => null;
+
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             var document = context.Document;
@@ -57,7 +59,7 @@ namespace GenericsAnalyzer
 
             // Remove the original argument from the attribute
             var oldDocument = document;
-            document = await document.RemoveAttributeArgumentAsync(attributeArgumentNode, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
+            document = await document.RemoveAttributeArgumentCleanAsync(attributeArgumentNode, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
             int difference = await document.LengthDifferenceFrom(oldDocument, cancellationToken);
 
             var root = await document.GetSyntaxRootAsync(cancellationToken);

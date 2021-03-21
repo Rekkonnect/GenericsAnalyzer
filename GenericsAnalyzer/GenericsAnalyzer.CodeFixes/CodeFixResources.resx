@@ -120,6 +120,9 @@
   <data name="ConstraintClauseTypeConstraintPlacer_Title" xml:space="preserve">
     <value>Move type constrraint to constraint clause</value>
   </data>
+  <data name="DuplicateAttributeArgumentRemover_Title" xml:space="preserve">
+    <value>Remove duplicate attribute arguments</value>
+  </data>
   <data name="RedundantAttributeArgumentRemover_Title" xml:space="preserve">
     <value>Remove redundant attribute argument</value>
   </data>

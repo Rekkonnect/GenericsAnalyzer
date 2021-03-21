@@ -219,4 +219,22 @@
   <data name="GA0017_Title" xml:space="preserve">
     <value>Type argument explicit type constraint mismatch</value>
   </data>
+  <data name="GA0019_MessageFormat" xml:space="preserve">
+    <value>The given type parameter name '{0}' does not reflect any locally declared type parameter</value>
+  </data>
+  <data name="GA0019_Title" xml:space="preserve">
+    <value>Invalid type parameter name</value>
+  </data>
+  <data name="GA0020_MessageFormat" xml:space="preserve">
+    <value>The type constraint inheritance causes a recursion</value>
+  </data>
+  <data name="GA0020_Title" xml:space="preserve">
+    <value>Recursive inheritance was detected</value>
+  </data>
+  <data name="GA0021_MessageFormat" xml:space="preserve">
+    <value>A type parameter may not inherit type constraints from itself</value>
+  </data>
+  <data name="GA0021_Title" xml:space="preserve">
+    <value>Cannot inherit from the same type parameter</value>
+  </data>
 </root>

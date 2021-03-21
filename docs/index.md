@@ -17,6 +17,9 @@ Rule ID                   | Category        | Severity
 [GA0015](rules/GA0015.md) | Brevity         | Warning
 [GA0016](rules/GA0016.md) | Brevity         | Warning
 [GA0017](rules/GA0017.md) | API Restriction | Error
+[GA0019](rules/GA0019.md) | Validity        | Error
+[GA0020](rules/GA0020.md) | Validity        | Error
+[GA0021](rules/GA0021.md) | Validity        | Error
 
 ## Discontinued Rules
 Some rules have been discontinued. They may have been embodied into other rules, whose ID(s) are listed alongside the discontinued ones'.

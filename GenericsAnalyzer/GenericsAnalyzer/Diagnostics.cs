@@ -70,5 +70,17 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0017_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
         }
+        public static Diagnostic CreateGA0019(AttributeArgumentSyntax attributeArgumentNode, string typeParameterName)
+        {
+            return Diagnostic.Create(GA0019_Rule, attributeArgumentNode.GetLocation(), typeParameterName);
+        }
+        public static Diagnostic CreateGA0020(AttributeArgumentSyntax attributeArgumentNode)
+        {
+            return Diagnostic.Create(GA0020_Rule, attributeArgumentNode.GetLocation());
+        }
+        public static Diagnostic CreateGA0021(AttributeArgumentSyntax attributeArgumentNode)
+        {
+            return Diagnostic.Create(GA0021_Rule, attributeArgumentNode.GetLocation());
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace GenericsAnalyzer.Core.Utilities
     public class TypeParameterConstraintClauseSegmentation
     {
         private TypeParameterConstraintSyntax keywordOrClassConstraint;
+        private TypeConstraintSyntax delegateOrEnumConstraint;
         private List<TypeConstraintSyntax> interfaceConstraints = new List<TypeConstraintSyntax>();
         private ConstructorConstraintSyntax newConstraint;
 
@@ -52,8 +53,16 @@ namespace GenericsAnalyzer.Core.Utilities
             switch (typeSymbol.TypeKind)
             {
                 case TypeKind.Class:
-                    keywordOrClassConstraint = typeConstraint;
-                    break;
+                    switch (typeSymbol.SpecialType)
+                    {
+                        case SpecialType.System_Delegate:
+                        case SpecialType.System_Enum:
+                            delegateOrEnumConstraint = typeConstraint;
+                            return;
+                        default:
+                            keywordOrClassConstraint = typeConstraint;
+                            return;
+                    }
                 case TypeKind.Interface:
                     interfaceConstraints.Add(typeConstraint);
                     break;
@@ -69,6 +78,8 @@ namespace GenericsAnalyzer.Core.Utilities
             var result = new SeparatedSyntaxList<TypeParameterConstraintSyntax>();
             if (keywordOrClassConstraint != null)
                 result = result.Add(keywordOrClassConstraint);
+            if (delegateOrEnumConstraint != null)
+                result = result.Add(delegateOrEnumConstraint);
             if (interfaceConstraints.Any())
                 result = result.AddRange(interfaceConstraints);
             if (newConstraint != null)

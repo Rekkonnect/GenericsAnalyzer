@@ -7,40 +7,15 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using static GenericsAnalyzer.DiagnosticDescriptors;
 
-// The analyzer should not be run concurrently due to the state that it preserves 
+// The analyzer should not be run concurrently due to the state that it preserves
 #pragma warning disable RS1026 // Enable concurrent execution
 
 namespace GenericsAnalyzer
 {
-    [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class PermittedTypeArgumentAnalyzer : DiagnosticAnalyzer
+    public class PermittedTypeArgumentAnalyzer : CSharpDiagnosticAnalyzer
     {
-        // This needs to be better abstracted instead of requiring be hardcoded
-        private static readonly ImmutableArray<DiagnosticDescriptor> supportedDiagnostics = new[]
-        {
-            GA0001_Rule,
-            GA0002_Rule,
-            GA0003_Rule,
-            GA0004_Rule,
-            GA0005_Rule,
-            GA0006_Rule,
-            GA0008_Rule,
-            GA0009_Rule,
-            GA0010_Rule,
-            GA0011_Rule,
-            GA0012_Rule,
-            GA0013_Rule,
-            GA0014_Rule,
-            GA0015_Rule,
-            GA0016_Rule,
-            GA0017_Rule,
-        }.ToImmutableArray();
-
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => supportedDiagnostics;
 
         public override void Initialize(AnalysisContext context)
         {

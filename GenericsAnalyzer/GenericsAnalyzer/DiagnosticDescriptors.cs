@@ -13,6 +13,7 @@ namespace GenericsAnalyzer
         public const string APIRestrictionsCategory = "API Restrictions";
         public const string BrevityCategory = "Brevity";
         public const string DesignCategory = "Design";
+        public const string InformationCategory = "Information";
         public const string ValidityCategory = "Validity";
         #endregion
 
@@ -37,7 +38,10 @@ namespace GenericsAnalyzer
             GA0017_Rule = GetDiagnosticDescriptor(17, APIRestrictionsCategory, DiagnosticSeverity.Error),
             GA0019_Rule = GetDiagnosticDescriptor(19, ValidityCategory, DiagnosticSeverity.Error),
             GA0020_Rule = GetDiagnosticDescriptor(20, ValidityCategory, DiagnosticSeverity.Error),
-            GA0021_Rule = GetDiagnosticDescriptor(21, ValidityCategory, DiagnosticSeverity.Error);
+            GA0021_Rule = GetDiagnosticDescriptor(21, ValidityCategory, DiagnosticSeverity.Error),
+            GA0022_Rule = GetDiagnosticDescriptor(22, InformationCategory, DiagnosticSeverity.Warning),
+            GA0023_Rule = GetDiagnosticDescriptor(23, InformationCategory, DiagnosticSeverity.Warning),
+            GA0024_Rule = GetDiagnosticDescriptor(24, ValidityCategory, DiagnosticSeverity.Error);
         #endregion
 
         private static readonly Dictionary<Type, HashSet<DiagnosticDescriptor>> analyzerGroupedDiagnostics = new Dictionary<Type, HashSet<DiagnosticDescriptor>>();
@@ -51,10 +55,7 @@ namespace GenericsAnalyzer
                 if (type is null)
                     continue;
 
-                HashSet<DiagnosticDescriptor> set;
-                if (analyzerGroupedDiagnostics.ContainsKey(type))
-                    set = analyzerGroupedDiagnostics[type];
-                else
+                if (!analyzerGroupedDiagnostics.TryGetValue(type, out var set))
                     analyzerGroupedDiagnostics.Add(type, set = new HashSet<DiagnosticDescriptor>());
 
                 set.Add(f.GetValue(null) as DiagnosticDescriptor);

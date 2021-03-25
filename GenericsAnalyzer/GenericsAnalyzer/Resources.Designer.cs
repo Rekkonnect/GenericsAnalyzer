@@ -419,5 +419,86 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0021_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This type parameter&apos;s type constraint system conflicts with the type constraint system of the inherited type&apos;s type parameter {0}, and the base systems&apos; conflicting rules have been overwritten.
+        /// </summary>
+        internal static string GA0022_Description {
+            get {
+                return ResourceManager.GetString("GA0022_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inheriting the base types&apos; type constraint systems for this type parameter causes a constraint collision.
+        /// </summary>
+        internal static string GA0022_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0022_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting inherited type constraint rules.
+        /// </summary>
+        internal static string GA0022_Title {
+            get {
+                return ResourceManager.GetString("GA0022_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This type parameter&apos;s type constraint system conflicts with the type constraint system of the locally declared type parameter {0}, and the base systems&apos; conflicting rules have been overwritten.
+        /// </summary>
+        internal static string GA0023_Description {
+            get {
+                return ResourceManager.GetString("GA0023_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inheriting the declared type parameters&apos; type constraint systems for this type parameter causes a constraint collision.
+        /// </summary>
+        internal static string GA0023_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0023_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting inherited type constraint rules.
+        /// </summary>
+        internal static string GA0023_Title {
+            get {
+                return ResourceManager.GetString("GA0023_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type constraint system of the inherited type&apos;s type parameter {0} conflicts with the type constraint system of the locally declared type parameter {1}.
+        /// </summary>
+        internal static string GA0024_Description {
+            get {
+                return ResourceManager.GetString("GA0024_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Inheriting the locally declared type parameters&apos; and base types&apos; type constraint systems causes a constraint collision.
+        /// </summary>
+        internal static string GA0024_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0024_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting inherited type constraint rules.
+        /// </summary>
+        internal static string GA0024_Title {
+            get {
+                return ResourceManager.GetString("GA0024_Title", resourceCulture);
+            }
+        }
     }
 }

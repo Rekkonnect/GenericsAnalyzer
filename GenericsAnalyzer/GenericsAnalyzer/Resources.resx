@@ -237,4 +237,31 @@
   <data name="GA0021_Title" xml:space="preserve">
     <value>Cannot inherit from the same type parameter</value>
   </data>
+  <data name="GA0022_Description" xml:space="preserve">
+    <value>This type parameter's type constraint system conflicts with the type constraint system of the inherited type's type parameter {0}, and the base systems' conflicting rules have been overwritten</value>
+  </data>
+  <data name="GA0022_MessageFormat" xml:space="preserve">
+    <value>Inheriting the base types' type constraint systems for this type parameter causes a constraint collision</value>
+  </data>
+  <data name="GA0022_Title" xml:space="preserve">
+    <value>Conflicting inherited type constraint rules</value>
+  </data>
+  <data name="GA0023_Description" xml:space="preserve">
+    <value>This type parameter's type constraint system conflicts with the type constraint system of the locally declared type parameter {0}, and the base systems' conflicting rules have been overwritten</value>
+  </data>
+  <data name="GA0023_MessageFormat" xml:space="preserve">
+    <value>Inheriting the declared type parameters' type constraint systems for this type parameter causes a constraint collision</value>
+  </data>
+  <data name="GA0023_Title" xml:space="preserve">
+    <value>Conflicting inherited type constraint rules</value>
+  </data>
+  <data name="GA0024_Description" xml:space="preserve">
+    <value>The type constraint system of the inherited type's type parameter {0} conflicts with the type constraint system of the locally declared type parameter {1}</value>
+  </data>
+  <data name="GA0024_MessageFormat" xml:space="preserve">
+    <value>Inheriting the locally declared type parameters' and base types' type constraint systems causes a constraint collision</value>
+  </data>
+  <data name="GA0024_Title" xml:space="preserve">
+    <value>Conflicting inherited type constraint rules</value>
+  </data>
 </root>

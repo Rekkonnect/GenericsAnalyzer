@@ -20,9 +20,7 @@ Rule ID                   | Category        | Severity
 [GA0019](rules/GA0019.md) | Validity        | Error
 [GA0020](rules/GA0020.md) | Validity        | Error
 [GA0021](rules/GA0021.md) | Validity        | Error
-[GA0022](rules/GA0022.md) | Information     | Warning
-[GA0023](rules/GA0023.md) | Information     | Warning
-[GA0024](rules/GA0024.md) | Validity        | Error
+[GA0022](rules/GA0022.md) | Validity        | Error
 
 ## Discontinued Rules
 Some rules have been discontinued. They may have been embodied into other rules, whose ID(s) are listed alongside the discontinued ones'.

@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
-        public void ConflictingConstraintRules()
+        public void ConflictingBaseTypeParameterConstraintRules()
         {
             var testCode =
 @"
@@ -27,6 +27,9 @@ class A
 class B
 <
     [ProhibitedBaseTypes(typeof(IEnumerable<string>))]
+    [OnlyPermitSpecifiedTypes]
+    T,
+    [InheritTypeConstraints(↓nameof(T))]
     [↓InheritBaseTypeUsageConstraints]
     U
 >

@@ -152,8 +152,7 @@ namespace GenericsAnalyzer
                                         if (inheritedTypeArguments[k].Name == parameter.Name)
                                         {
                                             var inheritedTypeParameter = inheritedTypeParameters[k];
-                                            if (!system.InheritFrom(inheritedTypeParameter, genericNames[inheritedTypeOriginalDefinition][k]))
-                                                context.ReportDiagnostic(Diagnostics.CreateGA0022(attributeNode, inheritedTypeParameter));
+                                            system.InheritFrom(inheritedTypeParameter, genericNames[inheritedTypeOriginalDefinition][k]);
                                         }
                                 }
                                 continue;
@@ -364,10 +363,7 @@ namespace GenericsAnalyzer
                             if (!isRecursiveInheritance)
                             {
                                 // Apply inheritance
-                                if (!constraints[inheritorType].InheritFrom(inheritedType, constraints[inheritedType]))
-                                {
-                                    context.ReportDiagnostics(inheritMap[inheritorType][inheritedType], a => Diagnostics.CreateGA0023(a, inheritedType));
-                                }
+                                constraints[inheritorType].InheritFrom(inheritedType, constraints[inheritedType]);
                             }
 
                             inheritMap[inheritorType].Remove(inheritedType);

@@ -1,5 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
@@ -74,13 +77,25 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0019_Rule, attributeArgumentNode.GetLocation(), typeParameterName);
         }
-        public static Diagnostic CreateGA0020(AttributeArgumentSyntax attributeArgumentNode)
+        public static Diagnostic CreateGA0020(AttributeArgumentSyntax attributeArgumentNode, IEnumerable<ITypeParameterSymbol> recursionPath)
         {
-            return Diagnostic.Create(GA0020_Rule, attributeArgumentNode.GetLocation());
+            return Diagnostic.Create(GA0020_Rule, attributeArgumentNode.GetLocation(), string.Join(", ", recursionPath.Select(t => t.ToDisplayString())));
         }
         public static Diagnostic CreateGA0021(AttributeArgumentSyntax attributeArgumentNode)
         {
             return Diagnostic.Create(GA0021_Rule, attributeArgumentNode.GetLocation());
+        }
+        public static Diagnostic CreateGA0022(AttributeSyntax attributeNode, ITypeParameterSymbol typeParameter)
+        {
+            return Diagnostic.Create(GA0022_Rule, attributeNode.GetLocation(), typeParameter.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0023(AttributeArgumentSyntax attributeArgumentNode, ITypeParameterSymbol typeParameter)
+        {
+            return Diagnostic.Create(GA0023_Rule, attributeArgumentNode.GetLocation(), typeParameter.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0024(AttributeArgumentSyntax attributeArgumentNode, ITypeParameterSymbol inheritedTypeParameter, ITypeParameterSymbol localTypeParameter)
+        {
+            return Diagnostic.Create(GA0024_Rule, attributeArgumentNode.GetLocation(), inheritedTypeParameter.ToDisplayString(), localTypeParameter.ToDisplayString());
         }
     }
 }

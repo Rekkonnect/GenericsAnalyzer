@@ -226,7 +226,7 @@
     <value>Invalid type parameter name</value>
   </data>
   <data name="GA0020_MessageFormat" xml:space="preserve">
-    <value>The type constraint inheritance causes a recursion</value>
+    <value>The type constraint inheritance causes a recursion with the following path:\n{0}</value>
   </data>
   <data name="GA0020_Title" xml:space="preserve">
     <value>Recursive inheritance was detected</value>

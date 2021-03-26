@@ -7,57 +7,73 @@ using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
+    using DiagnosticType = TypeConstraintSystemDiagnosticType;
+    using InheritanceDiagnosticType = TypeConstraintSystemInheritanceDiagnosticType;
+
     public sealed class TypeConstraintSystemDiagnostics
     {
-        private static readonly TypeConstraintSystemDiagnosticType[] diagnosticTypes;
+        private static readonly DiagnosticType[] diagnosticTypes;
+        private static readonly InheritanceDiagnosticType[] inheritanceDiagnosticTypes;
 
         static TypeConstraintSystemDiagnostics()
         {
-            diagnosticTypes = Enum.GetValues(typeof(TypeConstraintSystemDiagnosticType)).Cast<TypeConstraintSystemDiagnosticType>().ToArray();
+            diagnosticTypes = EnumHelpers.GetValues<DiagnosticType>();
+            inheritanceDiagnosticTypes = EnumHelpers.GetValues<InheritanceDiagnosticType>();
         }
 
-        private readonly Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>> erroneousTypes = new Dictionary<TypeConstraintSystemDiagnosticType, ISet<ITypeSymbol>>();
+        private readonly ErroneousElementDictionary<DiagnosticType, ITypeSymbol> erroneousTypes;
+        private readonly ErroneousElementDictionary<InheritanceDiagnosticType, ITypeParameterSymbol> erroneousInheritedTypeParameters;
 
-        private ISet<ITypeSymbol> ConflictingTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Conflicting];
-        private ISet<ITypeSymbol> DuplicateTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.Duplicate];
-        private ISet<ITypeSymbol> InvalidTypeArgumentTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.InvalidTypeArgument];
-        private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution];
-        private ISet<ITypeSymbol> RedundantlyPermittedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyPermitted];
-        private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantlyProhibited];
-        private ISet<ITypeSymbol> ReducibleToConstraintClauseTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause];
-        private ISet<ITypeSymbol> RedundantBaseTypeRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule];
-        private ISet<ITypeSymbol> RedundantBoundUnboundRuleTypes => erroneousTypes[TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule];
+        // DiagnosticType
+        private ISet<ITypeSymbol> ConflictingTypes => erroneousTypes[DiagnosticType.Conflicting];
+        private ISet<ITypeSymbol> DuplicateTypes => erroneousTypes[DiagnosticType.Duplicate];
+        private ISet<ITypeSymbol> InvalidTypeArgumentTypes => erroneousTypes[DiagnosticType.InvalidTypeArgument];
+        private ISet<ITypeSymbol> ConstrainedTypeArgumentSubstitutionTypes => erroneousTypes[DiagnosticType.ConstrainedTypeArgumentSubstitution];
+        private ISet<ITypeSymbol> RedundantlyPermittedTypes => erroneousTypes[DiagnosticType.RedundantlyPermitted];
+        private ISet<ITypeSymbol> RedundantlyProhibitedTypes => erroneousTypes[DiagnosticType.RedundantlyProhibited];
+        private ISet<ITypeSymbol> ReducibleToConstraintClauseTypes => erroneousTypes[DiagnosticType.ReducibleToConstraintClause];
+        private ISet<ITypeSymbol> RedundantBaseTypeRuleTypes => erroneousTypes[DiagnosticType.RedundantBaseTypeRule];
+        private ISet<ITypeSymbol> RedundantBoundUnboundRuleTypes => erroneousTypes[DiagnosticType.RedundantBoundUnboundRule];
 
-        public bool HasErroneousTypes
-        {
-            get
-            {
-                foreach (var set in erroneousTypes.Values)
-                    if (set.Any())
-                        return true;
-                return false;
-            }
-        }
+        // InheritanceDiagnosticType
+        private ISet<ITypeParameterSymbol> ConflictingInheritedTypeParameters => erroneousInheritedTypeParameters[InheritanceDiagnosticType.Conflicting];
+
+        public bool HasErroneousTypes => IEnumerableExtensions.AnyDeep(erroneousTypes.Values);
+        public bool HasErroneousInheritedTypeParameters => IEnumerableExtensions.AnyDeep(erroneousInheritedTypeParameters.Values);
 
         public TypeConstraintSystemDiagnostics()
         {
+            // Very long
+            erroneousTypes = new ErroneousElementDictionary<DiagnosticType, ITypeSymbol>();
             foreach (var type in diagnosticTypes)
-                if (type != TypeConstraintSystemDiagnosticType.Valid)
-                    erroneousTypes.Add(type, NewSymbolHashSet());
+                if (type != default)
+                    erroneousTypes.Add(type, NewSymbolHashSet<ITypeSymbol>());
+
+            erroneousInheritedTypeParameters = new ErroneousElementDictionary<InheritanceDiagnosticType, ITypeParameterSymbol>();
+            foreach (var type in inheritanceDiagnosticTypes)
+                if (type != default)
+                    erroneousInheritedTypeParameters.Add(type, NewSymbolHashSet<ITypeParameterSymbol>());
         }
         public TypeConstraintSystemDiagnostics(TypeConstraintSystemDiagnostics other)
             : this()
         {
             foreach (var kvp in other.erroneousTypes)
                 erroneousTypes[kvp.Key].AddRange(kvp.Value);
+
+            foreach (var kvp in other.erroneousInheritedTypeParameters)
+                erroneousInheritedTypeParameters[kvp.Key].AddRange(kvp.Value);
         }
 
-        public ISet<ITypeSymbol> GetTypesForDiagnosticType(TypeConstraintSystemDiagnosticType diagnosticType)
+        public ISet<ITypeSymbol> GetTypesForDiagnosticType(DiagnosticType diagnosticType)
         {
             return new HashSet<ITypeSymbol>(erroneousTypes[diagnosticType], SymbolEqualityComparer.Default);
         }
+        public ISet<ITypeParameterSymbol> GetTypeParametersForInheritanceDiagnosticType(InheritanceDiagnosticType diagnosticType)
+        {
+            return new HashSet<ITypeParameterSymbol>(erroneousInheritedTypeParameters[diagnosticType], SymbolEqualityComparer.Default);
+        }
 
-        public void RegisterTypes(TypeConstraintSystemDiagnostics typeDiagnostics)
+        public void RegisterDiagnostics(TypeConstraintSystemDiagnostics typeDiagnostics)
         {
             RegisterDuplicateTypes(typeDiagnostics.DuplicateTypes);
             RegisterConflictingTypes(typeDiagnostics.ConflictingTypes);
@@ -67,15 +83,21 @@ namespace GenericsAnalyzer.Core
                 // This should avoid directly adding elements that were previously handled
                 switch (kvp.Key)
                 {
-                    case TypeConstraintSystemDiagnosticType.Conflicting:
-                    case TypeConstraintSystemDiagnosticType.Duplicate:
+                    case DiagnosticType.Conflicting:
+                    case DiagnosticType.Duplicate:
                         continue;
                 }
 
                 erroneousTypes[kvp.Key].AddRange(kvp.Value);
             }
+
+            foreach (var kvp in typeDiagnostics.erroneousInheritedTypeParameters)
+            {
+                erroneousInheritedTypeParameters[kvp.Key].AddRange(kvp.Value);
+            }
         }
 
+        #region Register Type Diagnostics
         // Talk about a clusterfuck
         public void RegisterConflictingType(ITypeSymbol type)
         {
@@ -129,26 +151,49 @@ namespace GenericsAnalyzer.Core
         {
             DuplicateTypes.AddRange(types);
         }
+        #endregion
 
-        public TypeConstraintSystemDiagnosticType GetDiagnosticType(ITypeSymbol type)
+        #region Register Inherited Type Parameter Diagnostics
+        public void RegisterConflictingInheritedTypeParameter(ITypeParameterSymbol typeParameter)
         {
-            // There is no need to check for the key's value because Valid is the default value
-            return erroneousTypes.FirstOrDefault(kvp => kvp.Value.Contains(type)).Key;
+            ConflictingInheritedTypeParameters.Add(typeParameter);
+        }
+        #endregion
+
+        public DiagnosticType GetDiagnosticType(ITypeSymbol type)
+        {
+            return erroneousTypes.GetDiagnosticType(type);
+        }
+        public InheritanceDiagnosticType GetInheritanceDiagnosticType(ITypeParameterSymbol type)
+        {
+            return erroneousInheritedTypeParameters.GetDiagnosticType(type);
         }
 
-        private static HashSet<ITypeSymbol> NewSymbolHashSet() => new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+        private static HashSet<T> NewSymbolHashSet<T>()
+            where T : class, ISymbol
+        {
+            return new HashSet<T>(comparer: SymbolEqualityComparer.Default);
+        }
 
-        private static TypeConstraintSystemDiagnosticType GetDiagnosticType(ConstraintRule rule)
+        private static DiagnosticType GetDiagnosticType(ConstraintRule rule)
         {
             switch (rule)
             {
                 case ConstraintRule.Permit:
-                    return TypeConstraintSystemDiagnosticType.RedundantlyPermitted;
+                    return DiagnosticType.RedundantlyPermitted;
                 case ConstraintRule.Prohibit:
-                    return TypeConstraintSystemDiagnosticType.RedundantlyProhibited;
+                    return DiagnosticType.RedundantlyProhibited;
                 default:
                     throw new InvalidEnumArgumentException();
             }
+        }
+
+        // Aliasing is not possible just yet
+        private class ErroneousElementDictionary<TDiagnosticType, TElement> : Dictionary<TDiagnosticType, ISet<TElement>>
+            where TDiagnosticType : struct, Enum
+        {
+            // There is no need to check for the key's value because the valid value is the default value
+            public TDiagnosticType GetDiagnosticType(TElement type) => this.FirstOrDefault(kvp => kvp.Value.Contains(type)).Key;
         }
     }
 }

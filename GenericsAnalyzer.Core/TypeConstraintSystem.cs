@@ -43,13 +43,6 @@ namespace GenericsAnalyzer.Core
             TypeParameter = parameter;
         }
 
-        public void InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
-        {
-            OnlyPermitSpecifiedTypes |= baseSystem.OnlyPermitSpecifiedTypes;
-            typeConstraintRules.AddOrSetRange(baseSystem.typeConstraintRules);
-            inheritedTypes.Add(baseTypeParameter);
-        }
-
         #region Rule Equality Comparer Creators
         private static RuleEqualityComparer GetRuleEqualityComparer(TypeConstraintRule rule) => kvp => kvp.Value == rule;
         private static RuleEqualityComparer GetRuleEqualityComparer(ConstraintRule rule) => kvp => kvp.Value.Rule == rule;
@@ -170,6 +163,20 @@ namespace GenericsAnalyzer.Core
             }
         }
         #endregion
+
+        // It looks like there cannot be any other diagnostic from inheriting another type parameter's system
+        public bool InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
+        {
+            OnlyPermitSpecifiedTypes |= baseSystem.OnlyPermitSpecifiedTypes;
+
+            bool independent = typeConstraintRules.TryAddPreserveRange(baseSystem.typeConstraintRules);
+            if (!independent)
+                systemDiagnostics.RegisterConflictingInheritedTypeParameter(baseTypeParameter);
+
+            inheritedTypes.Add(baseTypeParameter);
+
+            return independent;
+        }
 
         public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
         public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
@@ -304,6 +311,11 @@ namespace GenericsAnalyzer.Core
                 return (PermissionResult)rule.Rule;
 
             return PermissionResult.Unknown;
+        }
+
+        public override string ToString()
+        {
+            return TypeParameter.ToDisplayString();
         }
     }
 }

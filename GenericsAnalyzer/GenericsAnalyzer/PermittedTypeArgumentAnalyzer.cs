@@ -1,4 +1,5 @@
 ﻿using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Core.DataStructures;
 using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -81,17 +82,23 @@ namespace GenericsAnalyzer
             AnalyzeGenericNameDefinition(context, symbol);
         }
 
-        // Okay this needs some serious refactoring
-        private void AnalyzeGenericNameDefinition(SyntaxNodeAnalysisContext context, ISymbol symbol)
+        private void AnalyzeGenericNameDefinition(SyntaxNodeAnalysisContext context, ISymbol declaringSymbol)
         {
-            if (genericNames.ContainsInfo(symbol))
+            if (genericNames.ContainsInfo(declaringSymbol))
                 return;
 
-            var typeParameters = symbol.GetTypeParameters();
+            var typeParameters = declaringSymbol.GetTypeParameters();
             if (typeParameters.IsEmpty)
                 return;
 
+            var semanticModel = context.SemanticModel;
+
+            var typeParameterNameIndexer = typeParameters.ToDictionary(t => t.Name);
+
             var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
+            genericNames[declaringSymbol] = constraints;
+
+            var typeConstraintInheritAttibuteData = new List<AttributeData>();
 
             for (int i = 0; i < typeParameters.Length; i++)
             {
@@ -99,150 +106,275 @@ namespace GenericsAnalyzer
                 var attributes = parameter.GetAttributes();
 
                 var system = new TypeConstraintSystem(parameter);
-                for (int j = 0; j < attributes.Length; j++)
-                {
-                    var a = attributes[j];
-                    var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-                    if (!AttributeNeedsProcessing(a))
-                        continue;
-
-                    switch (a.AttributeClass.Name)
-                    {
-                        case nameof(InheritBaseTypeUsageConstraintsAttribute):
-                        {
-                            if (AnalyzeInheritArgumentAttirbuteUsage(attributeSyntaxNode, symbol, parameter, context))
-                                continue;
-
-                            var type = symbol as INamedTypeSymbol;
-
-                            var inheritedTypes = new List<INamedTypeSymbol>();
-                            var baseType = type.BaseType;
-                            if (baseType != null)
-                                inheritedTypes.Add(baseType);
-                            inheritedTypes.AddRange(type.AllInterfaces);
-
-                            foreach (var inheritedType in inheritedTypes)
-                            {
-                                if (!inheritedType.IsGenericType)
-                                    continue;
-
-                                // Recursively analyze base type definitions
-                                AnalyzeGenericNameDefinition(context, inheritedType);
-
-                                var inheritedTypeParameters = inheritedType.TypeParameters;
-                                for (int k = 0; k < inheritedTypeParameters.Length; k++)
-                                    if (inheritedTypeParameters[k].Name == parameter.Name)
-                                        system.InheritFrom(inheritedTypeParameters[k], genericNames[inheritedType][k]);
-                            }
-                            continue;
-                        }
-
-                        case nameof(OnlyPermitSpecifiedTypesAttribute):
-                        {
-                            system.OnlyPermitSpecifiedTypes = true;
-                            continue;
-                        }
-                    }
-
-                    // It is assured that the analyzer cares about the attribute from the base intreface check
-                    var rule = ParseAttributeRule(a).Value;
-
-                    // The arguments will be always stored as an array, regardless of their count
-                    // If an error is thrown here, common causes could be:
-                    // - having forgotten to import a namespace
-                    // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
-                    system.Add(rule, GetConstraintRuleTypeArguments(a));
-                }
+                InitializeSystem();
 
                 constraints[i] = system;
                 var typeDiagnostics = system.AnalyzeFinalizedSystem();
                 var finiteTypeCount = system.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
-                for (int j = 0; j < attributes.Length; j++)
+                MarkErroneousTypes();
+
+                void InitializeSystem()
                 {
-                    var a = attributes[j];
-                    var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-                    if (attributeSyntaxNode is null)
-                        continue;
-
-                    if (!AttributeNeedsProcessing(a))
-                        continue;
-
-                    switch (a.AttributeClass.Name)
+                    for (int j = 0; j < attributes.Length; j++)
                     {
-                        case nameof(InheritBaseTypeUsageConstraintsAttribute):
-                        {
-                            // You will be soon used, don't worry
+                        var a = attributes[j];
+                        var attributeNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+
+                        if (!AttributeNeedsProcessing(a))
                             continue;
-                        }
 
-                        case nameof(OnlyPermitSpecifiedTypesAttribute):
+                        switch (a.AttributeClass.Name)
                         {
-                            if (system.HasNoPermittedTypes)
-                                context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
-                            continue;
-                        }
-                    }
-
-                    if (finiteTypeCount == 1)
-                        context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
-
-                    var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
-                    var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
-                    for (int argumentIndex = 0; argumentIndex < typeConstants.Length; argumentIndex++)
-                    {
-                        var typeConstant = typeConstants[argumentIndex];
-                        var argumentNode = argumentNodes[argumentIndex];
-
-                        var type = typeDiagnostics.GetDiagnosticType(typeConstant);
-
-                        var diagnostic = CreateReportDiagnostic();
-                        if (!(diagnostic is null))
-                            context.ReportDiagnostic(diagnostic);
-
-                        // "Using a non-static local function is fine."
-                        //                              -- Rekkon, 2021
-                        Diagnostic CreateReportDiagnostic()
-                        {
-                            switch (type)
+                            case nameof(InheritBaseTypeUsageConstraintsAttribute):
                             {
-                                case TypeConstraintSystemDiagnosticType.Conflicting:
-                                    return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
+                                if (AnalyzeInheritArgumentAttirbuteUsage(attributeNode, declaringSymbol, parameter, context))
+                                    continue;
 
-                                case TypeConstraintSystemDiagnosticType.Duplicate:
-                                    return Diagnostics.CreateGA0009(argumentNode, typeConstant);
+                                var type = declaringSymbol as INamedTypeSymbol;
 
-                                case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
-                                    return Diagnostics.CreateGA0004(argumentNode, typeConstant);
+                                var inheritedTypes = type.GetBaseTypeAndInterfaces();
 
-                                case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
-                                    return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
+                                foreach (var inheritedType in inheritedTypes)
+                                {
+                                    if (!inheritedType.IsGenericType)
+                                        continue;
 
-                                case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
-                                    return Diagnostics.CreateGA0011(argumentNode, typeConstant);
+                                    // Recursively analyze base type definitions
+                                    var inheritedTypeOriginalDefinition = inheritedType.OriginalDefinition;
+                                    AnalyzeGenericNameDefinition(context, inheritedTypeOriginalDefinition);
 
-                                case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
-                                    return Diagnostics.CreateGA0010(argumentNode, typeConstant);
+                                    var inheritedTypeArguments = inheritedType.TypeArguments;
+                                    var inheritedTypeParameters = inheritedType.TypeParameters;
 
-                                case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
-                                    return Diagnostics.CreateGA0006(argumentNode);
-
-                                case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
-                                    return Diagnostics.CreateGA0008(argumentNode, typeConstant);
-
-                                case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
-                                    return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
+                                    for (int k = 0; k < inheritedTypeArguments.Length; k++)
+                                        if (inheritedTypeArguments[k].Name == parameter.Name)
+                                        {
+                                            var inheritedTypeParameter = inheritedTypeParameters[k];
+                                            if (!system.InheritFrom(inheritedTypeParameter, genericNames[inheritedTypeOriginalDefinition][k]))
+                                                context.ReportDiagnostic(Diagnostics.CreateGA0022(attributeNode, inheritedTypeParameter));
+                                        }
+                                }
+                                continue;
                             }
-                            return null;
+
+                            case nameof(InheritTypeConstraintsAttribute):
+                            {
+                                // This will be analyzed after the first iteration to ensure all constraints are properly loaded
+                                typeConstraintInheritAttibuteData.Add(a);
+                                continue;
+                            }
+
+                            case nameof(OnlyPermitSpecifiedTypesAttribute):
+                            {
+                                system.OnlyPermitSpecifiedTypes = true;
+                                continue;
+                            }
+                        }
+
+                        // It is assured that the analyzer cares about the attribute from the base intreface check
+                        var rule = ParseAttributeRule(a).Value;
+
+                        // The arguments will be always stored as an array, regardless of their count
+                        // If an error is thrown here, common causes could be:
+                        // - having forgotten to import a namespace
+                        // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
+                        system.Add(rule, GetConstraintRuleTypeArguments(a));
+                    }
+                }
+                void MarkErroneousTypes()
+                {
+                    for (int j = 0; j < attributes.Length; j++)
+                    {
+                        var a = attributes[j];
+                        var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+
+                        if (attributeSyntaxNode is null)
+                            continue;
+
+                        if (!AttributeNeedsProcessing(a))
+                            continue;
+
+                        switch (a.AttributeClass.Name)
+                        {
+                            case nameof(InheritBaseTypeUsageConstraintsAttribute):
+                            {
+                                // You will be soon used, don't worry
+                                continue;
+                            }
+
+                            case nameof(OnlyPermitSpecifiedTypesAttribute):
+                            {
+                                if (system.HasNoPermittedTypes)
+                                    context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
+                                continue;
+                            }
+                        }
+
+                        if (finiteTypeCount == 1)
+                            context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
+
+                        var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
+                        var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
+                        for (int argumentIndex = 0; argumentIndex < typeConstants.Length; argumentIndex++)
+                        {
+                            var typeConstant = typeConstants[argumentIndex];
+                            var argumentNode = argumentNodes[argumentIndex];
+
+                            var type = typeDiagnostics.GetDiagnosticType(typeConstant);
+
+                            var diagnostic = CreateReportDiagnostic();
+                            if (!(diagnostic is null))
+                                context.ReportDiagnostic(diagnostic);
+
+                            // "Using a non-static local function is fine."
+                            //                              -- Rekkon, 2021
+                            Diagnostic CreateReportDiagnostic()
+                            {
+                                switch (type)
+                                {
+                                    case TypeConstraintSystemDiagnosticType.Conflicting:
+                                        return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.Duplicate:
+                                        return Diagnostics.CreateGA0009(argumentNode, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
+                                        return Diagnostics.CreateGA0004(argumentNode, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
+                                        return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
+
+                                    case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                        return Diagnostics.CreateGA0011(argumentNode, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                        return Diagnostics.CreateGA0010(argumentNode, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
+                                        return Diagnostics.CreateGA0006(argumentNode);
+
+                                    case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
+                                        return Diagnostics.CreateGA0008(argumentNode, typeConstant);
+
+                                    case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
+                                        return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
+                                }
+                                return null;
+                            }
                         }
                     }
                 }
             }
+            // Analyze the inherited type constaints from local type parameters
+            AnalyzeInheritedTypeConstraints();
 
-            genericNames[symbol] = constraints;
+            void AnalyzeInheritedTypeConstraints()
+            {
+                var inheritMap = new Dictionary<ITypeParameterSymbol, TypeParameterAttributeArgumentCorrelationDictionary>(SymbolEqualityComparer.Default);
+                var typeParameterInheritanceArguments = new Dictionary<ITypeParameterSymbol, SeparatedSyntaxList<AttributeArgumentSyntax>>(SymbolEqualityComparer.Default);
+
+                foreach (var p in typeParameters)
+                {
+                    inheritMap.Add(p, new TypeParameterAttributeArgumentCorrelationDictionary());
+                    typeParameterInheritanceArguments.Add(p, SyntaxFactory.SeparatedList<AttributeArgumentSyntax>());
+                }
+
+                // Create inherit map from attribute data
+                foreach (var attributeData in typeConstraintInheritAttibuteData)
+                {
+                    if (attributeData is null)
+                        return;
+
+                    var ctorArguments = attributeData.ConstructorArguments;
+                    if (ctorArguments.Length == 0)
+                        return;
+
+                    var typeParameterNames = ctorArguments[0].Values.Select(c => c.Value as string).ToArray();
+
+                    // TODO: Validate that this can never be null
+                    var attributeNode = attributeData.ApplicationSyntaxReference.GetSyntax(context.CancellationToken) as AttributeSyntax;
+                    var arguments = attributeNode.ArgumentList.Arguments;
+
+                    var originalTypeParameterNode = attributeNode.Parent.Parent as TypeParameterSyntax;
+                    var originalTypeParameter = semanticModel.GetDeclaredSymbol(originalTypeParameterNode);
+
+                    typeParameterInheritanceArguments[originalTypeParameter] = arguments;
+
+                    for (int j = 0; j < typeParameterNames.Length; j++)
+                    {
+                        var inheritingTypeParameterName = typeParameterNames[j];
+                        var attributeArgumentNode = arguments[j];
+
+                        if (inheritingTypeParameterName == originalTypeParameter.Name)
+                        {
+                            context.ReportDiagnostic(Diagnostics.CreateGA0021(attributeArgumentNode));
+                            continue;
+                        }
+
+                        var inheritingTypeParameter = typeParameters.FirstOrDefault(p => p.Name == inheritingTypeParameterName);
+                        if (inheritingTypeParameter is null)
+                        {
+                            context.ReportDiagnostic(Diagnostics.CreateGA0019(attributeArgumentNode, inheritingTypeParameterName));
+                            continue;
+                        }
+
+                        var originalTypeParameterInherit = inheritMap[originalTypeParameter];
+                        originalTypeParameterInherit.Add(inheritingTypeParameter, attributeArgumentNode);
+                    }
+                }
+
+                // Recursively inherit
+                var inheritStack = new StackSet<ITypeParameterSymbol>(inheritMap.Count, SymbolEqualityComparer.Default);
+                foreach (var inheritor in inheritMap)
+                {
+                    var inheritorType = inheritor.Key;
+                    var correlationDictionary = inheritor.Value;
+
+                    while (correlationDictionary.Any())
+                    {
+                        var inheritedTypeCorrelation = correlationDictionary.First();
+                        var inheritedType = inheritedTypeCorrelation.Key;
+
+                        bool isRecursiveInheritance = false;
+
+                        // Discover the inheritance stack
+                        while (inheritedType != null)
+                        {
+                            if (isRecursiveInheritance = !inheritStack.Push(inheritorType))
+                            {
+                                // The diagnostic is always emitted on the source of the recursion
+                                context.ReportDiagnostics(inheritedTypeCorrelation.Value, a => Diagnostics.CreateGA0020(a, inheritStack.Reverse()));
+                                break;
+                            }
+
+                            inheritorType = inheritedType;
+                            inheritedTypeCorrelation = inheritMap[inheritorType].FirstOrDefault();
+                            inheritedType = inheritedTypeCorrelation.Key;
+                        }
+
+                        // Consume the inheritance stack
+                        while (!inheritStack.IsEmpty)
+                        {
+                            inheritedType = inheritorType;
+                            inheritorType = inheritStack.Pop();
+                            inheritedTypeCorrelation = inheritMap[inheritorType].GetKeyValuePair(inheritedType);
+
+                            if (!isRecursiveInheritance)
+                            {
+                                // Apply inheritance
+                                if (!constraints[inheritorType].InheritFrom(inheritedType, constraints[inheritedType]))
+                                {
+                                    context.ReportDiagnostics(inheritMap[inheritorType][inheritedType], a => Diagnostics.CreateGA0023(a, inheritedType));
+                                }
+                            }
+
+                            inheritMap[inheritorType].Remove(inheritedType);
+                        }
+                    }
+                }
+            }
         }
         private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
         {
@@ -286,16 +418,16 @@ namespace GenericsAnalyzer
         }
 
         // Emits GA0014, GA0015, GA0016
-        private bool AnalyzeInheritArgumentAttirbuteUsage(AttributeSyntax attributeSyntaxNode, ISymbol symbol, ITypeParameterSymbol parameter, SyntaxNodeAnalysisContext context)
+        private bool AnalyzeInheritArgumentAttirbuteUsage(AttributeSyntax attributeNode, ISymbol symbol, ITypeParameterSymbol parameter, SyntaxNodeAnalysisContext context)
         {
-            if (attributeSyntaxNode is null)
+            if (attributeNode is null)
                 return false;
 
             var type = symbol as INamedTypeSymbol;
 
             if (symbol is IMethodSymbol || !type.TypeKind.CanInheritTypes())
             {
-                context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeSyntaxNode, symbol));
+                context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeNode, symbol));
                 return true;
             }
 
@@ -304,7 +436,7 @@ namespace GenericsAnalyzer
 
             if (!allGenericBaseTypes.Any())
             {
-                context.ReportDiagnostic(Diagnostics.CreateGA0015(attributeSyntaxNode, symbol));
+                context.ReportDiagnostic(Diagnostics.CreateGA0015(attributeNode, symbol));
                 return true;
             }
 
@@ -321,7 +453,7 @@ namespace GenericsAnalyzer
 
             if (!typeUsedInBaseTypes)
             {
-                context.ReportDiagnostic(Diagnostics.CreateGA0016(attributeSyntaxNode, symbol));
+                context.ReportDiagnostic(Diagnostics.CreateGA0016(attributeNode, symbol));
                 return true;
             }
 
@@ -330,8 +462,7 @@ namespace GenericsAnalyzer
 
         private static bool AttributeNeedsProcessing(AttributeData data)
         {
-            // All attributes are marked with that decorative interface
-            return data.AttributeClass.AllInterfaces.Any(baseInterface => baseInterface.Name == nameof(IGenericTypeConstraintAttribute));
+            return data.AttributeClass.IsGenericConstraintAttribute();
         }
         private static IEnumerable<ITypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
         {

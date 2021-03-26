@@ -385,7 +385,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The type constraint inheritance causes a recursion.
+        ///   Looks up a localized string similar to The type constraint inheritance causes a recursion with the following path:\n{0}.
         /// </summary>
         internal static string GA0020_MessageFormat {
             get {

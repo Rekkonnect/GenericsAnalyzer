@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
         protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
-        public void ConflictingBaseTypeParameterConstraintRules()
+        public void ConflictingConstraintRules()
         {
             var testCode =
 @"
@@ -29,11 +29,39 @@ class B
     [ProhibitedBaseTypes(typeof(IEnumerable<string>))]
     [OnlyPermitSpecifiedTypes]
     T,
-    [InheritTypeConstraints(↓nameof(T))]
-    [↓InheritBaseTypeUsageConstraints]
-    U
+    [InheritTypeConstraints(nameof(T))]
+    [InheritBaseTypeUsageConstraints]
+    ↓U
 >
     : A<U>
+{ }
+";
+
+            AssertDiagnosticsWithUsings(testCode);
+        }
+        [TestMethod]
+        public void MultipleConflictingConstraintRules()
+        {
+            var testCode =
+@"
+class A
+<
+    [ProhibitedBaseTypes(typeof(IEnumerable<string>))]
+    [OnlyPermitSpecifiedTypes]
+    T,
+    [ProhibitedTypes(typeof(IEnumerable<string>))]
+    [OnlyPermitSpecifiedTypes]
+    U,
+    [PermittedBaseTypes(typeof(IEnumerable<string>))]
+    [OnlyPermitSpecifiedTypes]
+    V,
+    [InheritTypeConstraints(nameof(T), nameof(U), nameof(V))]
+    ↓W,
+    [InheritTypeConstraints(nameof(W))]
+    X,
+    [InheritTypeConstraints(nameof(X))]
+    Y
+>
 { }
 ";
 

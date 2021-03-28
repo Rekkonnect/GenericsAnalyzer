@@ -34,7 +34,7 @@ namespace GenericsAnalyzer
             var argument = syntaxNode as AttributeArgumentSyntax;
             var targetType = GetTypeSymbol(argument);
 
-            argument.GetAttributeRelatedSyntaxNodes(out var argumentList, out var attribute, out var attributeList);
+            argument.GetAttributeRelatedParents(out var argumentList, out var attribute, out var attributeList);
 
             var typeParameter = attributeList.Parent as TypeParameterSyntax;
             var attributes = typeParameter.AttributeLists.SelectMany(l => l.Attributes)

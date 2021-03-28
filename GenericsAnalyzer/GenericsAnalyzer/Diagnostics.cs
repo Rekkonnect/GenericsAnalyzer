@@ -85,9 +85,9 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0021_Rule, attributeArgumentNode.GetLocation());
         }
-        public static Diagnostic CreateGA0022(AttributeArgumentSyntax attributeArgumentNode, ITypeParameterSymbol inheritedTypeParameter, ITypeParameterSymbol localTypeParameter)
+        public static Diagnostic CreateGA0022(TypeParameterSyntax typeParameterDeclaration)
         {
-            return Diagnostic.Create(GA0022_Rule, attributeArgumentNode.GetLocation(), inheritedTypeParameter.ToDisplayString(), localTypeParameter.ToDisplayString());
+            return Diagnostic.Create(GA0022_Rule, typeParameterDeclaration.Identifier.GetLocation());
         }
     }
 }

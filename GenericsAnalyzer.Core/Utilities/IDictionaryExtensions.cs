@@ -67,7 +67,7 @@ namespace GenericsAnalyzer.Core.Utilities
                 overwritten |= source.AddOrSet(entry.Key, entry.Value);
             return overwritten;
         }
-        /// <summary>Adds a collection of new entries to the dictionary. For each of the given entries, if its key already exists, its value is overwritten in the source dictionary.</summary>
+        /// <summary>Adds a collection of new entries to the dictionary. For each of the given entries, if its key already exists, its value is preserved in the source dictionary.</summary>
         /// <typeparam name="TKey">The type of the keys stored in the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of the values stored in the dictionary.</typeparam>
         /// <param name="source">The source dictionary.</param>
@@ -75,10 +75,10 @@ namespace GenericsAnalyzer.Core.Utilities
         /// <returns><see langword="true"/> if none of the given entries already existed with a different value, otherwise <see langword="false"/>.</returns>
         public static bool TryAddPreserveRange<TKey, TValue>(this IDictionary<TKey, TValue> source, IDictionary<TKey, TValue> entries)
         {
-            bool overwritten = true;
+            bool preserved = true;
             foreach (var entry in entries)
-                overwritten &= source.TryAddPreserve(entry.Key, entry.Value);
-            return overwritten;
+                preserved &= source.TryAddPreserve(entry.Key, entry.Value);
+            return preserved;
         }
 
         public static KeyValuePair<TKey, TValue> GetKeyValuePair<TKey, TValue>(this IDictionary<TKey, TValue> source, TKey key)

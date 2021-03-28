@@ -5,8 +5,8 @@ namespace GenericsAnalyzer.Core.DataStructures
 {
     public class StackSet<T> : IEnumerable<T>
     {
-        private Stack<T> stack;
-        private HashSet<T> set;
+        private readonly Stack<T> stack;
+        private readonly HashSet<T> set;
 
         public int Count => set.Count;
         public bool IsEmpty => Count == 0;

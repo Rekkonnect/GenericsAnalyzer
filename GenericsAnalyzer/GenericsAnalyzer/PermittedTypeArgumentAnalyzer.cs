@@ -95,8 +95,8 @@ namespace GenericsAnalyzer
 
             var typeParameterNameIndexer = typeParameters.ToDictionary(t => t.Name);
 
-            var constraints = new GenericTypeConstraintInfo(typeParameters.Length);
-            genericNames[declaringSymbol] = constraints;
+            var constraints = new GenericTypeConstraintInfo.Builder(declaringSymbol);
+            genericNames.SetBuilder(declaringSymbol, constraints);
 
             var typeConstraintInheritAttibuteData = new List<AttributeData>();
 
@@ -105,12 +105,10 @@ namespace GenericsAnalyzer
                 var parameter = typeParameters[i];
                 var attributes = parameter.GetAttributes();
 
-                var system = new TypeConstraintSystem(parameter);
+                var systemBuilder = constraints[i];
                 InitializeSystem();
 
-                constraints[i] = system;
-                var typeDiagnostics = system.AnalyzeFinalizedSystem();
-                var finiteTypeCount = system.GetFinitePermittedTypeCount();
+                var finiteTypeCount = systemBuilder.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
                 MarkErroneousTypes();
@@ -152,9 +150,23 @@ namespace GenericsAnalyzer
                                         if (inheritedTypeArguments[k].Name == parameter.Name)
                                         {
                                             var inheritedTypeParameter = inheritedTypeParameters[k];
-                                            system.InheritFrom(inheritedTypeParameter, genericNames[inheritedTypeOriginalDefinition][k]);
+                                            genericNames.GetBuilderOrFinalizedInfo(inheritedTypeOriginalDefinition, out var finalized, out var builder);
+
+                                            bool safeInheritance;
+                                            if (builder is null)
+                                                safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, finalized[k]);
+                                            else
+                                                safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, builder[k]);
+
+                                            if (!safeInheritance)
+                                            {
+                                                var parameterDeclaration = attributeNode.GetParentAttributeList().Parent as TypeParameterSyntax;
+                                                context.ReportDiagnostic(Diagnostics.CreateGA0022(parameterDeclaration));
+                                                goto end;
+                                            }
                                         }
                                 }
+                            end:
                                 continue;
                             }
 
@@ -167,7 +179,7 @@ namespace GenericsAnalyzer
 
                             case nameof(OnlyPermitSpecifiedTypesAttribute):
                             {
-                                system.OnlyPermitSpecifiedTypes = true;
+                                systemBuilder.OnlyPermitSpecifiedTypes = true;
                                 continue;
                             }
                         }
@@ -179,11 +191,13 @@ namespace GenericsAnalyzer
                         // If an error is thrown here, common causes could be:
                         // - having forgotten to import a namespace
                         // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
-                        system.Add(rule, GetConstraintRuleTypeArguments(a));
+                        systemBuilder.Add(rule, GetConstraintRuleTypeArguments(a));
                     }
                 }
                 void MarkErroneousTypes()
                 {
+                    var typeSystemDiagnostics = systemBuilder.AnalyzeFinalizedBaseSystem();
+
                     for (int j = 0; j < attributes.Length; j++)
                     {
                         var a = attributes[j];
@@ -205,7 +219,8 @@ namespace GenericsAnalyzer
 
                             case nameof(OnlyPermitSpecifiedTypesAttribute):
                             {
-                                if (system.HasNoPermittedTypes)
+                                // TODO: Refactor this into a system diagnostic that will be accessible
+                                if (systemBuilder.HasNoPermittedTypes)
                                     context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
                                 continue;
                             }
@@ -221,10 +236,10 @@ namespace GenericsAnalyzer
                             var typeConstant = typeConstants[argumentIndex];
                             var argumentNode = argumentNodes[argumentIndex];
 
-                            var type = typeDiagnostics.GetDiagnosticType(typeConstant);
+                            var type = typeSystemDiagnostics.GetDiagnosticType(typeConstant);
 
                             var diagnostic = CreateReportDiagnostic();
-                            if (!(diagnostic is null))
+                            if (diagnostic != null)
                                 context.ReportDiagnostic(diagnostic);
 
                             // "Using a non-static local function is fine."
@@ -268,6 +283,7 @@ namespace GenericsAnalyzer
             }
             // Analyze the inherited type constaints from local type parameters
             AnalyzeInheritedTypeConstraints();
+            genericNames.FinalizeGenericSymbol(declaringSymbol);
 
             void AnalyzeInheritedTypeConstraints()
             {
@@ -354,16 +370,24 @@ namespace GenericsAnalyzer
                         }
 
                         // Consume the inheritance stack
+                        bool safeInheritance = true;
                         while (!inheritStack.IsEmpty)
                         {
                             inheritedType = inheritorType;
                             inheritorType = inheritStack.Pop();
                             inheritedTypeCorrelation = inheritMap[inheritorType].GetKeyValuePair(inheritedType);
 
-                            if (!isRecursiveInheritance)
+                            if (!isRecursiveInheritance && safeInheritance)
                             {
                                 // Apply inheritance
-                                constraints[inheritorType].InheritFrom(inheritedType, constraints[inheritedType]);
+                                safeInheritance = constraints[inheritorType].InheritFrom(inheritedType, constraints[inheritedType]);
+                            }
+
+                            if (!safeInheritance)
+                            {
+                                inheritedTypeCorrelation.Value.First().GetAttributeRelatedParents(out _, out _, out var attributeList);
+                                var typeParameterDeclaration = attributeList.Parent as TypeParameterSyntax;
+                                context.ReportDiagnostic(Diagnostics.CreateGA0022(typeParameterDeclaration));
                             }
 
                             inheritMap[inheritorType].Remove(inheritedType);

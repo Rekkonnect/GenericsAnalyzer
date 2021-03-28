@@ -215,15 +215,15 @@ class A
 class B
 <
     [InheritBaseTypeUsageConstraints]
-    T
-> : A<T>
+    U
+> : A<U>
 {
 }
 class C
 <
     [InheritBaseTypeUsageConstraints]
-    T
-> : B<T>
+    V
+> : B<V>
 {
 }
 ";

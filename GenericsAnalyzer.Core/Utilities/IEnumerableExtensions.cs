@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace GenericsAnalyzer.Core.Utilities
 {
@@ -26,6 +27,18 @@ namespace GenericsAnalyzer.Core.Utilities
             }
 
             return first;
+        }
+
+        /// <summary>Determines whether there are any elements contained in any sequence of the sequences that are provided.</summary>
+        /// <typeparam name="T">The type of elements stored in the sequences.</typeparam>
+        /// <param name="source">The sequence of sequences to analyze on whether any elements are contained.</param>
+        /// <returns><see langword="true"/> if there is at least one element in any of the sequences, otherwise <see langword="false"/>.</returns>
+        public static bool AnyDeep<T>(this IEnumerable<IEnumerable<T>> source)
+        {
+            foreach (var e in source)
+                if (e.Any())
+                    return true;
+            return false;
         }
     }
 }

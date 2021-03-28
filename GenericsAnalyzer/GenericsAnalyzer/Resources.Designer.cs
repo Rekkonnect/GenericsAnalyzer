@@ -365,5 +365,77 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0017_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given type parameter name &apos;{0}&apos; does not reflect any locally declared type parameter.
+        /// </summary>
+        internal static string GA0019_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0019_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid type parameter name.
+        /// </summary>
+        internal static string GA0019_Title {
+            get {
+                return ResourceManager.GetString("GA0019_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The type constraint inheritance causes a recursion with the following path:\n{0}.
+        /// </summary>
+        internal static string GA0020_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0020_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recursive inheritance was detected.
+        /// </summary>
+        internal static string GA0020_Title {
+            get {
+                return ResourceManager.GetString("GA0020_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A type parameter may not inherit type constraints from itself.
+        /// </summary>
+        internal static string GA0021_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0021_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot inherit from the same type parameter.
+        /// </summary>
+        internal static string GA0021_Title {
+            get {
+                return ResourceManager.GetString("GA0021_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint inheritance results in a rule collision.
+        /// </summary>
+        internal static string GA0022_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0022_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting inherited type constraint rules.
+        /// </summary>
+        internal static string GA0022_Title {
+            get {
+                return ResourceManager.GetString("GA0022_Title", resourceCulture);
+            }
+        }
     }
 }

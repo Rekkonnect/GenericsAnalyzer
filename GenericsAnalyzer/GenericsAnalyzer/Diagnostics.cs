@@ -1,5 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using static GenericsAnalyzer.DiagnosticDescriptors;
 
 namespace GenericsAnalyzer
@@ -69,6 +72,22 @@ namespace GenericsAnalyzer
         public static Diagnostic CreateGA0017(SyntaxNode node, ISymbol originalDefinition, ITypeSymbol argumentType)
         {
             return Diagnostic.Create(GA0017_Rule, node.GetLocation(), originalDefinition.ToDisplayString(), argumentType.ToDisplayString());
+        }
+        public static Diagnostic CreateGA0019(AttributeArgumentSyntax attributeArgumentNode, string typeParameterName)
+        {
+            return Diagnostic.Create(GA0019_Rule, attributeArgumentNode.GetLocation(), typeParameterName);
+        }
+        public static Diagnostic CreateGA0020(AttributeArgumentSyntax attributeArgumentNode, IEnumerable<ITypeParameterSymbol> recursionPath)
+        {
+            return Diagnostic.Create(GA0020_Rule, attributeArgumentNode.GetLocation(), string.Join(", ", recursionPath.Select(t => t.ToDisplayString())));
+        }
+        public static Diagnostic CreateGA0021(AttributeArgumentSyntax attributeArgumentNode)
+        {
+            return Diagnostic.Create(GA0021_Rule, attributeArgumentNode.GetLocation());
+        }
+        public static Diagnostic CreateGA0022(TypeParameterSyntax typeParameterDeclaration)
+        {
+            return Diagnostic.Create(GA0022_Rule, typeParameterDeclaration.Identifier.GetLocation());
         }
     }
 }

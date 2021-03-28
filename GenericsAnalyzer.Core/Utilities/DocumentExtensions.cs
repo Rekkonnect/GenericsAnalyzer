@@ -98,7 +98,7 @@ namespace GenericsAnalyzer.Core.Utilities
             while (unprocessedArguments.Any())
             {
                 var argument = unprocessedArguments.First();
-                argument.GetAttributeRelatedSyntaxNodes(out var argumentList, out var attribute, out var attributeList);
+                argument.GetAttributeRelatedParents(out var argumentList, out var attribute, out var attributeList);
 
                 foreach (var arg in argumentList.Arguments)
                 {

@@ -1,5 +1,6 @@
 ﻿using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 
 namespace GenericsAnalyzer.Core
 {
@@ -7,17 +8,10 @@ namespace GenericsAnalyzer.Core
     {
         private readonly TypeConstraintSystem[] systems;
 
-        public GenericTypeConstraintInfo(int length)
+        private GenericTypeConstraintInfo(TypeConstraintSystem[] finalizedSystems)
         {
-            systems = new TypeConstraintSystem[length];
+            systems = finalizedSystems;
         }
-
-        public GenericTypeConstraintInfo(ISymbol symbol)
-            : this(symbol.GetArity()) { }
-        public GenericTypeConstraintInfo(IMethodSymbol methodSymbol)
-            : this(methodSymbol.Arity) { }
-        public GenericTypeConstraintInfo(INamedTypeSymbol typeSymbol)
-            : this(typeSymbol.Arity) { }
 
         public TypeConstraintSystem this[int index]
         {
@@ -28,6 +22,37 @@ namespace GenericsAnalyzer.Core
         {
             get => systems[typeParameter.Ordinal];
             set => systems[typeParameter.Ordinal] = value;
+        }
+
+        public class Builder
+        {
+            private readonly TypeConstraintSystem.Builder[] builders;
+
+            public Builder(ISymbol symbol)
+            {
+                builders = new TypeConstraintSystem.Builder[symbol.GetArity()];
+
+                var typeParameters = symbol.GetTypeParameters();
+                for (int i = 0; i < typeParameters.Length; i++)
+                    builders[i] = new TypeConstraintSystem.Builder(typeParameters[i]);
+            }
+
+            public GenericTypeConstraintInfo FinalizeTypeInfo()
+            {
+                var finalizedBuilders = builders.Select(b => b.FinalizeSystem()).ToArray();
+                return new GenericTypeConstraintInfo(finalizedBuilders);
+            }
+
+            public TypeConstraintSystem.Builder this[int index]
+            {
+                get => builders[index];
+                set => builders[index] = value;
+            }
+            public TypeConstraintSystem.Builder this[ITypeParameterSymbol typeParameter]
+            {
+                get => builders[typeParameter.Ordinal];
+                set => builders[typeParameter.Ordinal] = value;
+            }
         }
     }
 }

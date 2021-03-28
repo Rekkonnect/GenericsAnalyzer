@@ -51,3 +51,14 @@ GA0008 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../.
 GA0010 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0010.md)
 GA0011 | Brevity | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0011.md)
 GA0013 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0013.md)
+
+## Release 1.2.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+GA0019 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0019.md)
+GA0020 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0020.md)
+GA0021 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0021.md)
+GA0022 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0022.md)

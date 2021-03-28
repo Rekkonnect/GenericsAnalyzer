@@ -5,7 +5,6 @@ namespace GenericsAnalyzer.Core
     using static TypeConstraintRule;
 
     /// <summary>Denotes that a generic type argument permits the usage of the specified types.</summary>
-    [AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = true)]
     public class PermittedTypesAttribute : ConstrainedTypesAttributeBase
     {
         protected override TypeConstraintRule Rule => PermitExactType;

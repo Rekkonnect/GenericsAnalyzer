@@ -11,7 +11,7 @@
     <Description>The core components for using the generics analyzer.</Description>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,15 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0002_Tests : BaseDiagnosticTests
+    public sealed class GA0002_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
         public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0002_Rule;
-
-        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
         public void ConflictingConstraints()

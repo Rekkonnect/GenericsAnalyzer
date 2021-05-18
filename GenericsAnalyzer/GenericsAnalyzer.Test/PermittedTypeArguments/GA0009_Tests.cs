@@ -1,15 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0009_Tests : BaseDiagnosticTests
+    public sealed class GA0009_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
         public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0009_Rule;
-
-        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
 
         [TestMethod]
         public void DuplicateConstraints()

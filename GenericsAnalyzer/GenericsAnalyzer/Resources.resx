@@ -243,4 +243,40 @@
   <data name="GA0022_Title" xml:space="preserve">
     <value>Conflicting inherited type constraint rules</value>
   </data>
+  <data name="GA0023_MessageFormat" xml:space="preserve">
+    <value>Only non-generic interfaces can be type constraint profiles or type constraint profile groups</value>
+  </data>
+  <data name="GA0023_Title" xml:space="preserve">
+    <value>Invalid type constraint profile type declaration</value>
+  </data>
+  <data name="GA0024_MessageFormat" xml:space="preserve">
+    <value>Type constraint profile-related interfaces should not contain any non-static members</value>
+  </data>
+  <data name="GA0024_Title" xml:space="preserve">
+    <value>Type constaint profile type also implements other behavior</value>
+  </data>
+  <data name="GA0025_MessageFormat" xml:space="preserve">
+    <value>Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles (did you forget to use the TypeConstraintProfileAttribute?)</value>
+  </data>
+  <data name="GA0025_Title" xml:space="preserve">
+    <value>Non-type constraint profile interface inheriting a profile one</value>
+  </data>
+  <data name="GA0026_MessageFormat" xml:space="preserve">
+    <value>The given type does not represent a type constraint profile definition</value>
+  </data>
+  <data name="GA0026_Title" xml:space="preserve">
+    <value>Invalid type constraint profile type</value>
+  </data>
+  <data name="GA0027_MessageFormat" xml:space="preserve">
+    <value>The given type does not represent a type constraint profile group definition</value>
+  </data>
+  <data name="GA0027_Title" xml:space="preserve">
+    <value>Invalid type constraint profile group type</value>
+  </data>
+  <data name="GA0028_MessageFormat" xml:space="preserve">
+    <value>Another type constraint profile of the same distinct group was used for inheritance</value>
+  </data>
+  <data name="GA0028_Title" xml:space="preserve">
+    <value>Conflicting profiles of the same distinct profile group</value>
+  </data>
 </root>

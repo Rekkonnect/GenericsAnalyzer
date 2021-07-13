@@ -28,6 +28,7 @@ Rule ID                   | Category        | Severity
 [GA0027](rules/GA0027.md) | Validity        | Error
 [GA0028](rules/GA0028.md) | API Restriction | Error
 [GA0029](rules/GA0029.md) | Validity        | Error
+[GA0030](rules/GA0030.md) | Design          | Warning
 
 ## Discontinued Rules
 Some rules have been discontinued. They may have been embodied into other rules, whose ID(s) are listed alongside the discontinued ones'.

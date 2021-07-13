@@ -285,4 +285,10 @@
   <data name="GA0029_Title" xml:space="preserve">
     <value>Invalid mutually exclusive declarations of the interface</value>
   </data>
+  <data name="GA0030_MessageFormat" xml:space="preserve">
+    <value>Type constraint-related attributes are assigned at the given interface, which is not declared as a type constraint profile (did you forget to use the TypeConstraintProfileAttribute?)</value>
+  </data>
+  <data name="GA0030_Title" xml:space="preserve">
+    <value>Type constraint attributes used on non-profile interface</value>
+  </data>
 </root>

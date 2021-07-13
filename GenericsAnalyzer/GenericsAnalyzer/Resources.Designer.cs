@@ -563,5 +563,23 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0029_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint-related attributes are assigned at the given interface, which is not declared as a type constraint profile (did you forget to use the TypeConstraintProfileAttribute?).
+        /// </summary>
+        internal static string GA0030_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0030_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint attributes used on non-profile interface.
+        /// </summary>
+        internal static string GA0030_Title {
+            get {
+                return ResourceManager.GetString("GA0030_Title", resourceCulture);
+            }
+        }
     }
 }

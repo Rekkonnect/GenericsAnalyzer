@@ -46,7 +46,8 @@ namespace GenericsAnalyzer
             GA0026_Rule = GetDiagnosticDescriptor(26, ValidityCategory, DiagnosticSeverity.Error),
             GA0027_Rule = GetDiagnosticDescriptor(27, ValidityCategory, DiagnosticSeverity.Error),
             GA0028_Rule = GetDiagnosticDescriptor(28, APIRestrictionsCategory, DiagnosticSeverity.Error),
-            GA0029_Rule = GetDiagnosticDescriptor(29, ValidityCategory, DiagnosticSeverity.Error);
+            GA0029_Rule = GetDiagnosticDescriptor(29, ValidityCategory, DiagnosticSeverity.Error),
+            GA0030_Rule = GetDiagnosticDescriptor(30, DesignCategory, DiagnosticSeverity.Warning);
         #endregion
 
         private static readonly Dictionary<Type, HashSet<DiagnosticDescriptor>> analyzerGroupedDiagnostics = new Dictionary<Type, HashSet<DiagnosticDescriptor>>();

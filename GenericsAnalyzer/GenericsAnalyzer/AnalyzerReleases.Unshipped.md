@@ -11,3 +11,4 @@ GA0025 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../..
 GA0026 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0026.md)
 GA0027 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0027.md)
 GA0028 | API Restriction | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0028.md)
+GA0029 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0029.md)

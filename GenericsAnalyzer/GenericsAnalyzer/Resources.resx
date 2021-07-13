@@ -256,10 +256,10 @@
     <value>Type constaint profile type also implements other behavior</value>
   </data>
   <data name="GA0025_MessageFormat" xml:space="preserve">
-    <value>Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles (did you forget to use the TypeConstraintProfileAttribute?)</value>
+    <value>Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?)</value>
   </data>
   <data name="GA0025_Title" xml:space="preserve">
-    <value>Non-type constraint profile interface inheriting a profile one</value>
+    <value>Mixed type constraint profile interfaces with irrelevant ones in inheritance</value>
   </data>
   <data name="GA0026_MessageFormat" xml:space="preserve">
     <value>The given type does not represent a type constraint profile definition</value>
@@ -278,5 +278,11 @@
   </data>
   <data name="GA0028_Title" xml:space="preserve">
     <value>Conflicting profiles of the same distinct profile group</value>
+  </data>
+  <data name="GA0029_MessageFormat" xml:space="preserve">
+    <value>An interface can only be declared as a type constraint profile or a type constraint profile group</value>
+  </data>
+  <data name="GA0029_Title" xml:space="preserve">
+    <value>Invalid mutually exclusive declarations of the interface</value>
   </data>
 </root>

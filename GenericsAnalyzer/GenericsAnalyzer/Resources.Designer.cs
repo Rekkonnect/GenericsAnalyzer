@@ -475,7 +475,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles (did you forget to use the TypeConstraintProfileAttribute?).
+        ///   Looks up a localized string similar to Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?).
         /// </summary>
         internal static string GA0025_MessageFormat {
             get {
@@ -484,7 +484,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Non-type constraint profile interface inheriting a profile one.
+        ///   Looks up a localized string similar to Mixed type constraint profile interfaces with irrelevant ones in inheritance.
         /// </summary>
         internal static string GA0025_Title {
             get {
@@ -543,6 +543,24 @@ namespace GenericsAnalyzer {
         internal static string GA0028_Title {
             get {
                 return ResourceManager.GetString("GA0028_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An interface can only be declared as a type constraint profile or a type constraint profile group.
+        /// </summary>
+        internal static string GA0029_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0029_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid mutually exclusive declarations of the interface.
+        /// </summary>
+        internal static string GA0029_Title {
+            get {
+                return ResourceManager.GetString("GA0029_Title", resourceCulture);
             }
         }
     }

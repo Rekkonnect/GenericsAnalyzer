@@ -45,7 +45,8 @@ namespace GenericsAnalyzer
             GA0025_Rule = GetDiagnosticDescriptor(25, DesignCategory, DiagnosticSeverity.Warning),
             GA0026_Rule = GetDiagnosticDescriptor(26, ValidityCategory, DiagnosticSeverity.Error),
             GA0027_Rule = GetDiagnosticDescriptor(27, ValidityCategory, DiagnosticSeverity.Error),
-            GA0028_Rule = GetDiagnosticDescriptor(28, APIRestrictionsCategory, DiagnosticSeverity.Error);
+            GA0028_Rule = GetDiagnosticDescriptor(28, APIRestrictionsCategory, DiagnosticSeverity.Error),
+            GA0029_Rule = GetDiagnosticDescriptor(29, ValidityCategory, DiagnosticSeverity.Error);
         #endregion
 
         private static readonly Dictionary<Type, HashSet<DiagnosticDescriptor>> analyzerGroupedDiagnostics = new Dictionary<Type, HashSet<DiagnosticDescriptor>>();
@@ -87,18 +88,12 @@ namespace GenericsAnalyzer
             return new DiagnosticDescriptor(GetDiagnosticID(id), GetTitle(id), GetMessageFormat(id), category, severity, true, helpLinkUri: GetHelpLinkURI(id), description: GetDescription(id));
         }
 
-        private static LocalizableResourceString GetTitle(int id) => GetResourceString(id, "Title");
-        private static LocalizableResourceString GetMessageFormat(int id) => GetResourceString(id, "MessageFormat");
-        private static LocalizableResourceString GetDescription(int id) => GetResourceString(id, "Description");
-        private static LocalizableResourceString GetResourceString(int id, string property)
+        private static LocalizableString GetTitle(int id) => GetResourceString(id, "Title");
+        private static LocalizableString GetMessageFormat(int id) => GetResourceString(id, "MessageFormat");
+        private static LocalizableString GetDescription(int id) => GetResourceString(id, "Description");
+        private static LocalizableString GetResourceString(int id, string property)
         {
-            try
-            {
-                return new LocalizableResourceString($"{GetDiagnosticID(id)}_{property}", Resources.ResourceManager, typeof(Resources));
-            }
-            catch { }
-
-            return null;
+            return Resources.ResourceManager.GetString($"{GetDiagnosticID(id)}_{property}");
         }
         #endregion
     }

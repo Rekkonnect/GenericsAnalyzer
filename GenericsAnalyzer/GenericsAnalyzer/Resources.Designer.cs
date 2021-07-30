@@ -457,7 +457,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type constraint profile-related interfaces should not contain any non-static members.
+        ///   Looks up a localized string similar to Type constraint profile group interfaces should not contain any non-static members.
         /// </summary>
         internal static string GA0024_MessageFormat {
             get {
@@ -466,7 +466,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type constaint profile type also implements other behavior.
+        ///   Looks up a localized string similar to Type constaint profile group type also implements other behavior.
         /// </summary>
         internal static string GA0024_Title {
             get {

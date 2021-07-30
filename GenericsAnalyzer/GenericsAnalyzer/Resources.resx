@@ -250,10 +250,10 @@
     <value>Invalid type constraint profile type declaration</value>
   </data>
   <data name="GA0024_MessageFormat" xml:space="preserve">
-    <value>Type constraint profile-related interfaces should not contain any non-static members</value>
+    <value>Type constraint profile group interfaces should not contain any non-static members</value>
   </data>
   <data name="GA0024_Title" xml:space="preserve">
-    <value>Type constaint profile type also implements other behavior</value>
+    <value>Type constaint profile group type also implements other behavior</value>
   </data>
   <data name="GA0025_MessageFormat" xml:space="preserve">
     <value>Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?)</value>

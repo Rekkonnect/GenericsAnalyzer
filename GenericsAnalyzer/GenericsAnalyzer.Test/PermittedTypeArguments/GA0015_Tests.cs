@@ -1,13 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
     public sealed class GA0015_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0015_Rule;
-
         [TestMethod]
         public void RedundantUsageInClass()
         {

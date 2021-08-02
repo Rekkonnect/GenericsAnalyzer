@@ -1,29 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
     public sealed class GA0017_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0017_Rule;
-
-        [TestMethod]
-        public void IntermediateGenericTypeUsage()
-        {
-            var testCode =
-@"
-class A<T>
-{
-}
-class B<T> : A<T>
-{
-}
-";
-
-            ValidateCodeWithUsings(testCode);
-        }
-
         [TestMethod]
         public void IntermediateSubsetGenericTypeUsage()
         {
@@ -90,59 +71,5 @@ class C<T> : A<↓T>
             AssertDiagnosticsWithUsings(testCode);
         }
 
-        [TestMethod]
-        public void IntermediateProhibitedGenericType()
-        {
-            var testCode =
-@"
-class A
-<
-    [ProhibitedTypes(typeof(string))]
-    T
->
-{
-}
-class B
-<
-    [InheritBaseTypeUsageConstraints]
-    T
-> : A<T>
-{
-}
-";
-
-            ValidateCodeWithUsings(testCode);
-        }
-
-        [TestMethod]
-        public void SubsetVarianceTest()
-        {
-            var testCode =
-@"
-class A
-<
-    [PermittedBaseTypes(typeof(ID))]
-    [ProhibitedBaseTypes(typeof(IA), typeof(IC))]
-    T
->
-{
-}
-class B
-<
-    [ProhibitedBaseTypes(typeof(IBase))]
-    T
-> : A<T>
-{
-}
-
-interface IBase { }
-interface IA : IBase { }
-interface IB : IBase { }
-interface IC : IBase { }
-interface ID : IC { }
-";
-
-            ValidateCodeWithUsings(testCode);
-        }
     }
 }

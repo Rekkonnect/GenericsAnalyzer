@@ -1,9 +1,6 @@
-﻿using Microsoft.CodeAnalysis.Diagnostics;
-
-namespace GenericsAnalyzer.Test
+﻿namespace GenericsAnalyzer.Test
 {
-    public abstract class PermittedTypeArgumentAnalyzerDiagnosticTests : BaseDiagnosticTests
+    public abstract class PermittedTypeArgumentAnalyzerDiagnosticTests : BaseDiagnosticTests<PermittedTypeArgumentAnalyzer>
     {
-        protected sealed override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
     }
 }

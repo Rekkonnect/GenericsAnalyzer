@@ -5,7 +5,7 @@ namespace GenericsAnalyzer.Core
 {
     /// <summary>Denotes that the marked interface represents a type constraint profile.</summary>
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-    public sealed class TypeConstraintProfileAttribute : Attribute, IGenericTypeConstraintAttribute
+    public sealed class TypeConstraintProfileAttribute : Attribute, ITypeConstraintProfileRelatedAttribute
     {
         /// <summary>The type constraint profile group types.</summary>
         public ImmutableArray<Type> ProfileGroupTypes { get; }

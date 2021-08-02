@@ -189,5 +189,24 @@ class C
             ValidateCodeWithUsings(testCode);
         }
         #endregion
+
+        #region Type constraint profiles
+        [TestMethod]
+        [Ignore("Default interface implementations are not supported by target runtime -- requires some config")]
+        public void ProfileGroupInterfaceWithStaticMembers()
+        {
+            var testCode =
+$@"
+[TypeConstraintProfileGroup]
+interface IGroup3
+{{
+    public const int Value = 4;
+    public static void Function() {{ }}
+}}
+";
+
+            ValidateCodeWithUsings(testCode);
+        }
+        #endregion
     }
 }

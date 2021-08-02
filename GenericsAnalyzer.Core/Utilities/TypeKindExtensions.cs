@@ -4,9 +4,15 @@ namespace GenericsAnalyzer.Core.Utilities
 {
     public static class TypeKindExtensions
     {
-        public static bool CanInheritTypes(this TypeKind kind)
+        public static bool CanExplicitlyInheritTypes(this TypeKind kind)
         {
-            return kind != TypeKind.Delegate;
+            switch (kind)
+            {
+                case TypeKind.Delegate:
+                case TypeKind.Enum:
+                    return false;
+            }
+            return true;
         }
     }
 }

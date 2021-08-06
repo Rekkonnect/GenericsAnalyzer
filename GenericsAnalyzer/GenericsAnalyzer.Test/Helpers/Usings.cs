@@ -7,6 +7,7 @@
 using GenericsAnalyzer.Core;
 using GenericsAnalyzer.Test.Resources;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 ";
 

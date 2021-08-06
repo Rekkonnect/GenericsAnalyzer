@@ -30,21 +30,21 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments
             var testCode =
 $@"
 // Individually test every attribute
-[PermittedTypes(typeof(int))]
+[↓PermittedTypes(typeof(int))]
 {profileAttribute}
-interface ↓IA {{ }}
-[ProhibitedTypes(typeof(long))]
+interface IA {{ }}
+[↓ProhibitedTypes(typeof(long))]
 {profileAttribute}
-interface ↓IB {{ }}
-[PermittedBaseTypes(typeof(IEnumerable))]
+interface IB {{ }}
+[↓PermittedBaseTypes(typeof(IEnumerable))]
 {profileAttribute}
-interface ↓IC {{ }}
-[ProhibitedBaseTypes(typeof(ICollection))]
+interface IC {{ }}
+[↓ProhibitedBaseTypes(typeof(ICollection))]
 {profileAttribute}
-interface ↓ID {{ }}
-[OnlyPermitSpecifiedTypes]
+interface ID {{ }}
+[↓OnlyPermitSpecifiedTypes]
 {profileAttribute}
-interface ↓IE {{ }}
+interface IE {{ }}
 ";
 
             AssertOrValidateWithUsings(testCode, assertDiagnostics);

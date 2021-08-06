@@ -13,6 +13,12 @@ namespace GenericsAnalyzer.Core.Utilities
                 && type.Assembly.FullName == symbol.ContainingAssembly.MetadataName;
         }
 
+        public static bool IsNonProfileTypeConstraintAttribute(this ITypeSymbol attributeType)
+        {
+            return attributeType.IsGenericConstraintAttribute()
+                && !attributeType.IsGenericConstraintAttribute<ITypeConstraintProfileRelatedAttribute>();
+        }
+
         /// <summary>Determines whether the given attribute type is a generic constaint attribute that the analyzer should take into account.</summary>
         /// <param name="attributeType">The attribute type that will be evaluated.</param>
         /// <returns><see langword="true"/> if the given attribute type is a generic constraint attribute one that is important enough, otherwise <see langword="false"/>.</returns>

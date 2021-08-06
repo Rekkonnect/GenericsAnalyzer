@@ -96,15 +96,9 @@ namespace GenericsAnalyzer
         private void AnalyzeProfileRelatedDeclaration(SyntaxNodeAnalysisContext context)
         {
             var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
-            // Consider not passing the context down the line; instead the analysis functions should
-            // only analyze the type from the given symbol instances and not immediately report
-            // diagnostics to the context
             AnalyzeProfileRelatedDefinition(context, symbol);
         }
 
-        // TODO: To add support for GA0030, all attributes of the declaration will be processed beforehand,
-        //       caching the type constraint ones, and if the interface is not a profile declaration, the
-        //       warning is emitted to all of them
         private void AnalyzeProfileRelatedDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol profileSymbol)
         {
             // Process whether the symbol is an interface because of the recursive processing
@@ -122,6 +116,7 @@ namespace GenericsAnalyzer
 
             var profileTypeDeclarationNode = declaringSyntaxReferences[0].GetSyntax() as InterfaceDeclarationSyntax;
 
+            var typeConstraintAttributes = new List<AttributeData>();
             var templateTypes = TypeConstraintTemplateType.None;
             AttributeData templateAttribute = null;
 
@@ -143,8 +138,12 @@ namespace GenericsAnalyzer
                         break;
                     }
 
-                    // If the attribute is not a profile-relevant one, it will be ignored and not cached
+                    // If the attribute is not a profile-relevant one, it will be evaluated if it's
+                    // related to type constraints and cached there for GA0030 warnings
                     default:
+                        if (IsNonProfileTypeConstraintAttribute(attribute))
+                            typeConstraintAttributes.Add(attribute);
+
                         continue;
                 }
 
@@ -152,6 +151,16 @@ namespace GenericsAnalyzer
                 templateAttribute = attribute;
             }
 
+            // If not a type constraint profile, the provided type constraint attributes have no effect
+            if (!templateTypes.HasFlag(TypeConstraintTemplateType.Profile))
+            {
+                foreach (var typeConstraintAttribute in typeConstraintAttributes)
+                {
+                    context.ReportDiagnostic(Diagnostics.CreateGA0030(typeConstraintAttribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax));
+                }
+            }
+
+            // Now analyze semantic information about the templates
             if (templateTypes is TypeConstraintTemplateType.None)
                 return;
 
@@ -241,11 +250,12 @@ namespace GenericsAnalyzer
             // Nested profile types should also be ideally avoided
             if (groupDeclarationType.GetMembers().Any(m => !m.IsStatic))
             {
+                // TODO: Implement a way to only emit the diagnostic on the partial declarations
+                //       that contain instance members (decorative)
                 context.ReportDiagnostic(Diagnostics.CreateGA0024(profileTypeDeclarationNode));
             }
 
-            var ctorArguments = profileGroupAttribute.ConstructorArguments;
-            bool isDistinct = ctorArguments.Length > 0 && (bool)ctorArguments[0].Value;
+            bool isDistinct = (bool)profileGroupAttribute.ConstructorArguments[0].Value;
             constraintProfiles.AddGroup(groupDeclarationType, isDistinct);
         }
 
@@ -412,7 +422,7 @@ namespace GenericsAnalyzer
                     if (!(attribute.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attributeSyntaxNode))
                         return;
 
-                    if (!AttributeNeedsProcessing(attribute))
+                    if (!IsNonProfileTypeConstraintAttribute(attribute))
                         return;
 
                     switch (attribute.AttributeClass.Name)
@@ -715,7 +725,7 @@ namespace GenericsAnalyzer
 
         private bool ProcessAttribute(TypeConstraintSystem.Builder systemBuilder, AttributeData attributeData, AttributeProcessor attributeProcessor)
         {
-            if (!AttributeNeedsProcessing(attributeData))
+            if (!IsNonProfileTypeConstraintAttribute(attributeData))
                 return false;
 
             // Using switch for when the other constraint attributes come into play
@@ -743,10 +753,9 @@ namespace GenericsAnalyzer
             return true;
         }
 
-        private static bool AttributeNeedsProcessing(AttributeData data)
+        private static bool IsNonProfileTypeConstraintAttribute(AttributeData data)
         {
-            return data.AttributeClass.IsGenericConstraintAttribute()
-                && !data.AttributeClass.IsGenericConstraintAttribute<ITypeConstraintProfileRelatedAttribute>();
+            return data.AttributeClass.IsNonProfileTypeConstraintAttribute();
         }
         private static IEnumerable<ITypeSymbol> GetAttributeTypeArrayArgument(AttributeData data)
         {

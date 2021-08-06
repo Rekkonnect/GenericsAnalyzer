@@ -151,13 +151,27 @@ namespace GenericsAnalyzer
                 templateAttribute = attribute;
             }
 
+            bool isProfile = templateTypes.HasFlag(TypeConstraintTemplateType.Profile);
+
             // If not a type constraint profile, the provided type constraint attributes have no effect
-            if (!templateTypes.HasFlag(TypeConstraintTemplateType.Profile))
+            if (!isProfile)
             {
                 foreach (var typeConstraintAttribute in typeConstraintAttributes)
                 {
                     context.ReportDiagnostic(Diagnostics.CreateGA0030(typeConstraintAttribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax));
                 }
+            }
+
+            for (int inheritedInterfaceIndex = 0; inheritedInterfaceIndex < profileSymbol.Interfaces.Length; inheritedInterfaceIndex++)
+            {
+                var directlyInheritedInterface = profileSymbol.Interfaces[inheritedInterfaceIndex];
+                var directlyInheritedInterfaceNode = profileTypeDeclarationNode.BaseList.Types[inheritedInterfaceIndex];
+
+                AnalyzeProfileRelatedDefinition(context, directlyInheritedInterface);
+
+                bool inheritedIsProfile = constraintProfiles.ContainsProfile(directlyInheritedInterface);
+                if (isProfile != inheritedIsProfile)
+                    context.ReportDiagnostic(Diagnostics.CreateGA0025(directlyInheritedInterfaceNode));
             }
 
             // Now analyze semantic information about the templates
@@ -748,6 +762,7 @@ namespace GenericsAnalyzer
             // If an error is thrown here, common causes could be:
             // - having forgotten to import a namespace
             // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
+            // - neglecting that type constraint attributes may also be applied to interfaces and not just type params
             systemBuilder.Add(rule, GetAttributeTypeArrayArgument(attributeData));
 
             return true;

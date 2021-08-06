@@ -17,6 +17,32 @@ interface IB : ↓IA {{ }}
 
 [TypeConstraintProfile]
 interface IC : ↓IB {{ }}
+
+[TypeConstraintProfile]
+interface ID : IC {{ }}
+
+interface IE {{ }}
+
+[TypeConstraintProfile]
+interface IF : IA, ↓IB, ↓IE {{ }}
+";
+
+            AssertDiagnosticsWithUsings(testCode);
+        }
+
+        [TestMethod]
+        public void ProfileInterfacesAndProfileGroupInterfaces()
+        {
+            var testCode =
+$@"
+[TypeConstraintProfile]
+interface IA {{ }}
+
+[TypeConstraintProfileGroup]
+interface IB : ↓IA {{ }}
+
+[TypeConstraintProfile]
+interface IC : ↓IB {{ }}
 ";
 
             AssertDiagnosticsWithUsings(testCode);

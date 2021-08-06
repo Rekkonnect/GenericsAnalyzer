@@ -475,7 +475,7 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type constraint profile-related interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?).
+        ///   Looks up a localized string similar to Type constraint profile interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?).
         /// </summary>
         internal static string GA0025_MessageFormat {
             get {

@@ -1,5 +1,4 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,8 +6,11 @@ namespace GenericsAnalyzer.Core
 {
     public class TypeConstraintProfileInfoCollection
     {
-        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> profiles = new Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo>();
-        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo> groups = new Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo>();
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> profiles = new Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo>(SymbolEqualityComparer.Default);
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo> groups = new Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo>(SymbolEqualityComparer.Default);
+
+        public IEnumerable<TypeConstraintProfileInfo> Profiles => profiles.Values;
+        public IEnumerable<TypeConstraintProfileGroupInfo> Groups => groups.Values;
 
         public void AddProfile(INamedTypeSymbol profileDeclarationType, IEnumerable<INamedTypeSymbol> groupTypes)
         {
@@ -26,52 +28,5 @@ namespace GenericsAnalyzer.Core
 
         public TypeConstraintProfileInfo GetProfileInfo(INamedTypeSymbol profileDeclarationType) => profiles[profileDeclarationType];
         public TypeConstraintProfileGroupInfo GetGroupInfo(INamedTypeSymbol groupDeclarationType) => groups[groupDeclarationType];
-    }
-
-    public class TypeConstraintProfileGroupInfo
-    {
-        public INamedTypeSymbol GroupDeclaringInterface { get; }
-
-        public bool Distinct { get; }
-
-        public TypeConstraintProfileGroupInfo(INamedTypeSymbol groupDeclaringInterface, bool distinct)
-        {
-            GroupDeclaringInterface = groupDeclaringInterface;
-            Distinct = distinct;
-        }
-
-        public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode(GroupDeclaringInterface);
-    }
-    public class TypeConstraintProfileInfo
-    {
-        private readonly HashSet<TypeConstraintProfileGroupInfo> groups = new HashSet<TypeConstraintProfileGroupInfo>();
-
-        public TypeConstraintSystem System { get; private set; }
-        public TypeConstraintSystem.Builder Builder { get; }
-
-        public IEnumerable<TypeConstraintProfileGroupInfo> Groups => groups.ToArray();
-
-        public INamedTypeSymbol ProfileDeclaringInterface => Builder.ProfileInterface;
-
-        public TypeConstraintProfileInfo(INamedTypeSymbol profileDeclaringInterface)
-        {
-            Builder = new TypeConstraintSystem.Builder(profileDeclaringInterface);
-        }
-        public TypeConstraintProfileInfo(INamedTypeSymbol profileDeclaringInterface, IEnumerable<TypeConstraintProfileGroupInfo> groupInfos)
-            : this(profileDeclaringInterface)
-        {
-            AddToGroups(groupInfos);
-        }
-
-        public void AddToGroup(TypeConstraintProfileGroupInfo groupInfo) => groups.Add(groupInfo);
-        public void AddToGroups(params TypeConstraintProfileGroupInfo[] groupInfos) => groups.AddRange(groupInfos);
-        public void AddToGroups(IEnumerable<TypeConstraintProfileGroupInfo> groupInfos) => groups.AddRange(groupInfos);
-
-        public void FinalizeSystem()
-        {
-            System = Builder.FinalizeSystem();
-        }
-
-        public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode(ProfileDeclaringInterface);
     }
 }

@@ -337,15 +337,15 @@ namespace GenericsAnalyzer.Core
 
             private bool Add(TypeConstraintProfileGroupInfo distinctGroup, TypeConstraintProfileInfo usingProfile)
             {
-                bool added = !distinctGroupUsages.TryGetValue(distinctGroup, out var usageList);
-                if (added)
+                bool stillDistinct = !distinctGroupUsages.TryGetValue(distinctGroup, out var usageList);
+                if (stillDistinct)
                 {
                     usageList = new List<TypeConstraintProfileInfo>();
                     distinctGroupUsages.Add(distinctGroup, usageList);
                 }
 
                 usageList.Add(usingProfile);
-                return added;
+                return stillDistinct;
             }
 
             public void Clear() => distinctGroupUsages.Clear();
@@ -442,7 +442,7 @@ namespace GenericsAnalyzer.Core
             private bool InheritFrom<T>(T baseType, TypeConstraintSystem baseSystem, TypeConstraintSystem inheritedSystems, ISet<T> inheritedTypes)
                 where T : ITypeSymbol
             {
-                if (buildState.HasFinalizedWhole())
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return false;
 
                 inheritedSystems.OnlyPermitSpecifiedTypes |= baseSystem.OnlyPermitSpecifiedTypes;
@@ -458,7 +458,7 @@ namespace GenericsAnalyzer.Core
             private bool InheritFrom<T>(T baseType, Builder baseSystemBuilder, TypeConstraintSystem affectedInheritedSystems, ISet<T> inheritedTypes)
                 where T : ITypeSymbol
             {
-                if (buildState.HasFinalizedWhole())
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return false;
 
                 affectedInheritedSystems.OnlyPermitSpecifiedTypes |= baseSystemBuilder.OnlyPermitSpecifiedTypes;
@@ -477,7 +477,7 @@ namespace GenericsAnalyzer.Core
             public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
             public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
             {
-                if (buildState.HasFinalizedBase())
+                if (buildState.HasFlag(SystemBuildState.FinalizedBase))
                     return;
 
                 var systemDiagnostics = finalSystem.systemDiagnostics;
@@ -512,28 +512,32 @@ namespace GenericsAnalyzer.Core
 
             public TypeConstraintSystemDiagnostics AnalyzeFinalizedBaseSystem()
             {
-                if (buildState.HasFinalizedBase())
+                if (buildState.HasFlag(SystemBuildState.FinalizedBase))
                     return SystemDiagnostics;
 
-                buildState = SystemBuildState.FinalizedBase;
+                buildState |= SystemBuildState.FinalizedBase;
                 return finalSystem.AnalyzeFinalizedSystem();
             }
 
-            private void AnalyzeInheritedTypeProfiles()
+            public void AnalyzeFinalizedInheritedTypeProfiles()
             {
+                if (buildState.HasFlag(SystemBuildState.FinalizedInheritedProfiles))
+                    return;
+
                 var multipleDistinctGroupProfiles = finalSystem.inheritedProfileDistinctGroups.GetCollidingDistinctGroupProfileUsages();
-                foreach (var profile in multipleDistinctGroupProfiles)
-                    inheritedProfileSystems.systemDiagnostics.RegisterMultipleOfDistinctGroupInheritedProfile(profile);
+                finalSystem.systemDiagnostics.RegisterMultipleOfDistinctGroupInheritedProfiles(multipleDistinctGroupProfiles);
+
+                buildState |= SystemBuildState.FinalizedInheritedProfiles;
             }
 
             public TypeConstraintSystem FinalizeSystem()
             {
-                if (buildState.HasFinalizedWhole())
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return finalSystem;
 
                 AnalyzeFinalizedBaseSystem();
 
-                AnalyzeInheritedTypeProfiles();
+                AnalyzeFinalizedInheritedTypeProfiles();
 
                 // Copy inherited rules to the final system
                 finalSystem.typeConstraintRules.TryAddPreserveRange(inheritedTypeParameterSystems.typeConstraintRules);
@@ -549,11 +553,17 @@ namespace GenericsAnalyzer.Core
                 return finalSystem;
             }
 
-            public enum SystemBuildState
+            [Flags]
+            private enum SystemBuildState : uint
             {
                 Building,
-                FinalizedBase,
-                FinalizedWhole,
+                FinalizedBase = 1,
+                FinalizedInheritedTypeParameters = 1 << 1,
+                FinalizedInheritedProfiles = 1 << 2,
+
+                FinalizedWhole = FinalizedBase
+                               | FinalizedInheritedTypeParameters
+                               | FinalizedInheritedProfiles,
             }
         }
 

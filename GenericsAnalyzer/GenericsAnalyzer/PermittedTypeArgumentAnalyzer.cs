@@ -373,6 +373,17 @@ namespace GenericsAnalyzer
                                         }
                                     }
 
+                                    systemBuilder.AnalyzeFinalizedInheritedTypeProfiles();
+                                    var multipleOfDistinctGroupsProfiles = systemBuilder.SystemDiagnostics.GetProfilesForDiagnosticType(TypeConstraintSystemInheritanceDiagnosticType.MultipleOfDistinctGroup);
+
+                                    for (int argumentIndex = 0; argumentIndex < arguments.Length; argumentIndex++)
+                                    {
+                                        if (multipleOfDistinctGroupsProfiles.Contains(arguments[argumentIndex]))
+                                        {
+                                            context.ReportDiagnostic(Diagnostics.CreateGA0028(argumentNodes[argumentIndex]));
+                                        }
+                                    }
+
                                     return true;
                                 }
 

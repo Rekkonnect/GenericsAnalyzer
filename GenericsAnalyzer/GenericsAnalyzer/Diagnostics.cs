@@ -113,9 +113,9 @@ namespace GenericsAnalyzer
         {
             return Diagnostic.Create(GA0027_Rule, nonProfileGroupTypeArgumentNode?.GetLocation());
         }
-        public static Diagnostic CreateGA0028(AttributeSyntax typeProfileInheritanceAttributeNode)
+        public static Diagnostic CreateGA0028(AttributeArgumentSyntax typeProfileInheritanceAttributeArgumentNode)
         {
-            return Diagnostic.Create(GA0028_Rule, typeProfileInheritanceAttributeNode?.GetLocation());
+            return Diagnostic.Create(GA0028_Rule, typeProfileInheritanceAttributeArgumentNode?.GetLocation());
         }
         public static Diagnostic CreateGA0029(InterfaceDeclarationSyntax interfaceDeclarationNode)
         {

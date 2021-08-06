@@ -52,6 +52,9 @@ namespace GenericsAnalyzer.Core
 
             foreach (var kvp in other.erroneousInheritedTypeParameters)
                 erroneousInheritedTypeParameters[kvp.Key].AddRange(kvp.Value);
+
+            foreach (var kvp in other.erroneousInheritedProfiles)
+                erroneousInheritedProfiles[kvp.Key].AddRange(kvp.Value);
         }
 
         public ISet<ITypeSymbol> GetTypesForDiagnosticType(DiagnosticType diagnosticType)
@@ -184,6 +187,12 @@ namespace GenericsAnalyzer.Core
         public void RegisterMultipleOfDistinctGroupInheritedProfile(INamedTypeSymbol profile)
         {
             MultipleOfDistinctGroupInheritedProfiles.Add(profile);
+        }
+
+        // TODO: More overloads should exist for that purpose
+        public void RegisterMultipleOfDistinctGroupInheritedProfiles(IEnumerable<INamedTypeSymbol> profiles)
+        {
+            MultipleOfDistinctGroupInheritedProfiles.AddRange(profiles);
         }
         #endregion
 

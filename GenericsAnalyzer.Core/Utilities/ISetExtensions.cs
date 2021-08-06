@@ -6,20 +6,15 @@ namespace GenericsAnalyzer.Core.Utilities
     {
         public static void AddRange<T>(this ISet<T> set, IEnumerable<T> elements)
         {
-            foreach (var e in elements)
-                set.Add(e);
+            set.UnionWith(elements);
         }
         public static void RemoveRange<T>(this ISet<T> set, IEnumerable<T> elements)
         {
-            foreach (var e in elements)
-                set.Remove(e);
+            set.IntersectWith(elements);
         }
         public static bool ContainsAll<T>(this ISet<T> set, IEnumerable<T> elements)
         {
-            foreach (var e in elements)
-                if (!set.Contains(e))
-                    return false;
-            return true;
+            return set.IsSupersetOf(elements);
         }    
     }
 }

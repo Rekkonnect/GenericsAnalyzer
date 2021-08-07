@@ -47,17 +47,14 @@ namespace GenericsAnalyzer
 
             return await context.RemoveAttributeArgumentsCleanAsync(removed, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
 
-            ITypeSymbol GetTypeSymbol(AttributeArgumentSyntax a)
+            ITypeSymbol GetTypeSymbol(AttributeArgumentSyntax arg)
             {
-                return semanticModel.GetTypeInfo((a.Expression as TypeOfExpressionSyntax)?.Type).Type;
+                return semanticModel.GetTypeInfo((arg.Expression as TypeOfExpressionSyntax)?.Type).Type;
             }
             bool ArgumentRemovalPredicate(AttributeArgumentSyntax arg)
             {
-                // DEBUG
                 var typeSymbol = GetTypeSymbol(arg);
                 return typeSymbol.Equals(targetType, SymbolEqualityComparer.Default);
-                // END DEBUG
-                return GetTypeSymbol(arg).Equals(targetType, SymbolEqualityComparer.Default);
             }
         }
     }

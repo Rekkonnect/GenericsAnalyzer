@@ -61,6 +61,15 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove all members from type.
+        /// </summary>
+        internal static string AllTypeMemberRemover_Title {
+            get {
+                return ResourceManager.GetString("AllTypeMemberRemover_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move type constrraint to constraint clause.
         /// </summary>
         internal static string ConstraintClauseTypeConstraintPlacer_Title {
@@ -75,6 +84,15 @@ namespace GenericsAnalyzer {
         internal static string DuplicateAttributeArgumentRemover_Title {
             get {
                 return ResourceManager.GetString("DuplicateAttributeArgumentRemover_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove all instance members from type.
+        /// </summary>
+        internal static string InstanceTypeMemberRemover_Title {
+            get {
+                return ResourceManager.GetString("InstanceTypeMemberRemover_Title", resourceCulture);
             }
         }
         
@@ -102,6 +120,24 @@ namespace GenericsAnalyzer {
         internal static string RedundantBaseTypeRuleConverter_Title {
             get {
                 return ResourceManager.GetString("RedundantBaseTypeRuleConverter_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove all static members from type.
+        /// </summary>
+        internal static string StaticTypeMemberRemover_Title {
+            get {
+                return ResourceManager.GetString("StaticTypeMemberRemover_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make type non-generic.
+        /// </summary>
+        internal static string Ungenericizer_Title {
+            get {
+                return ResourceManager.GetString("Ungenericizer_Title", resourceCulture);
             }
         }
     }

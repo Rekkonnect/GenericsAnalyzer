@@ -1,5 +1,4 @@
 ﻿using Gu.Roslyn.Asserts;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static GenericsAnalyzer.Test.Helpers.UsingsHelpers;
@@ -12,24 +11,8 @@ namespace GenericsAnalyzer.Test
         protected sealed override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new TAnalyzer();
     }
 
-    public abstract class BaseDiagnosticTests : IAnalyzerTestFixture
+    public abstract class BaseDiagnosticTests : BaseAnalyzerTestFixture
     {
-        private DiagnosticDescriptor testedDiagnosticRule;
-
-        public virtual DiagnosticDescriptor TestedDiagnosticRule
-        {
-            get
-            {
-                if (testedDiagnosticRule != null)
-                    return testedDiagnosticRule;
-
-                // TODO: This will need major refactoring if a new diagnostic group will be introduced
-                var thisType = GetType();
-                var ruleID = thisType.Name.Substring(0, "GA0000".Length);
-                return testedDiagnosticRule = DiagnosticDescriptors.GetDiagnosticDescriptor(ruleID);
-            }
-        }
-
         protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(TestedDiagnosticRule);
 
         protected abstract DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance();

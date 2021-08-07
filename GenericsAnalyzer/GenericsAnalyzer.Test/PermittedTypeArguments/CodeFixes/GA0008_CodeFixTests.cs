@@ -1,5 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
@@ -7,8 +6,6 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
     [Ignore("Resulting document's indentation is somehow altered during assertion")]
     public class GA0008_CodeFixTests : RedundantBaseTypeRuleConverterCodeFixTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0008_Rule;
-
         [TestMethod]
         public void RedundantBaseTypeRuleWithCodeFix()
         {

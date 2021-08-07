@@ -1,13 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
     [TestClass]
     public class GA0003_CodeFixTests : RedundantAttributeArgumentRemoverCodeFixTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0003_Rule;
-
         [TestMethod]
         public void RedundantBoundUnboundCodeFix()
         {

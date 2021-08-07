@@ -1,13 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
     [TestClass]
     public class GA0009_CodeFixTests : DuplicateAttributeArgumentRemoverCodeFixTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0009_Rule;
-
         // TODO: Find a way to test applying the code fix on a specified diagnostic
         [TestMethod]
         public void ConflictingConstraintsCodeFix()

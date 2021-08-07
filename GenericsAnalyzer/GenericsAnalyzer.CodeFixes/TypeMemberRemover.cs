@@ -36,7 +36,7 @@ namespace GenericsAnalyzer
             // none for the time being
         };
     }
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AllTypeMemberRemover))]
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InstanceTypeMemberRemover))]
     public sealed class InstanceTypeMemberRemover : TypeMemberRemover
     {
         protected override string CodeFixTitle => CodeFixResources.InstanceTypeMemberRemover_Title;

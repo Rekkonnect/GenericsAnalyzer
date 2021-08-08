@@ -97,6 +97,15 @@ namespace GenericsAnalyzer {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make interface a type constraint profile.
+        /// </summary>
+        internal static string ProfileInterfaceDeclarer_Title {
+            get {
+                return ResourceManager.GetString("ProfileInterfaceDeclarer_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove redundant attribute argument.
         /// </summary>
         internal static string RedundantAttributeArgumentRemover_Title {

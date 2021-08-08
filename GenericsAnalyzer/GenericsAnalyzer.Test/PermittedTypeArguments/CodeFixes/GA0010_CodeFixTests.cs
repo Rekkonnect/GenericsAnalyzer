@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class C
 <
-    [ProhibitedTypes({|GA0010:typeof(long)|})]
+    [ProhibitedTypes({|*:typeof(long)|})]
     [ProhibitedBaseTypes(typeof(IComparable<>))]
     T
 >
@@ -40,7 +40,7 @@ class C
 @"
 class C
 <
-    [Example, ProhibitedTypes({|GA0010:typeof(long)|}), Example]
+    [Example, ProhibitedTypes({|*:typeof(long)|}), Example]
     [ProhibitedBaseTypes(typeof(IComparable<>))]
     T
 >
@@ -70,7 +70,7 @@ class C
 @"
 class C
 <
-    [Example, ProhibitedTypes({|GA0010:typeof(long)|}, typeof(List<>)), Example]
+    [Example, ProhibitedTypes({|*:typeof(long)|}, typeof(List<>)), Example]
     [ProhibitedBaseTypes(typeof(IComparable<>))]
     T
 >

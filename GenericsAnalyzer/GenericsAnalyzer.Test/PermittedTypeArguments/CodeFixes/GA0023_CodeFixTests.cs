@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using GenericsAnalyzer.Core;
+using GenericsAnalyzer.Core.Utilities;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
@@ -6,18 +8,38 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
     public class GA0023_CodeFixTests : UngenericizerCodeFixTests
     {
         [TestMethod]
-        public void RedundantUsageWithCodeFix()
+        public void GenericProfileWithCodeFix()
         {
+            GenericProfileRelatedInterfaceWithCodeFix(nameof(TypeConstraintProfileAttribute));
+        }
+        [TestMethod]
+        public void GenericProfileGroupWithCodeFix()
+        {
+            GenericProfileRelatedInterfaceWithCodeFix(nameof(TypeConstraintProfileGroupAttribute));
+        }
+
+        private void GenericProfileRelatedInterfaceWithCodeFix(string attributeName)
+        {
+            ExtendedSyntaxFactory.SimplifyAttributeNameUsage(ref attributeName);
+
             var testCode =
-@"
-[TypeConstraintProfileGroup]
-interface {|GA0023:IProfile|}<T1, T2, T3> { }
+$@"
+[{attributeName}]
+interface {{|*:IProfile1|}}<T1> {{ }}
+[{attributeName}]
+interface {{|*:IProfile2|}}<T1, T2> {{ }}
+[{attributeName}]
+interface {{|*:IProfile3|}}<T1, T2, T3> {{ }}
 ";
 
             var fixedCode =
-@"
-[TypeConstraintProfileGroup]
-interface IProfile { }
+$@"
+[{attributeName}]
+interface IProfile1 {{ }}
+[{attributeName}]
+interface IProfile2 {{ }}
+[{attributeName}]
+interface IProfile3 {{ }}
 ";
 
             TestCodeFixWithUsings(testCode, fixedCode);

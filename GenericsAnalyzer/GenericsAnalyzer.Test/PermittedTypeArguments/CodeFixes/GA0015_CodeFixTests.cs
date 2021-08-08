@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class C
 <
-    [{|GA0015:InheritBaseTypeUsageConstraints|}]
+    [{|*:InheritBaseTypeUsageConstraints|}]
     T
 >
 {

@@ -13,7 +13,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class C
 <
-    [PermittedBaseTypes({|GA0008:typeof(long)|})]
+    [PermittedBaseTypes({|*:typeof(long)|})]
     [PermittedBaseTypes(typeof(IEnumerable<>))]
     [OnlyPermitSpecifiedTypes]
     T
@@ -44,7 +44,7 @@ class C
 @"
 class C
 <
-    [ProhibitedBaseTypes(typeof(Attribute), {|GA0008:typeof(long)|}, typeof(IEnumerable<>))]
+    [ProhibitedBaseTypes(typeof(Attribute), {|*:typeof(long)|}, typeof(IEnumerable<>))]
     T
 >
 {

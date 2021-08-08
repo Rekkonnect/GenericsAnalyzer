@@ -16,8 +16,8 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(int)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(int)|})]
+    [PermittedTypes({|*:typeof(int)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(int)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -69,9 +69,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -123,9 +123,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -176,9 +176,9 @@ class D
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [Example(typeof(List<int>), 1)]
     [OnlyPermitSpecifiedTypes]
     T

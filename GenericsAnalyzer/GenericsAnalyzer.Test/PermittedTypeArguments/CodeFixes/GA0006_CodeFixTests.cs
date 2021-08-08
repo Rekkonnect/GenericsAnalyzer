@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class Test
 <
-    [PermittedBaseTypes({|GA0006:typeof(C)|})]
+    [PermittedBaseTypes({|*:typeof(C)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -50,7 +50,7 @@ class C : B { }
 class Test
 <
     [ProhibitedTypes(typeof(C))]
-    [PermittedBaseTypes({|GA0006:typeof(B)|})]
+    [PermittedBaseTypes({|*:typeof(B)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -91,7 +91,7 @@ class C : B { }
 
 class Test
 <
-    [PermittedBaseTypes({|GA0006:typeof(IB)|})]
+    [PermittedBaseTypes({|*:typeof(IB)|})]
     [PermittedTypes(typeof(ID))]
     [ProhibitedBaseTypes(typeof(IC))]
     [OnlyPermitSpecifiedTypes]
@@ -138,7 +138,7 @@ interface ID : IC { }
 @"
 class Test
 <
-    [PermittedBaseTypes({|GA0006:typeof(IC)|})]
+    [PermittedBaseTypes({|*:typeof(IC)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -178,7 +178,7 @@ interface IC { }
 @"
 class C
 <
-    [PermittedBaseTypes({|GA0006:typeof(IComparable<int>)|})]
+    [PermittedBaseTypes({|*:typeof(IComparable<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -205,7 +205,7 @@ class C
 @"
 class C
 <
-    [Example, PermittedBaseTypes({|GA0006:typeof(IComparable<int>)|}), Example]
+    [Example, PermittedBaseTypes({|*:typeof(IComparable<int>)|}), Example]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -233,7 +233,7 @@ class C
 @"
 class C
 <
-    [Example, PermittedBaseTypes({|GA0006:typeof(IComparable<int>)|}), Example]
+    [Example, PermittedBaseTypes({|*:typeof(IComparable<int>)|}), Example]
     [OnlyPermitSpecifiedTypes]
     T,
     [Example]
@@ -269,7 +269,7 @@ class C
 <
     R,
     S,
-    [PermittedBaseTypes({|GA0006:typeof(IComparable<int>)|})]
+    [PermittedBaseTypes({|*:typeof(IComparable<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T,
     U,

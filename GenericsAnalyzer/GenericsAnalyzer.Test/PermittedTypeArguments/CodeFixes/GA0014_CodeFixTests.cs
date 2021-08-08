@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 delegate void Delegate
 <
-    [{|GA0014:InheritBaseTypeUsageConstraints|}]
+    [{|*:InheritBaseTypeUsageConstraints|}]
     T
 >(T something);
 ";
@@ -35,7 +35,7 @@ delegate void Delegate
 @"
 delegate void Delegate
 <
-    [Example, {|GA0014:InheritBaseTypeUsageConstraints|}, Example]
+    [Example, {|*:InheritBaseTypeUsageConstraints|}, Example]
     T
 >(T something);
 ";

@@ -16,8 +16,8 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 
 class C
 <
-    [PermittedTypes({|GA0009:typeof(int)|}, typeof(long), typeof(ulong))]
-    [PermittedTypes({|GA0009:typeof(int)|})]
+    [PermittedTypes({|*:typeof(int)|}, typeof(long), typeof(ulong))]
+    [PermittedTypes({|*:typeof(int)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -69,9 +69,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -123,9 +123,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -176,9 +176,9 @@ class D
 
 class C
 <
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
-    [PermittedTypes({|GA0009:typeof(List<int>)|}, {|GA0009:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [Example(typeof(List<int>), 1)]
     [OnlyPermitSpecifiedTypes]
     T

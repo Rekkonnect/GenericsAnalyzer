@@ -11,6 +11,7 @@ namespace GenericsAnalyzer.Test
         public void TestCodeFix(string markupCode, string expected, int codeActionIndex = 0) => Task.WaitAll(TestCodeFixAsync(markupCode, expected, codeActionIndex));
         public async Task TestCodeFixAsync(string markupCode, string expected, int codeActionIndex = 0)
         {
+            markupCode = markupCode.Replace("{|*", $"{{|{TestedDiagnosticRule.Id}");
             await CSharpCodeFixVerifier<TAnalyzer, TCodeFix>.VerifyCodeFixAsync(markupCode, expected, codeActionIndex);
         }
     }

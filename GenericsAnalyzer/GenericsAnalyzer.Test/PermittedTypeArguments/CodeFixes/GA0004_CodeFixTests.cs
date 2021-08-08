@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class C
 <
-    [PermittedTypes({|GA0004:typeof(int*)|})]
+    [PermittedTypes({|*:typeof(int*)|})]
     [ProhibitedBaseTypes(typeof(object))]
     T
 >
@@ -40,7 +40,7 @@ class C
 @"
 class C
 <
-    [PermittedTypes({|GA0004:typeof(int*)|}, typeof(List<>))]
+    [PermittedTypes({|*:typeof(int*)|}, typeof(List<>))]
     [OnlyPermitSpecifiedTypes]
     T
 >

@@ -12,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 class C
 <
-    [PermittedTypes({|GA0011:typeof(long)|})]
+    [PermittedTypes({|*:typeof(long)|})]
     [PermittedBaseTypes(typeof(IComparable<>))]
     [OnlyPermitSpecifiedTypes]
     T
@@ -42,7 +42,7 @@ class C
 @"
 class C
 <
-    [Example, PermittedTypes({|GA0011:typeof(long)|}), Example]
+    [Example, PermittedTypes({|*:typeof(long)|}), Example]
     [PermittedBaseTypes(typeof(IComparable<>))]
     [OnlyPermitSpecifiedTypes]
     T

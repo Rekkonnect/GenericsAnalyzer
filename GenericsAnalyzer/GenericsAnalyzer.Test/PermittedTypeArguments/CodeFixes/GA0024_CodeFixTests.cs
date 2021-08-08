@@ -11,7 +11,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
             var testCode =
 @"
 [TypeConstraintProfileGroup]
-interface {|GA0024:IGroup0|}
+interface {|*:IGroup0|}
 {
     int Property { get; set; }
     void Function();

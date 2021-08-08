@@ -21,6 +21,14 @@ Rule ID                   | Category        | Severity
 [GA0020](rules/GA0020.md) | Validity        | Error
 [GA0021](rules/GA0021.md) | Validity        | Error
 [GA0022](rules/GA0022.md) | Validity        | Error
+[GA0023](rules/GA0023.md) | Validity        | Error
+[GA0024](rules/GA0024.md) | Design          | Warning
+[GA0025](rules/GA0025.md) | Design          | Warning
+[GA0026](rules/GA0026.md) | Validity        | Error
+[GA0027](rules/GA0027.md) | Validity        | Error
+[GA0028](rules/GA0028.md) | API Restriction | Error
+[GA0029](rules/GA0029.md) | Validity        | Error
+[GA0030](rules/GA0030.md) | Design          | Warning
 
 ## Discontinued Rules
 Some rules have been discontinued. They may have been embodied into other rules, whose ID(s) are listed alongside the discontinued ones'.

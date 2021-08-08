@@ -117,11 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllTypeMemberRemover_Title" xml:space="preserve">
+    <value>Remove all members from type</value>
+  </data>
   <data name="ConstraintClauseTypeConstraintPlacer_Title" xml:space="preserve">
     <value>Move type constrraint to constraint clause</value>
   </data>
   <data name="DuplicateAttributeArgumentRemover_Title" xml:space="preserve">
     <value>Remove duplicate attribute arguments</value>
+  </data>
+  <data name="InstanceTypeMemberRemover_Title" xml:space="preserve">
+    <value>Remove all instance members from type</value>
+  </data>
+  <data name="ProfileInterfaceDeclarer_Title" xml:space="preserve">
+    <value>Make interface a type constraint profile</value>
   </data>
   <data name="RedundantAttributeArgumentRemover_Title" xml:space="preserve">
     <value>Remove redundant attribute argument</value>
@@ -131,5 +140,11 @@
   </data>
   <data name="RedundantBaseTypeRuleConverter_Title" xml:space="preserve">
     <value>Convert base type rule to exact type rule</value>
+  </data>
+  <data name="StaticTypeMemberRemover_Title" xml:space="preserve">
+    <value>Remove all static members from type</value>
+  </data>
+  <data name="Ungenericizer_Title" xml:space="preserve">
+    <value>Make type non-generic</value>
   </data>
 </root>

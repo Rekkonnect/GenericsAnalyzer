@@ -23,8 +23,6 @@ namespace GenericsAnalyzer
             GA0011_Rule,
         };
 
-        protected override string CodeFixTitle => CodeFixResources.RedundantAttributeArgumentRemover_Title;
-
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             return await context.RemoveAttributeArgumentCleanAsync(syntaxNode as AttributeArgumentSyntax, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);

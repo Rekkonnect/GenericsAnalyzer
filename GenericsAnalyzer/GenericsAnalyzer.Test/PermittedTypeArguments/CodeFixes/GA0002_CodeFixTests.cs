@@ -1,13 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
     [TestClass]
     public class GA0002_CodeFixTests : DuplicateAttributeArgumentRemoverCodeFixTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0002_Rule;
-
         // TODO: Find a way to test applying the code fix on a specified diagnostic
         [TestMethod]
         public void ConflictingConstraintsCodeFix()
@@ -19,8 +16,8 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(int)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(int)|})]
+    [PermittedTypes({|*:typeof(int)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(int)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -72,9 +69,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -126,9 +123,9 @@ class C
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [OnlyPermitSpecifiedTypes]
     T
 >
@@ -179,9 +176,9 @@ class D
 
 class C
 <
-    [PermittedTypes({|GA0002:typeof(List<int>)|}, typeof(long), typeof(ulong))]
-    [ProhibitedTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
-    [ProhibitedBaseTypes({|GA0002:typeof(List<int>)|}, {|GA0002:typeof(List<int>)|})]
+    [PermittedTypes({|*:typeof(List<int>)|}, typeof(long), typeof(ulong))]
+    [ProhibitedTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
+    [ProhibitedBaseTypes({|*:typeof(List<int>)|}, {|*:typeof(List<int>)|})]
     [Example(typeof(List<int>), 1)]
     [OnlyPermitSpecifiedTypes]
     T

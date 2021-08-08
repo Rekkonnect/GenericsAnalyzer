@@ -5,6 +5,7 @@ using System.Linq;
 namespace GenericsAnalyzer.Core
 {
     /// <summary>Denotes that a generic type argument permits the usage of the specified types.</summary>
+    [AttributeUsage(AttributeTargets.GenericParameter | AttributeTargets.Interface, AllowMultiple = true)]
     public abstract class ConstrainedTypesAttributeBase : Attribute, IGenericTypeConstraintAttribute
     {
         private static Type[] constrainedTypeAttributeTypes;
@@ -40,19 +41,22 @@ namespace GenericsAnalyzer.Core
             types = constrainedTypes;
         }
 
-        public static TypeConstraintRule GetConstraintRule<T>()
+        public static TypeConstraintRule? GetConstraintRule<T>()
             where T : ConstrainedTypesAttributeBase
         {
             return GetConstraintRule(typeof(T));
         }
-        public static TypeConstraintRule GetConstraintRule(string typeName)
+        /// <summary>Gets the constraint rule that the attribute with the given attribute name reflects.</summary>
+        /// <param name="attributeTypeName">The name of the attribute whose constraint rule to get.</param>
+        /// <returns>The <seealso cref="TypeConstraintRule"/> that is reflected from the attribute with the given name.</returns>
+        public static TypeConstraintRule? GetConstraintRuleFromAttributeName(string attributeTypeName)
         {
-            return GetConstraintRule(constrainedTypeAttributeTypes.FirstOrDefault(t => t.Name == typeName));
+            return GetConstraintRule(constrainedTypeAttributeTypes.FirstOrDefault(t => t.Name == attributeTypeName));
         }
-        public static TypeConstraintRule GetConstraintRule(Type type)
+        public static TypeConstraintRule? GetConstraintRule(Type type)
         {
             if (!IsValidConstraintRuleAttributeType(type))
-                throw new ArgumentException($"The type must be a non-abstract type that inherits from {nameof(ConstrainedTypesAttributeBase)}");
+                return null;
 
             return defaultInstances[type].Rule;
         }

@@ -437,5 +437,149 @@ namespace GenericsAnalyzer {
                 return ResourceManager.GetString("GA0022_Title", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only non-generic interfaces can be type constraint profiles or type constraint profile groups.
+        /// </summary>
+        internal static string GA0023_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0023_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid type constraint profile type declaration.
+        /// </summary>
+        internal static string GA0023_Title {
+            get {
+                return ResourceManager.GetString("GA0023_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint profile group interfaces should not contain any non-static members.
+        /// </summary>
+        internal static string GA0024_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0024_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constaint profile group type also implements other behavior.
+        /// </summary>
+        internal static string GA0024_Title {
+            get {
+                return ResourceManager.GetString("GA0024_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint profile interfaces should not be inherited by types unrelated to type constraint profiles, or vice versa (did you forget to use the TypeConstraintProfileAttribute?).
+        /// </summary>
+        internal static string GA0025_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0025_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mixed type constraint profile interfaces with irrelevant ones in inheritance.
+        /// </summary>
+        internal static string GA0025_Title {
+            get {
+                return ResourceManager.GetString("GA0025_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given type does not represent a type constraint profile definition.
+        /// </summary>
+        internal static string GA0026_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0026_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid type constraint profile type.
+        /// </summary>
+        internal static string GA0026_Title {
+            get {
+                return ResourceManager.GetString("GA0026_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The given type does not represent a type constraint profile group definition.
+        /// </summary>
+        internal static string GA0027_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0027_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid type constraint profile group type.
+        /// </summary>
+        internal static string GA0027_Title {
+            get {
+                return ResourceManager.GetString("GA0027_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Another type constraint profile of the same distinct group was used for inheritance.
+        /// </summary>
+        internal static string GA0028_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0028_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflicting profiles of the same distinct profile group.
+        /// </summary>
+        internal static string GA0028_Title {
+            get {
+                return ResourceManager.GetString("GA0028_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An interface can only be declared as a type constraint profile or a type constraint profile group.
+        /// </summary>
+        internal static string GA0029_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0029_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid mutually exclusive declarations of the interface.
+        /// </summary>
+        internal static string GA0029_Title {
+            get {
+                return ResourceManager.GetString("GA0029_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint-related attributes are assigned at the given interface, which is not declared as a type constraint profile (did you forget to use the TypeConstraintProfileAttribute?).
+        /// </summary>
+        internal static string GA0030_MessageFormat {
+            get {
+                return ResourceManager.GetString("GA0030_MessageFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Type constraint attributes used on non-profile interface.
+        /// </summary>
+        internal static string GA0030_Title {
+            get {
+                return ResourceManager.GetString("GA0030_Title", resourceCulture);
+            }
+        }
     }
 }

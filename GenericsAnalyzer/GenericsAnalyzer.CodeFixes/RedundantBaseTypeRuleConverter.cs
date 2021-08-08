@@ -21,8 +21,6 @@ namespace GenericsAnalyzer
             GA0008_Rule
         };
 
-        protected override string CodeFixTitle => CodeFixResources.RedundantBaseTypeRuleConverter_Title;
-
         public override FixAllProvider GetFixAllProvider() => null;
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
@@ -37,9 +35,7 @@ namespace GenericsAnalyzer
             var newAttributeName = attributeName.Replace("BaseType", "Type");
             var newAttributeArgumentList = SyntaxFactory.AttributeArgumentList(SyntaxFactory.SeparatedList(new[] { attributeArgumentNode }));
             var newAttributeNode = attributeNode.WithName(SyntaxFactory.IdentifierName(newAttributeName)).WithArgumentList(newAttributeArgumentList);
-            var newAttributeListNode = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(new[] { newAttributeNode }))
-                .WithLeadingTrivia(attributeListNode.GetLeadingTrivia())
-                .WithTrailingTrivia(attributeListNode.GetTrailingTrivia());
+            var newAttributeListNode = SyntaxFactory.AttributeList(SyntaxFactory.SeparatedList(new[] { newAttributeNode })).WithTriviaFrom(attributeListNode);
 
             // Get the type parameter node info to match it in the resulting document after the argument removal
             var typeParameterNode = attributeListNode.Parent as TypeParameterSyntax;

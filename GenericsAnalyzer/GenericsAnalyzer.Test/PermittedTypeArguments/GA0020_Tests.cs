@@ -1,16 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0020_Tests : BaseDiagnosticTests
+    public sealed class GA0020_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0020_Rule;
-
-        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
-
         [TestMethod]
         public void RecursiveInheritance()
         {

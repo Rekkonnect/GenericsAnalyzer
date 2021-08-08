@@ -1,13 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {
     [TestClass]
     public class GA0014_CodeFixTests : RedundantAttributeRemoverCodeFixTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0014_Rule;
-
         [TestMethod]
         public void RedundantUsageWithCodeFix()
         {
@@ -15,7 +12,7 @@ namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 @"
 delegate void Delegate
 <
-    [{|GA0014:InheritBaseTypeUsageConstraints|}]
+    [{|*:InheritBaseTypeUsageConstraints|}]
     T
 >(T something);
 ";
@@ -38,7 +35,7 @@ delegate void Delegate
 @"
 delegate void Delegate
 <
-    [Example, {|GA0014:InheritBaseTypeUsageConstraints|}, Example]
+    [Example, {|*:InheritBaseTypeUsageConstraints|}, Example]
     T
 >(T something);
 ";

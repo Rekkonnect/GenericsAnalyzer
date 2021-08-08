@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace GenericsAnalyzer.Core
 {
     /// <summary>Denotes that the marked generic type parameter constraints may be inherited from other type parameters declared in the declaring member.</summary>
-    [AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = false)]
-    public sealed class InheritTypeConstraintsAttribute : Attribute, IGenericTypeConstraintAttribute
+    public sealed class InheritTypeConstraintsAttribute : BaseInheritConstraintsAttribute
     {
         public ImmutableArray<string> TypeParameterNames { get; }
 

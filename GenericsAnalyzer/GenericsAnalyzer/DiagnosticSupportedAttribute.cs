@@ -3,7 +3,7 @@
 namespace GenericsAnalyzer
 {
     [AttributeUsage(AttributeTargets.Field)]
-    public class DiagnosticSupportedAttribute : Attribute
+    public sealed class DiagnosticSupportedAttribute : Attribute
     {
         public Type DiagnosticAnalyzerType { get; }
 

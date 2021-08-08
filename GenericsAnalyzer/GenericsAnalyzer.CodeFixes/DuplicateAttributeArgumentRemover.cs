@@ -22,8 +22,6 @@ namespace GenericsAnalyzer
             GA0009_Rule,
         };
 
-        protected override string CodeFixTitle => CodeFixResources.DuplicateAttributeArgumentRemover_Title;
-
         public override FixAllProvider GetFixAllProvider() => null;
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
@@ -47,17 +45,14 @@ namespace GenericsAnalyzer
 
             return await context.RemoveAttributeArgumentsCleanAsync(removed, SyntaxRemoveOptions.KeepNoTrivia, cancellationToken);
 
-            ITypeSymbol GetTypeSymbol(AttributeArgumentSyntax a)
+            ITypeSymbol GetTypeSymbol(AttributeArgumentSyntax arg)
             {
-                return semanticModel.GetTypeInfo((a.Expression as TypeOfExpressionSyntax)?.Type).Type;
+                return semanticModel.GetTypeInfo((arg.Expression as TypeOfExpressionSyntax)?.Type).Type;
             }
             bool ArgumentRemovalPredicate(AttributeArgumentSyntax arg)
             {
-                // DEBUG
                 var typeSymbol = GetTypeSymbol(arg);
                 return typeSymbol.Equals(targetType, SymbolEqualityComparer.Default);
-                // END DEBUG
-                return GetTypeSymbol(arg).Equals(targetType, SymbolEqualityComparer.Default);
             }
         }
     }

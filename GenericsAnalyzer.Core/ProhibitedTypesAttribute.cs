@@ -5,7 +5,6 @@ namespace GenericsAnalyzer.Core
     using static TypeConstraintRule;
 
     /// <summary>Denotes that a generic type argument prohibits the usage of the specified types.</summary>
-    [AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = true)]
     public class ProhibitedTypesAttribute : ConstrainedTypesAttributeBase
     {
         protected override TypeConstraintRule Rule => ProhibitExactType;

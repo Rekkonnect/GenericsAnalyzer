@@ -5,7 +5,6 @@ namespace GenericsAnalyzer.Core
     using static TypeConstraintRule;
 
     /// <summary>Denotes that a generic type argument permits the usage of the specified types and the types' inheritors. That means, if a type inherits one of the base types that are provided in this attribute, it is permitted too.</summary>
-    [AttributeUsage(AttributeTargets.GenericParameter, AllowMultiple = true)]
     public class PermittedBaseTypesAttribute : ConstrainedTypesAttributeBase
     {
         protected override TypeConstraintRule Rule => PermitBaseType;

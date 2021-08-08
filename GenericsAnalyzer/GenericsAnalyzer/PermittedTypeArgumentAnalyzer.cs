@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,15 +18,22 @@ namespace GenericsAnalyzer
     public class PermittedTypeArgumentAnalyzer : CSharpDiagnosticAnalyzer
     {
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
+        private readonly TypeConstraintProfileInfoCollection constraintProfiles = new TypeConstraintProfileInfoCollection();
 
         public override void Initialize(AnalysisContext context)
         {
-            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.ReportDiagnostics);
             // Concurrent execution is disabled due to the stateful profile of the analyzer
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.ReportDiagnostics);
 
+            RegisterNodeActions(context);
+        }
+
+        private void RegisterNodeActions(AnalysisContext context)
+        {
             // Only executed on *usage* of a generic element
             context.RegisterSyntaxNodeAction(AnalyzeGenericNameOrFunctionCall, SyntaxKind.GenericName, SyntaxKind.IdentifierName);
 
+            // Only executed on declaration of the following elements
             var genericSupportedMemberDeclarations = new SyntaxKind[]
             {
                 SyntaxKind.MethodDeclaration,
@@ -36,6 +44,9 @@ namespace GenericsAnalyzer
                 SyntaxKind.DelegateDeclaration,
             };
             context.RegisterSyntaxNodeAction(AnalyzeGenericDeclaration, genericSupportedMemberDeclarations);
+
+            // Only executed on declaration of profiles (interfaces)
+            context.RegisterSyntaxNodeAction(AnalyzeProfileRelatedDeclaration, SyntaxKind.InterfaceDeclaration);
         }
 
         private void AnalyzeGenericNameOrFunctionCall(SyntaxNodeAnalysisContext context)
@@ -82,6 +93,186 @@ namespace GenericsAnalyzer
             AnalyzeGenericNameDefinition(context, symbol);
         }
 
+        private void AnalyzeProfileRelatedDeclaration(SyntaxNodeAnalysisContext context)
+        {
+            var symbol = context.SemanticModel.GetDeclaredSymbol(context.Node) as INamedTypeSymbol;
+            AnalyzeProfileRelatedDefinition(context, symbol);
+        }
+
+        private void AnalyzeProfileRelatedDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol profileSymbol)
+        {
+            // Process whether the symbol is an interface because of the recursive processing
+            // from given type arguments
+            if (profileSymbol.TypeKind != TypeKind.Interface)
+                return;
+
+            if (constraintProfiles.ContainsDeclaringType(profileSymbol))
+                return;
+
+            var declaringSyntaxReferences = profileSymbol.DeclaringSyntaxReferences;
+            // TODO: Test for partial cases too
+            if (declaringSyntaxReferences.IsEmpty)
+                return;
+
+            var profileTypeDeclarationNode = declaringSyntaxReferences[0].GetSyntax() as InterfaceDeclarationSyntax;
+
+            var typeConstraintAttributes = new List<AttributeData>();
+            var templateTypes = TypeConstraintTemplateType.None;
+            AttributeData templateAttribute = null;
+
+            var attributes = profileSymbol.GetAttributes();
+
+            foreach (var attribute in attributes)
+            {
+                switch (attribute.AttributeClass.Name)
+                {
+                    case nameof(TypeConstraintProfileAttribute):
+                    {
+                        templateTypes |= TypeConstraintTemplateType.Profile;
+                        break;
+                    }
+
+                    case nameof(TypeConstraintProfileGroupAttribute):
+                    {
+                        templateTypes |= TypeConstraintTemplateType.ProfileGroup;
+                        break;
+                    }
+
+                    // If the attribute is not a profile-relevant one, it will be evaluated if it's
+                    // related to type constraints and cached there for GA0030 warnings
+                    default:
+                        if (IsNonProfileTypeConstraintAttribute(attribute))
+                            typeConstraintAttributes.Add(attribute);
+
+                        continue;
+                }
+
+                // For the time being, only one template attribute is allowed to exist at a time
+                templateAttribute = attribute;
+            }
+
+            bool isProfile = templateTypes.HasFlag(TypeConstraintTemplateType.Profile);
+
+            // If not a type constraint profile, the provided type constraint attributes have no effect
+            if (!isProfile)
+            {
+                foreach (var typeConstraintAttribute in typeConstraintAttributes)
+                {
+                    context.ReportDiagnostic(Diagnostics.CreateGA0030(typeConstraintAttribute.ApplicationSyntaxReference.GetSyntax() as AttributeSyntax));
+                }
+            }
+
+            for (int inheritedInterfaceIndex = 0; inheritedInterfaceIndex < profileSymbol.Interfaces.Length; inheritedInterfaceIndex++)
+            {
+                var directlyInheritedInterface = profileSymbol.Interfaces[inheritedInterfaceIndex];
+                var directlyInheritedInterfaceNode = profileTypeDeclarationNode.BaseList.Types[inheritedInterfaceIndex];
+
+                AnalyzeProfileRelatedDefinition(context, directlyInheritedInterface);
+
+                bool inheritedIsProfile = constraintProfiles.ContainsProfile(directlyInheritedInterface);
+                if (isProfile != inheritedIsProfile)
+                    context.ReportDiagnostic(Diagnostics.CreateGA0025(directlyInheritedInterfaceNode));
+            }
+
+            // Now analyze semantic information about the templates
+            if (templateTypes is TypeConstraintTemplateType.None)
+                return;
+
+            // Finally analyze the type of the declared template
+
+            // Must be non-generic regardless of the case
+            if (profileSymbol.Arity > 0)
+                context.ReportDiagnostic(Diagnostics.CreateGA0023(profileTypeDeclarationNode));
+
+            switch (templateTypes)
+            {
+                case TypeConstraintTemplateType.Profile:
+                {
+                    AnalyzeProfileDefinition(context, profileSymbol, templateAttribute);
+                    return;
+                }
+                case TypeConstraintTemplateType.ProfileGroup:
+                {
+                    AnalyzeProfileGroupDefinition(context, profileSymbol, templateAttribute, profileTypeDeclarationNode);
+                    return;
+                }
+
+                default:
+                    context.ReportDiagnostic(Diagnostics.CreateGA0029(profileTypeDeclarationNode));
+                    return;
+            }
+        }
+
+        private void AnalyzeProfileDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol profileDeclarationType, AttributeData profileAttribute)
+        {
+            if (constraintProfiles.ContainsDeclaringType(profileDeclarationType))
+                return;
+
+            // Recursively also ensure that the inherited interfaces are valid
+            var arguments = GetAttributeTypeArrayArgument(profileAttribute).ToArray();
+            var validGroupArguments = new List<INamedTypeSymbol>();
+
+            var attributeSyntaxReference = profileAttribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+            var attributeArgumentNodes = attributeSyntaxReference.ArgumentList?.Arguments;
+            var memberDeclarationNode = attributeSyntaxReference?.GetNearestParentOfType<MemberDeclarationSyntax>();
+
+            for (int argumentIndex = 0; argumentIndex < arguments.Length; argumentIndex++)
+            {
+                var typeArgument = arguments[argumentIndex];
+                var namedTypeArgument = typeArgument as INamedTypeSymbol;
+                var attributeArgumentNode = attributeArgumentNodes?[argumentIndex];
+
+                bool erroneousGroupType = namedTypeArgument is null;
+
+                if (!erroneousGroupType)
+                {
+                    // Do not assume that the given argument is an interface; let alone a profile group
+                    AnalyzeProfileRelatedDefinition(context, namedTypeArgument);
+                    erroneousGroupType |= !constraintProfiles.ContainsGroup(namedTypeArgument);
+                }
+
+                // Might wanna test this more carefully
+                if (erroneousGroupType)
+                {
+                    context.ReportDiagnostic(Diagnostics.CreateGA0027(attributeArgumentNode));
+                }
+                else
+                {
+                    validGroupArguments.Add(namedTypeArgument);
+                }
+            }
+
+            constraintProfiles.AddProfile(profileDeclarationType, validGroupArguments);
+            var profileInfo = constraintProfiles.GetProfileInfo(profileDeclarationType);
+
+            // Profile type declaration does not handle any attributes that are not already handled
+            // for all handlers
+            foreach (var attribute in profileDeclarationType.GetAttributes())
+                ProcessAttribute(profileInfo.Builder, attribute, NoUnhandledAttributeProcessor);
+
+            foreach (var inheritedInterface in profileDeclarationType.Interfaces)
+                AnalyzeProfileRelatedDefinition(context, inheritedInterface);
+
+            profileInfo.FinalizeSystem();
+        }
+        private void AnalyzeProfileGroupDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol groupDeclarationType, AttributeData profileGroupAttribute, InterfaceDeclarationSyntax profileTypeDeclarationNode)
+        {
+            if (constraintProfiles.ContainsDeclaringType(groupDeclarationType))
+                return;
+
+            // Preferably should not contain any static members
+            // Nested profile types should also be ideally avoided
+            if (groupDeclarationType.GetMembers().Any(m => !m.IsStatic))
+            {
+                // TODO: Implement a way to only emit the diagnostic on the partial declarations
+                //       that contain instance members (decorative)
+                context.ReportDiagnostic(Diagnostics.CreateGA0024(profileTypeDeclarationNode));
+            }
+
+            bool isDistinct = (bool)profileGroupAttribute.ConstructorArguments[0].Value;
+            constraintProfiles.AddGroup(groupDeclarationType, isDistinct);
+        }
+
         private void AnalyzeGenericNameDefinition(SyntaxNodeAnalysisContext context, ISymbol declaringSymbol)
         {
             if (genericNames.ContainsInfo(declaringSymbol))
@@ -111,172 +302,233 @@ namespace GenericsAnalyzer
                 var finiteTypeCount = systemBuilder.GetFinitePermittedTypeCount();
 
                 // Re-iterate over the attributes to mark erroneous types
-                MarkErroneousTypes();
+                MarkErroneousConstrainedTypes();
 
                 void InitializeSystem()
                 {
-                    for (int j = 0; j < attributes.Length; j++)
+                    foreach (var attribute in attributes)
                     {
-                        var a = attributes[j];
-                        var attributeNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+                        ProcessAttribute(systemBuilder, attribute, ProcessNonConstraintRuleAttribute);
 
-                        if (!AttributeNeedsProcessing(a))
-                            continue;
-
-                        switch (a.AttributeClass.Name)
+                        bool ProcessNonConstraintRuleAttribute(AttributeData attributeData)
                         {
-                            case nameof(InheritBaseTypeUsageConstraintsAttribute):
+                            var attributeNode = attributeData.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+
+                            switch (attributeData.AttributeClass.Name)
                             {
-                                if (AnalyzeInheritArgumentAttirbuteUsage(attributeNode, declaringSymbol, parameter, context))
-                                    continue;
-
-                                var type = declaringSymbol as INamedTypeSymbol;
-
-                                var inheritedTypes = type.GetBaseTypeAndInterfaces();
-
-                                foreach (var inheritedType in inheritedTypes)
+                                case nameof(InheritBaseTypeUsageConstraintsAttribute):
                                 {
-                                    if (!inheritedType.IsGenericType)
-                                        continue;
+                                    if (AnalyzeBaseTypeArgumentUsageAttributeUsage(attributeNode, declaringSymbol, parameter, context))
+                                        return true;
 
-                                    // Recursively analyze base type definitions
-                                    var inheritedTypeOriginalDefinition = inheritedType.OriginalDefinition;
-                                    AnalyzeGenericNameDefinition(context, inheritedTypeOriginalDefinition);
+                                    var type = declaringSymbol as INamedTypeSymbol;
 
-                                    var inheritedTypeArguments = inheritedType.TypeArguments;
-                                    var inheritedTypeParameters = inheritedType.TypeParameters;
+                                    var inheritedTypes = type.GetBaseTypeAndInterfaces();
 
-                                    for (int k = 0; k < inheritedTypeArguments.Length; k++)
-                                        if (inheritedTypeArguments[k].Name == parameter.Name)
-                                        {
-                                            var inheritedTypeParameter = inheritedTypeParameters[k];
-                                            genericNames.GetBuilderOrFinalizedInfo(inheritedTypeOriginalDefinition, out var finalized, out var builder);
+                                    foreach (var inheritedType in inheritedTypes)
+                                    {
+                                        if (!inheritedType.IsGenericType)
+                                            continue;
 
-                                            bool safeInheritance;
-                                            if (builder is null)
-                                                safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, finalized[k]);
-                                            else
-                                                safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, builder[k]);
+                                        // Recursively analyze base type definitions
+                                        var inheritedTypeOriginalDefinition = inheritedType.OriginalDefinition;
+                                        AnalyzeGenericNameDefinition(context, inheritedTypeOriginalDefinition);
 
-                                            if (!safeInheritance)
+                                        var inheritedTypeArguments = inheritedType.TypeArguments;
+                                        var inheritedTypeParameters = inheritedType.TypeParameters;
+
+                                        // TODO: Consider analyzing and reporting the source of the rule collision
+                                        for (int k = 0; k < inheritedTypeArguments.Length; k++)
+                                            if (inheritedTypeArguments[k].Name == parameter.Name)
                                             {
-                                                var parameterDeclaration = attributeNode.GetParentAttributeList().Parent as TypeParameterSyntax;
-                                                context.ReportDiagnostic(Diagnostics.CreateGA0022(parameterDeclaration));
-                                                goto end;
+                                                var inheritedTypeParameter = inheritedTypeParameters[k];
+                                                genericNames.GetBuilderOrFinalizedInfo(inheritedTypeOriginalDefinition, out var finalized, out var builder);
+
+                                                bool safeInheritance;
+                                                if (builder is null)
+                                                    safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, finalized[k]);
+                                                else
+                                                    safeInheritance = systemBuilder.InheritFrom(inheritedTypeParameter, builder[k]);
+
+                                                if (!safeInheritance)
+                                                {
+                                                    var erroneousInheritanceSource = systemBuilder.SystemDiagnostics.GetTypeParametersForDiagnosticType(TypeConstraintSystemInheritanceDiagnosticType.Conflicting);
+
+                                                    var parameterDeclaration = attributeNode.GetParentAttributeList().Parent as TypeParameterSyntax;
+                                                    context.ReportDiagnostic(Diagnostics.CreateGA0022(parameterDeclaration));
+                                                    goto end;
+                                                }
                                             }
-                                        }
+                                    }
+                                end:
+                                    return true;
                                 }
-                            end:
-                                continue;
-                            }
 
-                            case nameof(InheritTypeConstraintsAttribute):
-                            {
-                                // This will be analyzed after the first iteration to ensure all constraints are properly loaded
-                                typeConstraintInheritAttibuteData.Add(a);
-                                continue;
-                            }
+                                case nameof(InheritProfileTypeConstraintsAttribute):
+                                {
+                                    // Validate that the arguments are correct
+                                    var arguments = GetAttributeTypeArrayArgument(attributeData).ToArray();
+                                    if (!arguments.Any())
+                                        return true;
 
-                            case nameof(OnlyPermitSpecifiedTypesAttribute):
-                            {
-                                systemBuilder.OnlyPermitSpecifiedTypes = true;
-                                continue;
+                                    var argumentNodes = attributeNode.ArgumentList.Arguments;
+
+                                    // I'm noticing too much copy-pasted code and it's not fun
+                                    for (int argumentIndex = 0; argumentIndex < arguments.Length; argumentIndex++)
+                                    {
+                                        var typeArgument = arguments[argumentIndex];
+                                        var typeArgumentNode = argumentNodes[argumentIndex];
+
+                                        var namedTypeArgument = typeArgument as INamedTypeSymbol;
+                                        bool erroneousProfileType = namedTypeArgument is null;
+
+                                        if (!erroneousProfileType)
+                                        {
+                                            // Do not assume that the given argument is an interface; let alone a profile
+                                            AnalyzeProfileRelatedDefinition(context, namedTypeArgument);
+                                            erroneousProfileType |= !constraintProfiles.ContainsProfile(namedTypeArgument);
+                                        }
+
+                                        if (erroneousProfileType)
+                                            context.ReportDiagnostic(Diagnostics.CreateGA0026(typeArgumentNode));
+                                        else
+                                        {
+                                            systemBuilder.InheritFrom(constraintProfiles.GetProfileInfo(namedTypeArgument));
+                                        }
+                                    }
+
+                                    systemBuilder.AnalyzeFinalizedInheritedTypeProfiles();
+                                    var multipleOfDistinctGroupsProfiles = systemBuilder.SystemDiagnostics.GetProfilesForDiagnosticType(TypeConstraintSystemInheritanceDiagnosticType.MultipleOfDistinctGroup);
+
+                                    for (int argumentIndex = 0; argumentIndex < arguments.Length; argumentIndex++)
+                                    {
+                                        if (multipleOfDistinctGroupsProfiles.Contains(arguments[argumentIndex]))
+                                        {
+                                            context.ReportDiagnostic(Diagnostics.CreateGA0028(argumentNodes[argumentIndex]));
+                                        }
+                                    }
+
+                                    return true;
+                                }
+
+                                case nameof(InheritTypeConstraintsAttribute):
+                                {
+                                    // This will be analyzed after the first iteration to ensure all constraints are properly loaded
+                                    typeConstraintInheritAttibuteData.Add(attributeData);
+                                    return true;
+                                }
+
+                                default:
+                                    return false;
                             }
                         }
-
-                        // It is assured that the analyzer cares about the attribute from the base intreface check
-                        var rule = ParseAttributeRule(a).Value;
-
-                        // The arguments will be always stored as an array, regardless of their count
-                        // If an error is thrown here, common causes could be:
-                        // - having forgotten to import a namespace
-                        // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
-                        systemBuilder.Add(rule, GetConstraintRuleTypeArguments(a));
                     }
                 }
-                void MarkErroneousTypes()
+                void MarkErroneousConstrainedTypes()
                 {
                     var typeSystemDiagnostics = systemBuilder.AnalyzeFinalizedBaseSystem();
 
-                    for (int j = 0; j < attributes.Length; j++)
+                    foreach (var attribute in attributes)
+                        MarkErroneousConstrainedTypesAttribute(typeSystemDiagnostics, attribute);
+                }
+                void MarkErroneousConstrainedTypesAttribute(TypeConstraintSystemDiagnostics typeSystemDiagnostics, AttributeData attribute)
+                {
+                    if (!(attribute.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attributeSyntaxNode))
+                        return;
+
+                    if (!IsNonProfileTypeConstraintAttribute(attribute))
+                        return;
+
+                    switch (attribute.AttributeClass.Name)
                     {
-                        var a = attributes[j];
-                        var attributeSyntaxNode = a.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-                        if (attributeSyntaxNode is null)
-                            continue;
-
-                        if (!AttributeNeedsProcessing(a))
-                            continue;
-
-                        switch (a.AttributeClass.Name)
+                        case nameof(InheritBaseTypeUsageConstraintsAttribute):
                         {
-                            case nameof(InheritBaseTypeUsageConstraintsAttribute):
-                            {
-                                // You will be soon used, don't worry
-                                continue;
-                            }
-
-                            case nameof(OnlyPermitSpecifiedTypesAttribute):
-                            {
-                                // TODO: Refactor this into a system diagnostic that will be accessible
-                                if (systemBuilder.HasNoPermittedTypes)
-                                    context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
-                                continue;
-                            }
+                            // You will be soon used, don't worry
+                            return;
                         }
 
-                        if (finiteTypeCount == 1)
-                            context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
-
-                        var argumentNodes = attributeSyntaxNode.ArgumentList.Arguments;
-                        var typeConstants = GetConstraintRuleTypeArguments(a).ToArray();
-                        for (int argumentIndex = 0; argumentIndex < typeConstants.Length; argumentIndex++)
+                        // Profiles do not care about this diagnostic because they are not being directly used
+                        // TODO: This will have to emit a diagnostic on the generic parameter if it can be
+                        // applied but no such attribute is directly attributed to that element
+                        case nameof(OnlyPermitSpecifiedTypesAttribute):
                         {
-                            var typeConstant = typeConstants[argumentIndex];
-                            var argumentNode = argumentNodes[argumentIndex];
+                            // TODO: Refactor this into a system diagnostic that will be accessible
+                            if (systemBuilder.HasNoPermittedTypes)
+                                context.ReportDiagnostic(Diagnostics.CreateGA0012(attributeSyntaxNode));
+                            return;
+                        }
 
-                            var type = typeSystemDiagnostics.GetDiagnosticType(typeConstant);
+                        // Finally, the only attributes that demand being processed are the ones applying
+                        // constraints
+                        case nameof(PermittedTypesAttribute):
+                        case nameof(PermittedBaseTypesAttribute):
+                        case nameof(ProhibitedTypesAttribute):
+                        case nameof(ProhibitedBaseTypesAttribute):
+                            break;
 
-                            var diagnostic = CreateReportDiagnostic();
-                            if (diagnostic != null)
-                                context.ReportDiagnostic(diagnostic);
+                        // This excludes the profile-related attributes from having their arguments marked
+                        // as erroneous, since they are not related to constraining types and already have
+                        // been processed earlier
+                        // Furthermore, any other attributes should not correlate with type argument
+                        // constraints, unless they are related to logic
+                        default:
+                            return;
+                    }
 
-                            // "Using a non-static local function is fine."
-                            //                              -- Rekkon, 2021
-                            Diagnostic CreateReportDiagnostic()
+                    if (finiteTypeCount is 1)
+                        context.ReportDiagnostic(Diagnostics.CreateGA0013(attributeSyntaxNode, parameter));
+
+                    var argumentList = attributeSyntaxNode.ArgumentList;
+                    if (argumentList is null)
+                        return;
+
+                    var argumentNodes = argumentList.Arguments;
+                    var typeConstants = GetAttributeTypeArrayArgument(attribute).ToArray();
+                    for (int argumentIndex = 0; argumentIndex < typeConstants.Length; argumentIndex++)
+                    {
+                        var typeConstant = typeConstants[argumentIndex];
+                        var argumentNode = argumentNodes[argumentIndex];
+
+                        var type = typeSystemDiagnostics.GetDiagnosticType(typeConstant);
+
+                        var diagnostic = CreateReportDiagnostic();
+                        if (diagnostic != null)
+                            context.ReportDiagnostic(diagnostic);
+
+                        // "Using a non-static local function is fine."
+                        //                              -- Rekkon, 2021
+                        Diagnostic CreateReportDiagnostic()
+                        {
+                            switch (type)
                             {
-                                switch (type)
-                                {
-                                    case TypeConstraintSystemDiagnosticType.Conflicting:
-                                        return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.Conflicting:
+                                    return Diagnostics.CreateGA0002(argumentNode, parameter, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.Duplicate:
-                                        return Diagnostics.CreateGA0009(argumentNode, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.Duplicate:
+                                    return Diagnostics.CreateGA0009(argumentNode, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
-                                        return Diagnostics.CreateGA0004(argumentNode, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.InvalidTypeArgument:
+                                    return Diagnostics.CreateGA0004(argumentNode, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
-                                        return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
+                                case TypeConstraintSystemDiagnosticType.ConstrainedTypeArgumentSubstitution:
+                                    return Diagnostics.CreateGA0005(argumentNode, typeConstant, parameter);
 
-                                    case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
-                                        return Diagnostics.CreateGA0011(argumentNode, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.RedundantlyPermitted:
+                                    return Diagnostics.CreateGA0011(argumentNode, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
-                                        return Diagnostics.CreateGA0010(argumentNode, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.RedundantlyProhibited:
+                                    return Diagnostics.CreateGA0010(argumentNode, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
-                                        return Diagnostics.CreateGA0006(argumentNode);
+                                case TypeConstraintSystemDiagnosticType.ReducibleToConstraintClause:
+                                    return Diagnostics.CreateGA0006(argumentNode);
 
-                                    case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
-                                        return Diagnostics.CreateGA0008(argumentNode, typeConstant);
+                                case TypeConstraintSystemDiagnosticType.RedundantBaseTypeRule:
+                                    return Diagnostics.CreateGA0008(argumentNode, typeConstant);
 
-                                    case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
-                                        return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
-                                }
-                                return null;
+                                case TypeConstraintSystemDiagnosticType.RedundantBoundUnboundRule:
+                                    return Diagnostics.CreateGA0003(argumentNode, parameter, typeConstant as INamedTypeSymbol);
                             }
+                            return null;
                         }
                     }
                 }
@@ -303,7 +555,7 @@ namespace GenericsAnalyzer
                         return;
 
                     var ctorArguments = attributeData.ConstructorArguments;
-                    if (ctorArguments.Length == 0)
+                    if (ctorArguments.Length is 0)
                         return;
 
                     var typeParameterNames = ctorArguments[0].Values.Select(c => c.Value as string).ToArray();
@@ -396,6 +648,7 @@ namespace GenericsAnalyzer
                 }
             }
         }
+
         private void AnalyzeGenericNameUsage(SyntaxNodeAnalysisContext context, ISymbol symbol, GenericNameSyntax genericNameNode)
         {
             var originalDefinition = symbol.OriginalDefinition;
@@ -438,14 +691,14 @@ namespace GenericsAnalyzer
         }
 
         // Emits GA0014, GA0015, GA0016
-        private bool AnalyzeInheritArgumentAttirbuteUsage(AttributeSyntax attributeNode, ISymbol symbol, ITypeParameterSymbol parameter, SyntaxNodeAnalysisContext context)
+        private bool AnalyzeBaseTypeArgumentUsageAttributeUsage(AttributeSyntax attributeNode, ISymbol symbol, ITypeParameterSymbol parameter, SyntaxNodeAnalysisContext context)
         {
             if (attributeNode is null)
                 return false;
 
             var type = symbol as INamedTypeSymbol;
 
-            if (symbol is IMethodSymbol || !type.TypeKind.CanInheritTypes())
+            if (symbol is IMethodSymbol || !type.TypeKind.CanExplicitlyInheritTypes())
             {
                 context.ReportDiagnostic(Diagnostics.CreateGA0014(attributeNode, symbol));
                 return true;
@@ -480,21 +733,53 @@ namespace GenericsAnalyzer
             return false;
         }
 
-        private static bool AttributeNeedsProcessing(AttributeData data)
+        private static bool NoUnhandledAttributeProcessor(AttributeData _) => false;
+
+        private delegate bool AttributeProcessor(AttributeData attributeData);
+
+        private bool ProcessAttribute(TypeConstraintSystem.Builder systemBuilder, AttributeData attributeData, AttributeProcessor attributeProcessor)
         {
-            return data.AttributeClass.IsGenericConstraintAttribute();
+            if (!IsNonProfileTypeConstraintAttribute(attributeData))
+                return false;
+
+            // Using switch for when the other constraint attributes come into play
+            switch (attributeData.AttributeClass.Name)
+            {
+                case nameof(OnlyPermitSpecifiedTypesAttribute):
+                    systemBuilder.OnlyPermitSpecifiedTypes = true;
+                    return true;
+
+                default:
+                    if (attributeProcessor(attributeData))
+                        return true;
+                    break;
+            }
+
+            // It is assured that the analyzer cares about the attribute from the base interface check
+            var rule = ParseAttributeRule(attributeData).Value;
+
+            // The arguments will be always stored as an array, regardless of their count
+            // If an error is thrown here, common causes could be:
+            // - having forgotten to import a namespace
+            // - accidentally asserting unit test markup code as valid instead of asserting diagnostics
+            // - neglecting that type constraint attributes may also be applied to interfaces and not just type params
+            systemBuilder.Add(rule, GetAttributeTypeArrayArgument(attributeData));
+
+            return true;
         }
-        private static IEnumerable<ITypeSymbol> GetConstraintRuleTypeArguments(AttributeData data)
+
+        private static bool IsNonProfileTypeConstraintAttribute(AttributeData data)
+        {
+            return data.AttributeClass.IsNonProfileTypeConstraintAttribute();
+        }
+        private static IEnumerable<ITypeSymbol> GetAttributeTypeArrayArgument(AttributeData data)
         {
             return data.ConstructorArguments[0].Values.Select(c => c.Value as ITypeSymbol);
         }
 
         private static TypeConstraintRule? ParseAttributeRule(AttributeData data)
         {
-            if (!ConstrainedTypesAttributeBase.ConstrainedTypeAttributeTypes.Any(t => t.Name == data.AttributeClass.Name))
-                return null;
-
-            return ConstrainedTypesAttributeBase.GetConstraintRule(data.AttributeClass.Name);
+            return ConstrainedTypesAttributeBase.GetConstraintRuleFromAttributeName(data.AttributeClass.Name);
         }
     }
 }

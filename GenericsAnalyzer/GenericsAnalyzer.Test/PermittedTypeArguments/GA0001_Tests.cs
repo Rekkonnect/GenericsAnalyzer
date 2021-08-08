@@ -1,37 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments
 {
     [TestClass]
-    public sealed class GA0001_Tests : BaseDiagnosticTests
+    public sealed class GA0001_Tests : PermittedTypeArgumentAnalyzerDiagnosticTests
     {
-        public override DiagnosticDescriptor TestedDiagnosticRule => DiagnosticDescriptors.GA0001_Rule;
-
-        protected override DiagnosticAnalyzer GetNewDiagnosticAnalyzerInstance() => new PermittedTypeArgumentAnalyzer();
-
-        [TestMethod]
-        public void ArrayTypeUsage()
-        {
-            var testCode =
-@"
-class Program
-{
-    static void Main()
-    {
-        new A<int[]>();
-    }
-}
-
-class A<T>
-{
-}
-";
-
-            ValidateCodeWithUsings(testCode);
-        }
-
         [TestMethod]
         public void ImplicitFunctionTypeArgumentUsage()
         {
@@ -57,22 +30,6 @@ class Program
 ";
 
             AssertDiagnosticsWithUsings(testCode);
-        }
-
-        [TestMethod]
-        public void IntermediateGenericTypeUsage()
-        {
-            var testCode =
-@"
-class A<T>
-{
-}
-class B<T> : A<T>
-{
-}
-";
-
-            ValidateCodeWithUsings(testCode);
         }
 
         [TestMethod]

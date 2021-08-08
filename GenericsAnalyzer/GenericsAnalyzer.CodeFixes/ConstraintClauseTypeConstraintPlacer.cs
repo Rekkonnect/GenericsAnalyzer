@@ -23,8 +23,6 @@ namespace GenericsAnalyzer
             GA0006_Rule
         };
 
-        protected override string CodeFixTitle => CodeFixResources.ConstraintClauseTypeConstraintPlacer_Title;
-
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             var document = context.Document;
@@ -32,8 +30,8 @@ namespace GenericsAnalyzer
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
 
             // Find the useful nodes before altering the document to ensure the node is valid
-            var memberDeclarationSyntax = syntaxNode.GetParentRecursively<MemberDeclarationSyntax>();
-            var attributeListSyntax = syntaxNode.GetParentRecursively<AttributeListSyntax>();
+            var memberDeclarationSyntax = syntaxNode.GetNearestParentOfType<MemberDeclarationSyntax>();
+            var attributeListSyntax = syntaxNode.GetNearestParentOfType<AttributeListSyntax>();
 
             var typeParameter = attributeListSyntax.Parent as TypeParameterSyntax;
 

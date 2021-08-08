@@ -17,7 +17,8 @@ namespace GenericsAnalyzer
         protected abstract IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors { get; }
         public sealed override ImmutableArray<string> FixableDiagnosticIds => fixableDiagnosticIds;
 
-        protected abstract string CodeFixTitle { get; }
+        private string codeFixTitle;
+        public string CodeFixTitle => codeFixTitle ?? (codeFixTitle = CodeFixResources.ResourceManager.GetString($"{GetType().Name}_Title"));
 
         protected MultipleDiagnosticCodeFixProvider()
         {

@@ -1,6 +1,5 @@
 ﻿using GenericsAnalyzer.Core.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,16 +12,23 @@ namespace GenericsAnalyzer.Core
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
-        private Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
-        private HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+        private readonly Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
+        private readonly HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
+        private readonly HashSet<INamedTypeSymbol> inheritedProfiles = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
 
-        private TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
+        // TODO: Use IKeyedObject and KeyedObjectDictionary
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> inheritedProfileInfos = new Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo>(SymbolEqualityComparer.Default);
+        private readonly DistinctGroupDictionary inheritedProfileDistinctGroups = new DistinctGroupDictionary();
+
+        private readonly TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
 
         private Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> cachedTypeConstraintsByRule;
 
         public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
 
+        public INamedTypeSymbol ProfileInterface { get; }
         public ITypeParameterSymbol TypeParameter { get; }
+
         public bool OnlyPermitSpecifiedTypes { get; set; }
 
         public Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> TypeConstraintsByRule
@@ -40,6 +46,10 @@ namespace GenericsAnalyzer.Core
             }
         }
 
+        public TypeConstraintSystem(INamedTypeSymbol profileInterface)
+        {
+            ProfileInterface = profileInterface;
+        }
         public TypeConstraintSystem(ITypeParameterSymbol parameter)
         {
             TypeParameter = parameter;
@@ -59,12 +69,12 @@ namespace GenericsAnalyzer.Core
         {
             cachedTypeConstraintsByRule = TypeConstraintsByRule;
             AnalyzeRedundantlyConstrainedTypes();
-            AnalyzeConstraintClauseMovability();
+            AnalyzeConstraintClauseReducibility();
             AnalyzeRedundantBoundUnboundRuleTypes();
             return SystemDiagnostics;
         }
 
-        private void AnalyzeConstraintClauseMovability()
+        private void AnalyzeConstraintClauseReducibility()
         {
             if (!OnlyPermitSpecifiedTypes)
                 return;
@@ -104,7 +114,7 @@ namespace GenericsAnalyzer.Core
                 var type = rule.Key;
                 var constraintRule = rule.Value.Rule;
 
-                bool isRedundant = IsPermitted(type, false) == (constraintRule == ConstraintRule.Permit);
+                bool isRedundant = IsPermitted(type, false) == (constraintRule is ConstraintRule.Permit);
                 if (isRedundant)
                     systemDiagnostics.RegisterRedundantlyConstrainedType(type, constraintRule);
             }
@@ -135,8 +145,14 @@ namespace GenericsAnalyzer.Core
         }
         #endregion
 
-        public int? GetFinitePermittedTypeCount()
+        /// <summary>Calculates the finite permitted type count.</summary>
+        /// <param name="onlyEvaluateIfAny">If <see langword="true"/>, 0 will be returned if there are no type constraint rules.</param>
+        /// <returns>Returns the count of finite permitted types. If there are unbound generic types, or non-exact type permission rules, this returns <see langword="null"/>, also affected by <paramref name="onlyEvaluateIfAny"/>.</returns>
+        public int? GetFinitePermittedTypeCount(bool onlyEvaluateIfAny)
         {
+            if (onlyEvaluateIfAny && typeConstraintRules.Count is 0)
+                return 0;
+
             if (!OnlyPermitSpecifiedTypes)
                 return null;
 
@@ -147,13 +163,13 @@ namespace GenericsAnalyzer.Core
                 var type = typeRule.Key;
                 var rule = typeRule.Value;
 
-                if (rule.Rule == ConstraintRule.Prohibit)
+                if (rule.Rule is ConstraintRule.Prohibit)
                     continue;
 
                 // There is no need to check whether the rule is a permission
 
                 // Only exact permitted types can make for finite permitted type count
-                if (rule.TypeReferencePoint == TypeConstraintReferencePoint.ExactType)
+                if (rule.TypeReferencePoint is TypeConstraintReferencePoint.ExactType)
                 {
                     if (type is INamedTypeSymbol named && named.IsUnboundGenericTypeSafe())
                         return null;
@@ -217,7 +233,7 @@ namespace GenericsAnalyzer.Core
 
                 permission = IsPermittedWithUnbound(i, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
-                    return permission == PermissionResult.Permitted;
+                    return permission is PermissionResult.Permitted;
 
                 foreach (var indirectInterface in i.Interfaces)
                     interfaceQueue.Enqueue(indirectInterface);
@@ -228,7 +244,7 @@ namespace GenericsAnalyzer.Core
             {
                 permission = IsPermittedWithUnbound(type, true, TypeConstraintReferencePoint.BaseType);
                 if (permission != PermissionResult.Unknown)
-                    return permission == PermissionResult.Permitted;
+                    return permission is PermissionResult.Permitted;
 
                 type = type.BaseType;
             }
@@ -277,68 +293,183 @@ namespace GenericsAnalyzer.Core
             return TypeParameter.ToDisplayString();
         }
 
+        public static TypeConstraintSystem FromSymbol(ITypeSymbol typeSymbol)
+        {
+            switch (typeSymbol)
+            {
+                case ITypeParameterSymbol typeParameter:
+                    return new TypeConstraintSystem(typeParameter);
+
+                case INamedTypeSymbol profileType:
+                    return new TypeConstraintSystem(profileType);
+
+                default:
+                    return null;
+            }
+        }
+
+        public class DistinctGroupDictionary
+        {
+            // new() PLEASE
+            private readonly HashSet<TypeConstraintProfileInfo> usedProfiles = new HashSet<TypeConstraintProfileInfo>();
+            private readonly Dictionary<TypeConstraintProfileGroupInfo, List<TypeConstraintProfileInfo>> distinctGroupUsages
+                = new Dictionary<TypeConstraintProfileGroupInfo, List<TypeConstraintProfileInfo>>();
+
+            // Why did I overengineer this again?
+            /// <summary>Adds a profile's distinct groups to the dictionary, if it is not already added.</summary>
+            /// <param name="profile">The profile whose distinct groups to add to the dictionary, linking them to the profile.</param>
+            /// <returns><see langword="true"/> if all distinct groups were sucessfully added and are unique, otherwise <see langword="false"/>. In other words, <see langword="false"/> determines that a distinct group is used by more than one profile.</returns>
+            public bool AddProfile(TypeConstraintProfileInfo profile)
+            {
+                if (usedProfiles.Contains(profile))
+                    return true;
+
+                bool allDistinct = true;
+                foreach (var group in profile.Groups)
+                {
+                    if (!group.Distinct)
+                        continue;
+
+                    allDistinct &= Add(group, profile);
+                }
+                return allDistinct;
+            }
+
+            private bool Add(TypeConstraintProfileGroupInfo distinctGroup, TypeConstraintProfileInfo usingProfile)
+            {
+                bool stillDistinct = !distinctGroupUsages.TryGetValue(distinctGroup, out var usageList);
+                if (stillDistinct)
+                {
+                    usageList = new List<TypeConstraintProfileInfo>();
+                    distinctGroupUsages.Add(distinctGroup, usageList);
+                }
+
+                usageList.Add(usingProfile);
+                return stillDistinct;
+            }
+
+            public void Clear() => distinctGroupUsages.Clear();
+
+            public bool ContainsDistinctGroup(TypeConstraintProfileGroupInfo distinctGroup) => distinctGroupUsages.ContainsKey(distinctGroup);
+
+            public bool DetermineDistinctGroupUsage(TypeConstraintProfileGroupInfo distinctGroup) => GetDistinctGroupUsageCount(distinctGroup) < 2;
+            public int GetDistinctGroupUsageCount(TypeConstraintProfileGroupInfo distinctGroup)
+            {
+                if (!distinctGroupUsages.TryGetValue(distinctGroup, out var value))
+                    return 0;
+                return value.Count;
+            }
+            public IEnumerable<TypeConstraintProfileInfo> GetDistinctGroupUsageProfiles(TypeConstraintProfileGroupInfo distinctGroup) => distinctGroupUsages[distinctGroup];
+
+            // Replace SelectMany with Flatten
+            public ISet<INamedTypeSymbol> GetCollidingDistinctGroupProfileUsages()
+            {
+                return new HashSet<INamedTypeSymbol>(
+                    distinctGroupUsages.Values
+                        .Where(list => list.Count > 1)
+                        .SelectMany(list => list)
+                        .Select(info => info.ProfileDeclaringInterface),
+                    SymbolEqualityComparer.Default);
+            }
+        }
+
         public class Builder
         {
             private TypeConstraintSystem finalSystem;
-            private TypeConstraintSystem inheritedSystems;
+            private TypeConstraintSystem inheritedTypeParameterSystems;
+            private TypeConstraintSystem inheritedProfileSystems;
 
             private SystemBuildState buildState;
 
             public ITypeParameterSymbol TypeParameter => finalSystem.TypeParameter;
+            public INamedTypeSymbol ProfileInterface => finalSystem.ProfileInterface;
+
             public TypeConstraintSystemDiagnostics SystemDiagnostics => finalSystem.SystemDiagnostics;
 
             // Flags will be accordingly adjusted for the new features' needs
             public bool OnlyPermitSpecifiedTypes
             {
-                get => finalSystem.OnlyPermitSpecifiedTypes || inheritedSystems.OnlyPermitSpecifiedTypes;
+                get => finalSystem.OnlyPermitSpecifiedTypes || inheritedTypeParameterSystems.OnlyPermitSpecifiedTypes || inheritedProfileSystems.OnlyPermitSpecifiedTypes;
                 set => finalSystem.OnlyPermitSpecifiedTypes = value;
             }
-            public bool HasNoPermittedTypes => OnlyPermitSpecifiedTypes && finalSystem.HasNoExplicitlyPermittedTypes && inheritedSystems.HasNoExplicitlyPermittedTypes;
+            public bool HasNoPermittedTypes => OnlyPermitSpecifiedTypes
+                                            && finalSystem.HasNoExplicitlyPermittedTypes
+                                            && inheritedTypeParameterSystems.HasNoExplicitlyPermittedTypes
+                                            && inheritedProfileSystems.HasNoExplicitlyPermittedTypes;
 
             public Builder(ITypeParameterSymbol typeParameter)
             {
-                finalSystem = new TypeConstraintSystem(typeParameter);
-                inheritedSystems = new TypeConstraintSystem(typeParameter);
+                InitializeSystemsFromSymbol(typeParameter);
+            }
+            public Builder(INamedTypeSymbol profileType)
+            {
+                InitializeSystemsFromSymbol(profileType);
+            }
+
+            private void InitializeSystemsFromSymbol(ITypeSymbol typeSymbol)
+            {
+                finalSystem = FromSymbol(typeSymbol);
+                inheritedTypeParameterSystems = FromSymbol(typeSymbol);
+                inheritedProfileSystems = FromSymbol(typeSymbol);
             }
 
             public int? GetFinitePermittedTypeCount()
             {
-                int? count = finalSystem.GetFinitePermittedTypeCount();
-                if (inheritedSystems.typeConstraintRules.Count > 0)
-                    count += inheritedSystems.GetFinitePermittedTypeCount();
-                return count;
+                return finalSystem.GetFinitePermittedTypeCount(false)
+                     + inheritedTypeParameterSystems.GetFinitePermittedTypeCount(true)
+                     + inheritedProfileSystems.GetFinitePermittedTypeCount(true);
             }
 
-            // It looks like there cannot be any other diagnostic from inheriting another type parameter's system
-            // TODO: Consider removing the type parameter inheritance diagnostic; discovering the faulting type parameter is not planned
             public bool InheritFrom(ITypeParameterSymbol baseTypeParameter, TypeConstraintSystem baseSystem)
             {
-                if (buildState.HasFinalizedWhole())
+                return InheritFrom(baseTypeParameter, baseSystem, inheritedTypeParameterSystems, finalSystem.inheritedTypes);
+            }
+            public bool InheritFrom(ITypeParameterSymbol baseTypeParameter, Builder baseSystemBuilder)
+            {
+                return InheritFrom(baseTypeParameter, baseSystemBuilder, inheritedTypeParameterSystems, finalSystem.inheritedTypes);
+            }
+
+            public bool InheritFrom(TypeConstraintProfileInfo profileInfo)
+            {
+                finalSystem.inheritedProfileInfos.Add(profileInfo.ProfileDeclaringInterface, profileInfo);
+                // Do not report the diagnostic yet, allow every other inheritance to take place
+                // and then mark all colliding profiles' distinct groups
+                finalSystem.inheritedProfileDistinctGroups.AddProfile(profileInfo);
+
+                return InheritFrom(profileInfo.ProfileDeclaringInterface, profileInfo.Builder, inheritedProfileSystems, finalSystem.inheritedProfiles);
+            }
+
+            private bool InheritFrom<T>(T baseType, TypeConstraintSystem baseSystem, TypeConstraintSystem inheritedSystems, ISet<T> inheritedTypes)
+                where T : ITypeSymbol
+            {
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return false;
 
                 inheritedSystems.OnlyPermitSpecifiedTypes |= baseSystem.OnlyPermitSpecifiedTypes;
 
                 bool independent = inheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystem.typeConstraintRules);
                 if (!independent)
-                    inheritedSystems.systemDiagnostics.RegisterConflictingInheritedTypeParameter(baseTypeParameter);
+                    inheritedSystems.systemDiagnostics.RegisterConflictingInheritedSymbol(baseType);
 
-                finalSystem.inheritedTypes.Add(baseTypeParameter);
+                inheritedTypes.Add(baseType);
 
                 return independent;
             }
-            public bool InheritFrom(ITypeParameterSymbol baseTypeParameter, Builder baseSystemBuilder)
+            private bool InheritFrom<T>(T baseType, Builder baseSystemBuilder, TypeConstraintSystem affectedInheritedSystems, ISet<T> inheritedTypes)
+                where T : ITypeSymbol
             {
-                if (buildState.HasFinalizedWhole())
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return false;
 
-                inheritedSystems.OnlyPermitSpecifiedTypes |= baseSystemBuilder.OnlyPermitSpecifiedTypes;
+                affectedInheritedSystems.OnlyPermitSpecifiedTypes |= baseSystemBuilder.OnlyPermitSpecifiedTypes;
 
-                bool independent = inheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystemBuilder.inheritedSystems.typeConstraintRules);
-                independent &= inheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystemBuilder.finalSystem.typeConstraintRules);
+                bool independent = affectedInheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystemBuilder.inheritedTypeParameterSystems.typeConstraintRules);
+                independent &= affectedInheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystemBuilder.inheritedProfileSystems.typeConstraintRules);
+                independent &= affectedInheritedSystems.typeConstraintRules.TryAddPreserveRange(baseSystemBuilder.finalSystem.typeConstraintRules);
                 if (!independent)
-                    inheritedSystems.systemDiagnostics.RegisterConflictingInheritedTypeParameter(baseTypeParameter);
+                    affectedInheritedSystems.systemDiagnostics.RegisterConflictingInheritedSymbol(baseType);
 
-                finalSystem.inheritedTypes.Add(baseTypeParameter);
+                inheritedTypes.Add(baseType);
 
                 return independent;
             }
@@ -346,7 +477,7 @@ namespace GenericsAnalyzer.Core
             public void Add(TypeConstraintRule rule, params ITypeSymbol[] types) => Add(rule, (IEnumerable<ITypeSymbol>)types);
             public void Add(TypeConstraintRule rule, IEnumerable<ITypeSymbol> types)
             {
-                if (buildState.HasFinalizedBase())
+                if (buildState.HasFlag(SystemBuildState.FinalizedBase))
                     return;
 
                 var systemDiagnostics = finalSystem.systemDiagnostics;
@@ -357,8 +488,9 @@ namespace GenericsAnalyzer.Core
                     if (systemDiagnostics.ConditionallyRegisterInvalidTypeArgumentType(t))
                         continue;
 
-                    if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t, rule.TypeReferencePoint is TypeConstraintReferencePoint.BaseType))
-                        continue;
+                    if (TypeParameter != null)
+                        if (systemDiagnostics.ConditionallyRegisterConstrainedSubstitutionType(TypeParameter, t, rule.TypeReferencePoint is TypeConstraintReferencePoint.BaseType))
+                            continue;
 
                     if (typeConstraintRules.ContainsKey(t))
                     {
@@ -381,24 +513,39 @@ namespace GenericsAnalyzer.Core
 
             public TypeConstraintSystemDiagnostics AnalyzeFinalizedBaseSystem()
             {
-                if (buildState.HasFinalizedBase())
+                if (buildState.HasFlag(SystemBuildState.FinalizedBase))
                     return SystemDiagnostics;
 
-                buildState = SystemBuildState.FinalizedBase;
+                buildState |= SystemBuildState.FinalizedBase;
                 return finalSystem.AnalyzeFinalizedSystem();
+            }
+
+            public void AnalyzeFinalizedInheritedTypeProfiles()
+            {
+                if (buildState.HasFlag(SystemBuildState.FinalizedInheritedProfiles))
+                    return;
+
+                var multipleDistinctGroupProfiles = finalSystem.inheritedProfileDistinctGroups.GetCollidingDistinctGroupProfileUsages();
+                finalSystem.systemDiagnostics.RegisterMultipleOfDistinctGroupInheritedProfiles(multipleDistinctGroupProfiles);
+
+                buildState |= SystemBuildState.FinalizedInheritedProfiles;
             }
 
             public TypeConstraintSystem FinalizeSystem()
             {
-                if (buildState.HasFinalizedWhole())
+                if (buildState is SystemBuildState.FinalizedWhole)
                     return finalSystem;
 
                 AnalyzeFinalizedBaseSystem();
 
+                AnalyzeFinalizedInheritedTypeProfiles();
+
                 // Copy inherited rules to the final system
-                finalSystem.typeConstraintRules.TryAddPreserveRange(inheritedSystems.typeConstraintRules);
+                finalSystem.typeConstraintRules.TryAddPreserveRange(inheritedTypeParameterSystems.typeConstraintRules);
+                finalSystem.typeConstraintRules.TryAddPreserveRange(inheritedProfileSystems.typeConstraintRules);
                 // The flags system will be improved:tm:
-                finalSystem.OnlyPermitSpecifiedTypes |= inheritedSystems.OnlyPermitSpecifiedTypes;
+                finalSystem.OnlyPermitSpecifiedTypes |= inheritedTypeParameterSystems.OnlyPermitSpecifiedTypes 
+                                                     || inheritedProfileSystems.OnlyPermitSpecifiedTypes;
 
                 // The system diagnostics for base type systems are not copied over since they will have already appeared
 
@@ -407,11 +554,17 @@ namespace GenericsAnalyzer.Core
                 return finalSystem;
             }
 
-            public enum SystemBuildState
+            [Flags]
+            private enum SystemBuildState : uint
             {
                 Building,
-                FinalizedBase,
-                FinalizedWhole,
+                FinalizedBase = 1,
+                FinalizedInheritedTypeParameters = 1 << 1,
+                FinalizedInheritedProfiles = 1 << 2,
+
+                FinalizedWhole = FinalizedBase
+                               | FinalizedInheritedTypeParameters
+                               | FinalizedInheritedProfiles,
             }
         }
 

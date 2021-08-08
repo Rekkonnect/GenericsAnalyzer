@@ -62,3 +62,18 @@ GA0019 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../..
 GA0020 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0020.md)
 GA0021 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0021.md)
 GA0022 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0022.md)
+
+## Release 1.3.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+GA0023 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0023.md)
+GA0024 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0024.md)
+GA0025 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0025.md)
+GA0026 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0026.md)
+GA0027 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0027.md)
+GA0028 | API Restriction | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0028.md)
+GA0029 | Validity | Error | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0029.md)
+GA0030 | Design | Warning | PermittedTypeArgumentAnalyzer, [Documentation](../../docs/rules/GA0030.md)

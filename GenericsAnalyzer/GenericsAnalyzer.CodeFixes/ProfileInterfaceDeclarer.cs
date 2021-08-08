@@ -17,10 +17,6 @@ namespace GenericsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ProfileInterfaceDeclarer))]
     public sealed class ProfileInterfaceDeclarer : MultipleDiagnosticCodeFixProvider
     {
-        protected override string CodeFixTitle => CodeFixResources.ProfileInterfaceDeclarer_Title;
-
-        public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
-
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
         {
             GA0030_Rule

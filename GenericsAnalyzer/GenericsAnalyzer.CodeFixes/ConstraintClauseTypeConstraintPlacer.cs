@@ -23,8 +23,6 @@ namespace GenericsAnalyzer
             GA0006_Rule
         };
 
-        protected override string CodeFixTitle => CodeFixResources.ConstraintClauseTypeConstraintPlacer_Title;
-
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             var document = context.Document;

@@ -15,8 +15,6 @@ namespace GenericsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AllTypeMemberRemover))]
     public sealed class AllTypeMemberRemover : TypeMemberRemover
     {
-        protected override string CodeFixTitle => CodeFixResources.AllTypeMemberRemover_Title;
-
         protected override RemovableTypeMembers GetRemovableTypeMembers() => RemovableTypeMembers.All;
 
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
@@ -27,8 +25,6 @@ namespace GenericsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(StaticTypeMemberRemover))]
     public sealed class StaticTypeMemberRemover : TypeMemberRemover
     {
-        protected override string CodeFixTitle => CodeFixResources.StaticTypeMemberRemover_Title;
-
         protected override RemovableTypeMembers GetRemovableTypeMembers() => RemovableTypeMembers.Static;
 
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
@@ -39,8 +35,6 @@ namespace GenericsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(InstanceTypeMemberRemover))]
     public sealed class InstanceTypeMemberRemover : TypeMemberRemover
     {
-        protected override string CodeFixTitle => CodeFixResources.InstanceTypeMemberRemover_Title;
-
         protected override RemovableTypeMembers GetRemovableTypeMembers() => RemovableTypeMembers.Instance;
 
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
@@ -52,8 +46,6 @@ namespace GenericsAnalyzer
     [Shared]
     public abstract class TypeMemberRemover : MultipleDiagnosticCodeFixProvider
     {
-        public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
-
         protected abstract RemovableTypeMembers GetRemovableTypeMembers();
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)

@@ -14,10 +14,6 @@ namespace GenericsAnalyzer
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(Ungenericizer))]
     public sealed class Ungenericizer : MultipleDiagnosticCodeFixProvider
     {
-        protected override string CodeFixTitle => CodeFixResources.Ungenericizer_Title;
-
-        public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
-
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
         {
             GA0023_Rule

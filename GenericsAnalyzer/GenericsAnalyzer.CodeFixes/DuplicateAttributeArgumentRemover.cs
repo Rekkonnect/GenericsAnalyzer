@@ -22,8 +22,6 @@ namespace GenericsAnalyzer
             GA0009_Rule,
         };
 
-        protected override string CodeFixTitle => CodeFixResources.DuplicateAttributeArgumentRemover_Title;
-
         public override FixAllProvider GetFixAllProvider() => null;
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)

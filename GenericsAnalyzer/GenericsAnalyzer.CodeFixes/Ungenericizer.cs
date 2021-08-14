@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static GenericsAnalyzer.DiagnosticDescriptors;
@@ -22,12 +23,11 @@ namespace GenericsAnalyzer
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)
         {
             var document = context.Document;
+            var semanticModel = await document.GetSemanticModelAsync();
             var typeDeclarationNode = syntaxNode as TypeDeclarationSyntax;
-            var decalarationIdentifier = typeDeclarationNode.Identifier;
-            var triviaAfterTypeParameterList = typeDeclarationNode.TypeParameterList.GetTrailingTrivia();
-            var identifierWithTrivia = decalarationIdentifier.WithTrailingTrivia(decalarationIdentifier.TrailingTrivia.AddRange(triviaAfterTypeParameterList));
-            var appendedTriviaResultingNode = typeDeclarationNode.WithIdentifier(identifierWithTrivia);
-            return await document.ReplaceNodeAsync(typeDeclarationNode, appendedTriviaResultingNode.WithTypeParameterList(null), cancellationToken);
+            var declaredSymbol = semanticModel.GetDeclaredSymbol(typeDeclarationNode);
+            var declaringNodes = declaredSymbol.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax(cancellationToken) as MemberDeclarationSyntax);
+            return await document.RemoveTypeParameterListsAsync(declaringNodes, cancellationToken);
         }
     }
 }

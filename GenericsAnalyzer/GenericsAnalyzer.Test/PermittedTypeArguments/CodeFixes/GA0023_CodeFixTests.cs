@@ -44,5 +44,27 @@ interface IProfile3 {{ }}
 
             TestCodeFixWithUsings(testCode, fixedCode);
         }
+
+        [TestMethod]
+        public void PartialGenericProfileInterfaceWithCodeFix()
+        {
+            var testCode =
+$@"
+[TypeConstraintProfile]
+partial interface {{|*:IProfile1|}}<T1> {{ }}
+
+partial interface IProfile1<T1> {{ }}
+";
+
+            var fixedCode =
+$@"
+[TypeConstraintProfile]
+partial interface IProfile1 {{ }}
+
+partial interface IProfile1 {{ }}
+";
+
+            TestCodeFixWithUsings(testCode, fixedCode);
+        }
     }
 }

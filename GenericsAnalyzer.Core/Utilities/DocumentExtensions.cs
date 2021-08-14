@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -203,6 +204,50 @@ namespace GenericsAnalyzer.Core.Utilities
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken);
             return document.WithSyntaxRoot(root.ReplaceNode(oldNode, insertedNode));
+        }
+        public static async Task<Document> ReplaceNodesAsync<TNode>
+        (
+            this Document document,
+            IEnumerable<TNode> oldNodes,
+            Func<TNode, TNode, SyntaxNode> computeReplacementNode,
+            CancellationToken cancellationToken = default
+        )
+            where TNode : SyntaxNode
+        {
+            var root = await document.GetSyntaxRootAsync(cancellationToken);
+            return document.WithSyntaxRoot(root.ReplaceNodes(oldNodes, computeReplacementNode));
+        }
+        public static Task<Document> ReplaceNodesAsync<TNode>
+        (
+            this Document document,
+            IEnumerable<TNode> oldNodes,
+            Func<TNode, SyntaxNode> computeReplacementNode,
+            CancellationToken cancellationToken = default
+        )
+            where TNode : SyntaxNode
+        {
+            return document.ReplaceNodesAsync(oldNodes, ComputeReplacementNode, cancellationToken);
+
+            SyntaxNode ComputeReplacementNode(TNode old, TNode rewritten) => computeReplacementNode(rewritten);
+        }
+
+        public static async Task<Document> RemoveTypeParameterListAsync
+        (
+            this Document document,
+            MemberDeclarationSyntax typeDeclarationNode,
+            CancellationToken cancellationToken = default
+        )
+        {
+            return await document.ReplaceNodeAsync(typeDeclarationNode, typeDeclarationNode.RemoveTypeParameterList(), cancellationToken);
+        }
+        public static async Task<Document> RemoveTypeParameterListsAsync
+        (
+            this Document document,
+            IEnumerable<MemberDeclarationSyntax> typeDeclarationNodes,
+            CancellationToken cancellationToken = default
+        )
+        {
+            return await document.ReplaceNodesAsync(typeDeclarationNodes, TypeParameterizableMemberDeclarationSyntaxExtensions.RemoveTypeParameterList, cancellationToken);
         }
     }
 }

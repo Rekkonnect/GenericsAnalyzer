@@ -180,9 +180,10 @@ namespace GenericsAnalyzer
 
             // Finally analyze the type of the declared template
 
+            var templateAttributeDeclaringNode = templateAttribute.ApplicationSyntaxReference?.GetSyntax()?.GetNearestParentOfType<InterfaceDeclarationSyntax>();
             // Must be non-generic regardless of the case
             if (profileSymbol.Arity > 0)
-                context.ReportDiagnostic(Diagnostics.CreateGA0023(profileTypeDeclarationNode));
+                context.ReportDiagnostic(Diagnostics.CreateGA0023(templateAttributeDeclaringNode));
 
             switch (templateTypes)
             {

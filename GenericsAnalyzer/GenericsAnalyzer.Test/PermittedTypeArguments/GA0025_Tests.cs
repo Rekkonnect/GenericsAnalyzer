@@ -47,5 +47,29 @@ interface IC : ↓IB {{ }}
 
             AssertDiagnosticsWithUsings(testCode);
         }
+
+        [TestMethod]
+        public void PartialInterfaceInheritingMixed()
+        {
+            var testCode =
+$@"
+[TypeConstraintProfile]
+interface IA {{ }}
+
+interface IB {{ }}
+
+[TypeConstraintProfile]
+interface IC {{ }}
+
+[TypeConstraintProfile]
+interface ID {{ }}
+
+[TypeConstraintProfile]
+partial interface IE : IA, IC, ↓IB {{ }}
+partial interface IE : ↓IB, ID, IA {{ }}
+";
+
+            AssertDiagnosticsWithUsings(testCode);
+        }
     }
 }

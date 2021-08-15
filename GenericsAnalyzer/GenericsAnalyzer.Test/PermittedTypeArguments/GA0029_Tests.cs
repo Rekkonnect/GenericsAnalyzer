@@ -28,5 +28,21 @@ interface ↓IB {{ }}
 
             AssertDiagnosticsWithUsings(testCode);
         }
+
+        [TestMethod]
+        public void PartialInvalidInterface()
+        {
+            var testCode =
+$@"
+[TypeConstraintProfile]
+partial interface ↓IA {{ }}
+[TypeConstraintProfileGroup]
+partial interface ↓IA {{ }}
+[Example]
+partial interface IA {{ }}
+";
+
+            AssertDiagnosticsWithUsings(testCode);
+        }
     }
 }

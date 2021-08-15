@@ -110,11 +110,8 @@ namespace GenericsAnalyzer
                 return;
 
             var declaringSyntaxReferences = profileSymbol.DeclaringSyntaxReferences;
-            // TODO: Test for partial cases too
             if (declaringSyntaxReferences.IsEmpty)
                 return;
-
-            var profileTypeDeclarationNode = declaringSyntaxReferences[0].GetSyntax() as InterfaceDeclarationSyntax;
 
             var typeConstraintAttributes = new List<AttributeData>();
             var templateTypes = TypeConstraintTemplateType.None;
@@ -162,10 +159,10 @@ namespace GenericsAnalyzer
                 }
             }
 
-            for (int inheritedInterfaceIndex = 0; inheritedInterfaceIndex < profileSymbol.Interfaces.Length; inheritedInterfaceIndex++)
+            var baseTypeNodes = declaringSyntaxReferences.SelectMany(node => (node.GetSyntax() as InterfaceDeclarationSyntax).BaseList?.Types ?? default);
+            foreach (var directlyInheritedInterfaceNode in baseTypeNodes)
             {
-                var directlyInheritedInterface = profileSymbol.Interfaces[inheritedInterfaceIndex];
-                var directlyInheritedInterfaceNode = profileTypeDeclarationNode.BaseList.Types[inheritedInterfaceIndex];
+                var directlyInheritedInterface = context.SemanticModel.GetTypeInfo(directlyInheritedInterfaceNode).Type as INamedTypeSymbol;
 
                 AnalyzeProfileRelatedDefinition(context, directlyInheritedInterface);
 
@@ -181,9 +178,10 @@ namespace GenericsAnalyzer
             // Finally analyze the type of the declared template
 
             var templateAttributeDeclaringNode = templateAttribute.ApplicationSyntaxReference?.GetSyntax()?.GetNearestParentOfType<InterfaceDeclarationSyntax>();
+            var diagnosticReportNode = templateAttributeDeclaringNode ?? declaringSyntaxReferences[0].GetSyntax() as InterfaceDeclarationSyntax;
             // Must be non-generic regardless of the case
             if (profileSymbol.Arity > 0)
-                context.ReportDiagnostic(Diagnostics.CreateGA0023(templateAttributeDeclaringNode));
+                context.ReportDiagnostic(Diagnostics.CreateGA0023(diagnosticReportNode));
 
             switch (templateTypes)
             {
@@ -198,8 +196,9 @@ namespace GenericsAnalyzer
                     return;
                 }
 
+                // Either a mix of the flags, or an invalid value that should never exist
                 default:
-                    context.ReportDiagnostic(Diagnostics.CreateGA0029(profileTypeDeclarationNode));
+                    context.ReportDiagnostic(Diagnostics.CreateGA0029(diagnosticReportNode));
                     return;
             }
         }

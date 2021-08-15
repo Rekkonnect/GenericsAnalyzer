@@ -194,7 +194,7 @@ namespace GenericsAnalyzer
                 }
                 case TypeConstraintTemplateType.ProfileGroup:
                 {
-                    AnalyzeProfileGroupDefinition(context, profileSymbol, templateAttribute, profileTypeDeclarationNode);
+                    AnalyzeProfileGroupDefinition(context, profileSymbol, templateAttribute);
                     return;
                 }
 
@@ -256,18 +256,26 @@ namespace GenericsAnalyzer
 
             profileInfo.FinalizeSystem();
         }
-        private void AnalyzeProfileGroupDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol groupDeclarationType, AttributeData profileGroupAttribute, InterfaceDeclarationSyntax profileTypeDeclarationNode)
+        private void AnalyzeProfileGroupDefinition(SyntaxNodeAnalysisContext context, INamedTypeSymbol groupDeclarationType, AttributeData profileGroupAttribute)
         {
             if (constraintProfiles.ContainsDeclaringType(groupDeclarationType))
                 return;
 
-            // Preferably should not contain any static members
-            // Nested profile types should also be ideally avoided
-            if (groupDeclarationType.GetMembers().Any(m => !m.IsStatic))
+            var semanticModel = context.SemanticModel;
+
+            // Preferably should not contain any instance members
+            // Nested profile types should also be ideally avoided?
+            var declaredMembers = groupDeclarationType.GetMembers();
+            var declaredInstanceMembers = declaredMembers.Where(member => !member.IsStatic).ToImmutableArray();
+            if (!declaredInstanceMembers.IsEmpty)
             {
-                // TODO: Implement a way to only emit the diagnostic on the partial declarations
-                //       that contain instance members (decorative)
-                context.ReportDiagnostic(Diagnostics.CreateGA0024(profileTypeDeclarationNode));
+                // Now that's an expression
+                var declarationSet = new HashSet<InterfaceDeclarationSyntax>(
+                    declaredInstanceMembers.SelectMany(
+                        instanceMember => instanceMember.DeclaringSyntaxReferences.Select(
+                            reference => reference?.GetSyntax()?.GetNearestParentOfType<InterfaceDeclarationSyntax>())));
+                foreach (var declarationSetNode in declarationSet)
+                    context.ReportDiagnostic(Diagnostics.CreateGA0024(declarationSetNode));
             }
 
             bool isDistinct = (bool)profileGroupAttribute.ConstructorArguments[0].Value;

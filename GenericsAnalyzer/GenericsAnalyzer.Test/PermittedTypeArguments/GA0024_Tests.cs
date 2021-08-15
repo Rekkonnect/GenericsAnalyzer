@@ -36,5 +36,38 @@ interface IB
 
             AssertDiagnosticsWithUsings(testCode);
         }
+
+        [TestMethod]
+        public void PartialProfileGroupInterfaceWithMembers()
+        {
+            var testCode =
+$@"
+partial interface ↓IGroup0
+{{
+    int Property0 {{ get; set; }}
+}}
+
+partial interface ↓IGroup0
+{{
+    int Property1 {{ get; set; }}
+}}
+
+[TypeConstraintProfileGroup]
+partial interface IGroup0
+{{
+}}
+
+partial interface ↓IGroup0
+{{
+    int Property2 {{ get; set; }}
+}}
+
+partial interface IGroup0
+{{
+}}
+";
+
+            AssertDiagnosticsWithUsings(testCode);
+        }
     }
 }

@@ -115,7 +115,7 @@ namespace GenericsAnalyzer
 
             var typeConstraintAttributes = new List<AttributeData>();
             var templateTypes = TypeConstraintTemplateType.None;
-            AttributeData templateAttribute = null;
+            var templateAttributeStorage = new TypeConstraintTemplateAttributeStorage();
 
             var attributes = profileSymbol.GetAttributes();
 
@@ -126,12 +126,14 @@ namespace GenericsAnalyzer
                     case nameof(TypeConstraintProfileAttribute):
                     {
                         templateTypes |= TypeConstraintTemplateType.Profile;
+                        templateAttributeStorage.ProfileAttribute = attribute;
                         break;
                     }
 
                     case nameof(TypeConstraintProfileGroupAttribute):
                     {
                         templateTypes |= TypeConstraintTemplateType.ProfileGroup;
+                        templateAttributeStorage.ProfileGroupAttribute = attribute;
                         break;
                     }
 
@@ -143,9 +145,6 @@ namespace GenericsAnalyzer
 
                         continue;
                 }
-
-                // For the time being, only one template attribute is allowed to exist at a time
-                templateAttribute = attribute;
             }
 
             bool isProfile = templateTypes.HasFlag(TypeConstraintTemplateType.Profile);
@@ -177,28 +176,29 @@ namespace GenericsAnalyzer
 
             // Finally analyze the type of the declared template
 
-            var templateAttributeDeclaringNode = templateAttribute.ApplicationSyntaxReference?.GetSyntax()?.GetNearestParentOfType<InterfaceDeclarationSyntax>();
-            var diagnosticReportNode = templateAttributeDeclaringNode ?? declaringSyntaxReferences[0].GetSyntax() as InterfaceDeclarationSyntax;
+            var templateAttributeDeclaringNodes = new HashSet<InterfaceDeclarationSyntax>(
+                templateAttributeStorage.GetAllAssociatedAttributes().Select(
+                    attribute => attribute.ApplicationSyntaxReference?.GetSyntax()?.GetNearestParentOfType<InterfaceDeclarationSyntax>()));
             // Must be non-generic regardless of the case
             if (profileSymbol.Arity > 0)
-                context.ReportDiagnostic(Diagnostics.CreateGA0023(diagnosticReportNode));
+                context.ReportDiagnostics(templateAttributeDeclaringNodes, Diagnostics.CreateGA0023);
 
             switch (templateTypes)
             {
                 case TypeConstraintTemplateType.Profile:
                 {
-                    AnalyzeProfileDefinition(context, profileSymbol, templateAttribute);
+                    AnalyzeProfileDefinition(context, profileSymbol, templateAttributeStorage.ProfileAttribute);
                     return;
                 }
                 case TypeConstraintTemplateType.ProfileGroup:
                 {
-                    AnalyzeProfileGroupDefinition(context, profileSymbol, templateAttribute);
+                    AnalyzeProfileGroupDefinition(context, profileSymbol, templateAttributeStorage.ProfileGroupAttribute);
                     return;
                 }
 
                 // Either a mix of the flags, or an invalid value that should never exist
                 default:
-                    context.ReportDiagnostic(Diagnostics.CreateGA0029(diagnosticReportNode));
+                    context.ReportDiagnostics(templateAttributeDeclaringNodes, Diagnostics.CreateGA0029);
                     return;
             }
         }

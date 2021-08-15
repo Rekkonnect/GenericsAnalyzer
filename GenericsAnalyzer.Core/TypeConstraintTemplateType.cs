@@ -7,9 +7,12 @@ namespace GenericsAnalyzer.Core
     {
         None,
 
+        // Profile-related
         Profile = 1,
         ProfileGroup = 1 << 1,
+        ProfileRelated = Profile | ProfileGroup,
 
-        All = Profile | ProfileGroup
+        // All
+        All = ProfileRelated,
     }
 }

@@ -1,17 +1,19 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using GenericsAnalyzer.Core.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
 namespace GenericsAnalyzer.Core
 {
+    using TemplateType = TypeConstraintTemplateType;
+
     public class TypeConstraintTemplateAttributeStorage
     {
-        // TODO: Overengineer this system so that:
-        //       - properties are accessed through reflection
-        //       - association system is generalized
-        [AssociatedTemplateType(TypeConstraintTemplateType.Profile)]
+        private static readonly AssociatedPropertyContainer templateAssociativity = new AssociatedPropertyContainer(typeof(TypeConstraintTemplateAttributeStorage));
+
+        [AssociatedTemplateType(TemplateType.Profile)]
         public AttributeData ProfileAttribute { get; set; }
-        [AssociatedTemplateType(TypeConstraintTemplateType.ProfileGroup)]
+        [AssociatedTemplateType(TemplateType.ProfileGroup)]
         public AttributeData ProfileGroupAttribute { get; set; }
 
         public AttributeData ProfileRelatedAttribute
@@ -25,26 +27,31 @@ namespace GenericsAnalyzer.Core
             }
         }
 
-        public IEnumerable<AttributeData> GetAllAssociatedAttributes() => GetAssociatedAttributes(TypeConstraintTemplateType.All);
-        public IEnumerable<AttributeData> GetAssociatedAttributes(TypeConstraintTemplateType templateTypes)
+        public IEnumerable<AttributeData> GetAllAssociatedAttributes() => GetAssociatedAttributes(TemplateType.All);
+        public IEnumerable<AttributeData> GetAssociatedAttributes(TemplateType templateTypes)
         {
-            // yield return? x;
-            if ((templateTypes & TypeConstraintTemplateType.Profile) != default)
-                if (ProfileAttribute != null)
-                    yield return ProfileAttribute;
+            // Enums deserve much more love
+            for (int mask = 1; mask < (int)TemplateType.All; mask <<= 1)
+            {
+                if (((int)templateTypes & mask) == default)
+                    continue;
 
-            if ((templateTypes & TypeConstraintTemplateType.ProfileGroup) != default)
-                if (ProfileGroupAttribute != null)
-                    yield return ProfileGroupAttribute;
+                var associatedAttribute = templateAssociativity.GetAssociatedProperty((TemplateType)mask).GetValue(this) as AttributeData;
+                // yield return? x;
+                if (associatedAttribute != null)
+                    yield return associatedAttribute;
+            }
+            yield break;
         }
 
-        private sealed class AssociatedTemplateTypeAttribute : Attribute
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+        private sealed class AssociatedTemplateTypeAttribute : Attribute, IAssociatedEnumValueAttribute<TemplateType>
         {
-            public TypeConstraintTemplateType TemplateType { get; }
+            public TemplateType AssociatedValue { get; }
 
-            public AssociatedTemplateTypeAttribute(TypeConstraintTemplateType templateType)
+            public AssociatedTemplateTypeAttribute(TemplateType templateType)
             {
-                TemplateType = templateType;
+                AssociatedValue = templateType;
             }
         }
     }

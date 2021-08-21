@@ -6,8 +6,8 @@ namespace GenericsAnalyzer.Core
 {
     public class TypeConstraintProfileInfoCollection
     {
-        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> profiles = new Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo>(SymbolEqualityComparer.Default);
-        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo> groups = new Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo>(SymbolEqualityComparer.Default);
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> profiles = new(SymbolEqualityComparer.Default);
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileGroupInfo> groups = new(SymbolEqualityComparer.Default);
 
         public IEnumerable<TypeConstraintProfileInfo> Profiles => profiles.Values;
         public IEnumerable<TypeConstraintProfileGroupInfo> Groups => groups.Values;

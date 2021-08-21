@@ -8,7 +8,7 @@ namespace GenericsAnalyzer.Core
 {
     public class TypeConstraintProfileInfo : IEquatable<TypeConstraintProfileInfo>
     {
-        private readonly HashSet<TypeConstraintProfileGroupInfo> groups = new HashSet<TypeConstraintProfileGroupInfo>();
+        private readonly HashSet<TypeConstraintProfileGroupInfo> groups = new();
 
         public TypeConstraintSystem System { get; private set; }
         public TypeConstraintSystem.Builder Builder { get; }

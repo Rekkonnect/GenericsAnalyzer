@@ -13,19 +13,19 @@ namespace GenericsAnalyzer.Core
     /// <summary>Represents a system that contains a set of rules about type constraints.</summary>
     public class TypeConstraintSystem
     {
-        private readonly Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new Dictionary<ITypeSymbol, TypeConstraintRule>(SymbolEqualityComparer.Default);
-        private readonly HashSet<ITypeParameterSymbol> inheritedTypes = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
-        private readonly HashSet<INamedTypeSymbol> inheritedProfiles = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        private readonly Dictionary<ITypeSymbol, TypeConstraintRule> typeConstraintRules = new(SymbolEqualityComparer.Default);
+        private readonly HashSet<ITypeParameterSymbol> inheritedTypes = new(SymbolEqualityComparer.Default);
+        private readonly HashSet<INamedTypeSymbol> inheritedProfiles = new(SymbolEqualityComparer.Default);
 
         // TODO: Use IKeyedObject and KeyedObjectDictionary
-        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> inheritedProfileInfos = new Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo>(SymbolEqualityComparer.Default);
-        private readonly DistinctGroupDictionary inheritedProfileDistinctGroups = new DistinctGroupDictionary();
+        private readonly Dictionary<INamedTypeSymbol, TypeConstraintProfileInfo> inheritedProfileInfos = new(SymbolEqualityComparer.Default);
+        private readonly DistinctGroupDictionary inheritedProfileDistinctGroups = new();
 
-        private readonly TypeConstraintSystemDiagnostics systemDiagnostics = new TypeConstraintSystemDiagnostics();
+        private readonly TypeConstraintSystemDiagnostics systemDiagnostics = new();
 
         private Dictionary<TypeConstraintRule, HashSet<ITypeSymbol>> cachedTypeConstraintsByRule;
 
-        public TypeConstraintSystemDiagnostics SystemDiagnostics => new TypeConstraintSystemDiagnostics(systemDiagnostics);
+        public TypeConstraintSystemDiagnostics SystemDiagnostics => new(systemDiagnostics);
 
         public INamedTypeSymbol ProfileInterface { get; }
         public ITypeParameterSymbol TypeParameter { get; }
@@ -311,10 +311,8 @@ namespace GenericsAnalyzer.Core
 
         public class DistinctGroupDictionary
         {
-            // new() PLEASE
-            private readonly HashSet<TypeConstraintProfileInfo> usedProfiles = new HashSet<TypeConstraintProfileInfo>();
-            private readonly Dictionary<TypeConstraintProfileGroupInfo, List<TypeConstraintProfileInfo>> distinctGroupUsages
-                = new Dictionary<TypeConstraintProfileGroupInfo, List<TypeConstraintProfileInfo>>();
+            private readonly HashSet<TypeConstraintProfileInfo> usedProfiles = new();
+            private readonly Dictionary<TypeConstraintProfileGroupInfo, List<TypeConstraintProfileInfo>> distinctGroupUsages = new();
 
             // Why did I overengineer this again?
             /// <summary>Adds a profile's distinct groups to the dictionary, if it is not already added.</summary>
@@ -571,7 +569,7 @@ namespace GenericsAnalyzer.Core
 
         public class EqualityComparer : IEqualityComparer<TypeConstraintSystem>
         {
-            public static readonly EqualityComparer Default = new EqualityComparer();
+            public static readonly EqualityComparer Default = new();
 
             private EqualityComparer() { }
 

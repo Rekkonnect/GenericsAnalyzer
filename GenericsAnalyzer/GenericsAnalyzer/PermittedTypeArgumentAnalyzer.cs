@@ -22,8 +22,8 @@ namespace GenericsAnalyzer
 {
     public class PermittedTypeArgumentAnalyzer : CSharpDiagnosticAnalyzer
     {
-        private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
-        private readonly TypeConstraintProfileInfoCollection constraintProfiles = new TypeConstraintProfileInfoCollection();
+        private readonly GenericTypeConstraintInfoCollection genericNames = new();
+        private readonly TypeConstraintProfileInfoCollection constraintProfiles = new();
 
         protected override DiagnosticDescriptorStorageBase DiagnosticDescriptorStorage => GADiagnosticDescriptorStorage.Instance;
 

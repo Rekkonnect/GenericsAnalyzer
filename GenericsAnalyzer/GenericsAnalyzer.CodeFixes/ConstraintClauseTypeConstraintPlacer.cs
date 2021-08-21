@@ -5,12 +5,14 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using RoseLynn;
+using RoseLynn.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static GenericsAnalyzer.DiagnosticDescriptors;
+using static GenericsAnalyzer.GADiagnosticDescriptorStorage;
 
 namespace GenericsAnalyzer
 {
@@ -20,7 +22,7 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            GA0006_Rule
+            Instance.GA0006_Rule
         };
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)

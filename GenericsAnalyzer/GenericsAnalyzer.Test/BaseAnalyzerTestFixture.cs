@@ -16,7 +16,7 @@ namespace GenericsAnalyzer.Test
                 // TODO: This will need major refactoring if a new diagnostic group will be introduced
                 var thisType = GetType();
                 var ruleID = thisType.Name.Substring(0, "GA0000".Length);
-                return testedDiagnosticRule = DiagnosticDescriptors.GetDiagnosticDescriptor(ruleID);
+                return testedDiagnosticRule = GADiagnosticDescriptorStorage.Instance.GetDiagnosticDescriptor(ruleID);
             }
         }
     }

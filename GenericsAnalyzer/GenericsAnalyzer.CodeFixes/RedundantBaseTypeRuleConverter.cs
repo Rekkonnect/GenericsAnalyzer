@@ -1,14 +1,15 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using RoseLynn;
+using RoseLynn.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Composition;
 using System.Threading;
 using System.Threading.Tasks;
-using static GenericsAnalyzer.DiagnosticDescriptors;
+using static GenericsAnalyzer.GADiagnosticDescriptorStorage;
 
 namespace GenericsAnalyzer
 {
@@ -18,7 +19,7 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            GA0008_Rule
+            Instance.GA0008_Rule
         };
 
         public override FixAllProvider GetFixAllProvider() => null;

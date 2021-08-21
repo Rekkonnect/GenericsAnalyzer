@@ -22,8 +22,8 @@ namespace GenericsAnalyzer
 {
     public class PermittedTypeArgumentAnalyzer : CSharpDiagnosticAnalyzer
     {
-        private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
-        private readonly TypeConstraintProfileInfoCollection constraintProfiles = new TypeConstraintProfileInfoCollection();
+        private readonly GenericTypeConstraintInfoCollection genericNames = new();
+        private readonly TypeConstraintProfileInfoCollection constraintProfiles = new();
 
         protected override DiagnosticDescriptorStorageBase DiagnosticDescriptorStorage => GADiagnosticDescriptorStorage.Instance;
 
@@ -448,7 +448,7 @@ namespace GenericsAnalyzer
                 }
                 void MarkErroneousConstrainedTypesAttribute(TypeConstraintSystemDiagnostics typeSystemDiagnostics, AttributeData attribute)
                 {
-                    if (!(attribute.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attributeSyntaxNode))
+                    if (attribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntaxNode)
                         return;
 
                     if (!IsNonProfileTypeConstraintAttribute(attribute))

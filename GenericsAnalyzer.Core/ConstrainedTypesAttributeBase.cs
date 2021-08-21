@@ -8,8 +8,8 @@ namespace GenericsAnalyzer.Core
     [AttributeUsage(AttributeTargets.GenericParameter | AttributeTargets.Interface, AllowMultiple = true)]
     public abstract class ConstrainedTypesAttributeBase : Attribute, IGenericTypeConstraintAttribute
     {
-        private static Type[] constrainedTypeAttributeTypes;
-        private static Dictionary<Type, ConstrainedTypesAttributeBase> defaultInstances;
+        private static readonly Type[] constrainedTypeAttributeTypes;
+        private static readonly Dictionary<Type, ConstrainedTypesAttributeBase> defaultInstances;
 
         /// <summary>Gets all the constrained type attribute types that exist in this assembly.</summary>
         public static Type[] ConstrainedTypeAttributeTypes => constrainedTypeAttributeTypes.ToArray();
@@ -27,7 +27,7 @@ namespace GenericsAnalyzer.Core
             }
         }
 
-        private Type[] types;
+        private readonly Type[] types;
 
         protected abstract TypeConstraintRule Rule { get; }
 

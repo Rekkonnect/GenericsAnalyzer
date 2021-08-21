@@ -9,7 +9,7 @@ namespace GenericsAnalyzer.Core
 
     public class TypeConstraintTemplateAttributeStorage
     {
-        private static readonly AssociatedPropertyContainer templateAssociativity = new AssociatedPropertyContainer(typeof(TypeConstraintTemplateAttributeStorage));
+        private static readonly AssociatedPropertyContainer templateAssociativity = new(typeof(TypeConstraintTemplateAttributeStorage));
 
         [AssociatedTemplateType(TemplateType.Profile)]
         public AttributeData ProfileAttribute { get; set; }

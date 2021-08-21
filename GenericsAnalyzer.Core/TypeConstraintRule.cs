@@ -4,10 +4,10 @@ namespace GenericsAnalyzer.Core
 {
     public struct TypeConstraintRule : IEquatable<TypeConstraintRule>
     {
-        public static TypeConstraintRule PermitExactType => new TypeConstraintRule(ConstraintRule.Permit, TypeConstraintReferencePoint.ExactType);
-        public static TypeConstraintRule PermitBaseType => new TypeConstraintRule(ConstraintRule.Permit, TypeConstraintReferencePoint.BaseType);
-        public static TypeConstraintRule ProhibitExactType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.ExactType);
-        public static TypeConstraintRule ProhibitBaseType => new TypeConstraintRule(ConstraintRule.Prohibit, TypeConstraintReferencePoint.BaseType);
+        public static TypeConstraintRule PermitExactType => new(ConstraintRule.Permit, TypeConstraintReferencePoint.ExactType);
+        public static TypeConstraintRule PermitBaseType => new(ConstraintRule.Permit, TypeConstraintReferencePoint.BaseType);
+        public static TypeConstraintRule ProhibitExactType => new(ConstraintRule.Prohibit, TypeConstraintReferencePoint.ExactType);
+        public static TypeConstraintRule ProhibitBaseType => new(ConstraintRule.Prohibit, TypeConstraintReferencePoint.BaseType);
 
         public static TypeConstraintRule[] AllValidRules => new[] { PermitExactType, PermitBaseType, ProhibitExactType, ProhibitBaseType };
 

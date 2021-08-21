@@ -84,7 +84,7 @@ namespace GenericsAnalyzer.Core
             if (symbol is null)
                 return;
 
-            if (!(symbol is INamedTypeSymbol named))
+            if (symbol is not INamedTypeSymbol named)
                 return;
 
             switch (named.TypeKind)
@@ -127,7 +127,7 @@ namespace GenericsAnalyzer.Core
             {
                 var type = rule.Key;
 
-                if (!(type is INamedTypeSymbol named))
+                if (type is not INamedTypeSymbol named)
                     continue;
 
                 if (!named.IsBoundGenericTypeSafe())
@@ -296,17 +296,12 @@ namespace GenericsAnalyzer.Core
 
         public static TypeConstraintSystem FromSymbol(ITypeSymbol typeSymbol)
         {
-            switch (typeSymbol)
+            return typeSymbol switch
             {
-                case ITypeParameterSymbol typeParameter:
-                    return new TypeConstraintSystem(typeParameter);
-
-                case INamedTypeSymbol profileType:
-                    return new TypeConstraintSystem(profileType);
-
-                default:
-                    return null;
-            }
+                ITypeParameterSymbol typeParameter => new TypeConstraintSystem(typeParameter),
+                INamedTypeSymbol profileType       => new TypeConstraintSystem(profileType),
+                _ => null,
+            };
         }
 
         public class DistinctGroupDictionary

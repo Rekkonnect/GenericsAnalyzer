@@ -58,7 +58,7 @@ namespace GenericsAnalyzer
 
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
 
-            if (!(syntaxNode is TypeDeclarationSyntax typeDeclaration))
+            if (syntaxNode is not TypeDeclarationSyntax typeDeclaration)
                 return document;
 
             var declaredMembers = typeDeclaration.Members;

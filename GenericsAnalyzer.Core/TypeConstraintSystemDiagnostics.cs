@@ -218,15 +218,12 @@ namespace GenericsAnalyzer.Core
 
         private static DiagnosticType GetDiagnosticType(ConstraintRule rule)
         {
-            switch (rule)
+            return rule switch
             {
-                case ConstraintRule.Permit:
-                    return DiagnosticType.RedundantlyPermitted;
-                case ConstraintRule.Prohibit:
-                    return DiagnosticType.RedundantlyProhibited;
-                default:
-                    throw new InvalidEnumArgumentException();
-            }
+                ConstraintRule.Permit   => DiagnosticType.RedundantlyPermitted,
+                ConstraintRule.Prohibit => DiagnosticType.RedundantlyProhibited,
+                _ => throw new InvalidEnumArgumentException(),
+            };
         }
 
         // Aliasing is not possible just yet

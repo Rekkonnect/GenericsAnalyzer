@@ -448,7 +448,7 @@ namespace GenericsAnalyzer
                 }
                 void MarkErroneousConstrainedTypesAttribute(TypeConstraintSystemDiagnostics typeSystemDiagnostics, AttributeData attribute)
                 {
-                    if (!(attribute.ApplicationSyntaxReference?.GetSyntax() is AttributeSyntax attributeSyntaxNode))
+                    if (attribute.ApplicationSyntaxReference?.GetSyntax() is not AttributeSyntax attributeSyntaxNode)
                         return;
 
                     if (!IsNonProfileTypeConstraintAttribute(attribute))

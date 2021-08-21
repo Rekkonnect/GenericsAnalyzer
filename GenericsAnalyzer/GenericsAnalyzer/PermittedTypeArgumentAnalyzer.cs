@@ -5,6 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using RoseLynn;
+using RoseLynn.Analyzers;
+using RoseLynn.CSharp.Syntax;
+using RoseLynn.Diagnostics;
+using RoseLynn.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -19,6 +24,8 @@ namespace GenericsAnalyzer
     {
         private readonly GenericTypeConstraintInfoCollection genericNames = new GenericTypeConstraintInfoCollection();
         private readonly TypeConstraintProfileInfoCollection constraintProfiles = new TypeConstraintProfileInfoCollection();
+
+        protected override DiagnosticDescriptorStorageBase DiagnosticDescriptorStorage => GADiagnosticDescriptorStorage.Instance;
 
         public override void Initialize(AnalysisContext context)
         {

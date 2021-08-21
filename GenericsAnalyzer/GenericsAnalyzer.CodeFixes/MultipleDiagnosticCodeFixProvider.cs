@@ -1,7 +1,7 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using RoseLynn.CodeFixes;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

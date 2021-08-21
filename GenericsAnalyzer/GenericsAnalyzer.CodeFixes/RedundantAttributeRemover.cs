@@ -1,12 +1,12 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RoseLynn.CodeFixes;
 using System.Collections.Generic;
 using System.Composition;
 using System.Threading;
 using System.Threading.Tasks;
-using static GenericsAnalyzer.DiagnosticDescriptors;
+using static GenericsAnalyzer.GADiagnosticDescriptorStorage;
 
 namespace GenericsAnalyzer
 {
@@ -16,9 +16,9 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            GA0014_Rule,
-            GA0015_Rule,
-            GA0016_Rule,
+            Instance.GA0014_Rule,
+            Instance.GA0015_Rule,
+            Instance.GA0016_Rule,
         };
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)

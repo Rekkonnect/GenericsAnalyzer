@@ -1,6 +1,6 @@
 ﻿using GenericsAnalyzer.Core;
-using GenericsAnalyzer.Core.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RoseLynn.CSharp.Syntax;
 
 namespace GenericsAnalyzer.Test.PermittedTypeArguments.CodeFixes
 {

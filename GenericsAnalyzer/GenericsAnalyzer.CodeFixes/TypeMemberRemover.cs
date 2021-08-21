@@ -1,14 +1,14 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RoseLynn;
 using System;
 using System.Collections.Generic;
 using System.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static GenericsAnalyzer.DiagnosticDescriptors;
+using static GenericsAnalyzer.GADiagnosticDescriptorStorage;
 
 namespace GenericsAnalyzer
 {
@@ -39,7 +39,7 @@ namespace GenericsAnalyzer
 
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            GA0024_Rule,
+            Instance.GA0024_Rule,
         };
     }
 

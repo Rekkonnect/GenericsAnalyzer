@@ -1,5 +1,5 @@
-﻿using GenericsAnalyzer.Core.Utilities;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
+using RoseLynn;
 using System.Linq;
 
 namespace GenericsAnalyzer.Core

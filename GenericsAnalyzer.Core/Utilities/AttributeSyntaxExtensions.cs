@@ -5,8 +5,6 @@ namespace GenericsAnalyzer.Core.Utilities
 {
     public static class AttributeSyntaxExtensions
     {
-        public static string GetAttributeIdentifierString(this AttributeSyntax attribute) => (attribute.Name as IdentifierNameSyntax).Identifier.ValueText;
-
         /// <summary>Determines whether the given attribute is a generic constaint attribute that the analyzer should take into account.</summary>
         /// <param name="attribute">The attribute that will be evaluated.</param>
         /// <param name="semanticModel">The semantic model that contains the information for the attribute's type.</param>

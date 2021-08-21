@@ -6,8 +6,8 @@ namespace GenericsAnalyzer.Core
 {
     public class GenericTypeConstraintInfoCollection
     {
-        private Dictionary<ISymbol, GenericTypeConstraintInfo> finalizedSymbols = new(SymbolEqualityComparer.Default);
-        private Dictionary<ISymbol, GenericTypeConstraintInfo.Builder> builders = new(SymbolEqualityComparer.Default);
+        private readonly Dictionary<ISymbol, GenericTypeConstraintInfo> finalizedSymbols = new(SymbolEqualityComparer.Default);
+        private readonly Dictionary<ISymbol, GenericTypeConstraintInfo.Builder> builders = new(SymbolEqualityComparer.Default);
 
         public bool ContainsInfo(ISymbol symbol)
         {

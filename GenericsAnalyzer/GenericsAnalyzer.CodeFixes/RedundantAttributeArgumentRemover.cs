@@ -12,7 +12,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RedundantAttributeArgumentRemover))]
-    public class RedundantAttributeArgumentRemover : MultipleDiagnosticCodeFixProvider
+    public class RedundantAttributeArgumentRemover : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {

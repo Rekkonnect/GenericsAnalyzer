@@ -9,7 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RoseLynn" Version="0.1.3" />
+    <PackageReference Include="RoseLynn" Version="0.2.0" />
+    <PackageReference Include="RoseLynn.CodeFixes" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>

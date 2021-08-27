@@ -17,7 +17,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ProfileInterfaceDeclarer))]
-    public sealed class ProfileInterfaceDeclarer : MultipleDiagnosticCodeFixProvider
+    public sealed class ProfileInterfaceDeclarer : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
         {

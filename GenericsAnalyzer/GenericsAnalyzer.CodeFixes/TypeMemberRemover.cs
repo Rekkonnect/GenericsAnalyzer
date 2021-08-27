@@ -44,7 +44,7 @@ namespace GenericsAnalyzer
     }
 
     [Shared]
-    public abstract class TypeMemberRemover : MultipleDiagnosticCodeFixProvider
+    public abstract class TypeMemberRemover : GACodeFixProvider
     {
         protected abstract RemovableTypeMembers GetRemovableTypeMembers();
 

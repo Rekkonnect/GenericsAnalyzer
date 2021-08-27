@@ -18,7 +18,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ConstraintClauseTypeConstraintPlacer))]
-    public class ConstraintClauseTypeConstraintPlacer : MultipleDiagnosticCodeFixProvider
+    public class ConstraintClauseTypeConstraintPlacer : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {

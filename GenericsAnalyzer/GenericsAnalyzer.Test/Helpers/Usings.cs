@@ -4,7 +4,7 @@ namespace GenericsAnalyzer.Test.Helpers
 {
     public sealed class GAUsingsProvider : UsingsProviderBase
     {
-        public static GAUsingsProvider Instance = new();
+        public static readonly GAUsingsProvider Instance = new();
 
         public const string DefaultUsings =
 @"

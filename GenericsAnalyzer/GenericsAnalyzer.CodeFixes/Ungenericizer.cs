@@ -13,7 +13,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(Ungenericizer))]
-    public sealed class Ungenericizer : MultipleDiagnosticCodeFixProvider
+    public sealed class Ungenericizer : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
         {

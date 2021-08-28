@@ -15,7 +15,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RedundantBaseTypeRuleConverter))]
-    public class RedundantBaseTypeRuleConverter : MultipleDiagnosticCodeFixProvider
+    public class RedundantBaseTypeRuleConverter : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {

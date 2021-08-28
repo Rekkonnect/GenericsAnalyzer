@@ -1,8 +1,12 @@
-﻿namespace GenericsAnalyzer.Test.Helpers
+﻿using RoseLynn.Testing;
+
+namespace GenericsAnalyzer.Test.Helpers
 {
-    public static class UsingsHelpers
+    public sealed class GAUsingsProvider : UsingsProviderBase
     {
-        public const string DefaultNecessaryUsings =
+        public static readonly GAUsingsProvider Instance = new();
+
+        public const string DefaultUsings =
 @"
 using GenericsAnalyzer.Core;
 using GenericsAnalyzer.Test.Resources;
@@ -11,7 +15,8 @@ using System.Collections;
 using System.Collections.Generic;
 ";
 
-        public static string WithUsings(string original) => WithUsings(original, DefaultNecessaryUsings);
-        public static string WithUsings(string original, string usings) => $"{usings}\n{original}";
+        public override string DefaultNecessaryUsings => DefaultUsings;
+
+        private GAUsingsProvider() { }
     }
 }

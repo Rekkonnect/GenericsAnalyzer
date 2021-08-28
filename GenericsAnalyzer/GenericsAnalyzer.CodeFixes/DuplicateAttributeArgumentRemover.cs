@@ -16,7 +16,7 @@ namespace GenericsAnalyzer
 {
     [Shared]
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(DuplicateAttributeArgumentRemover))]
-    public class DuplicateAttributeArgumentRemover : MultipleDiagnosticCodeFixProvider
+    public class DuplicateAttributeArgumentRemover : GACodeFixProvider
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {

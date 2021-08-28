@@ -2,6 +2,7 @@
 using Gu.Roslyn.Asserts;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RoseLynn.Analyzers;
 using RoseLynn.Testing;
 
 namespace GenericsAnalyzer.Test
@@ -15,6 +16,7 @@ namespace GenericsAnalyzer.Test
     public abstract class BaseGADiagnosticTests : BaseDiagnosticTests
     {
         protected ExpectedDiagnostic ExpectedDiagnostic => ExpectedDiagnostic.Create(TestedDiagnosticRule);
+        protected sealed override DiagnosticDescriptorStorageBase DiagnosticDescriptorStorage => GADiagnosticDescriptorStorage.Instance;
 
         protected override UsingsProviderBase GetNewUsingsProviderInstance()
         {

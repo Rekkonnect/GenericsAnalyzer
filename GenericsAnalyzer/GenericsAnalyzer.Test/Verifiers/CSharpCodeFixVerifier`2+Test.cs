@@ -1,10 +1,10 @@
 ﻿using GenericsAnalyzer.Core;
 using GenericsAnalyzer.Test.Resources;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using RoseLynn;
 
 namespace GenericsAnalyzer.Test
 {
@@ -28,8 +28,8 @@ namespace GenericsAnalyzer.Test
 
                 TestState.AdditionalReferences.AddRange(new[]
                 {
-                    MetadataReference.CreateFromFile(typeof(IGenericTypeConstraintAttribute).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(ExampleAttribute).Assembly.Location),
+                    MetadataReferenceFactory.CreateFromType<IGenericTypeConstraintAttribute>(),
+                    MetadataReferenceFactory.CreateFromType<ExampleAttribute>(),
                 });
             }
         }

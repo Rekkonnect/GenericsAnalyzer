@@ -10,12 +10,13 @@
   <PropertyGroup>
     <PackageId>GenericsAnalyzer</PackageId>
     <Authors>Alex Kalfakakos</Authors>
-    <Version>1.3.1</Version>
-    <PackageVersion>1.3.1</PackageVersion>
+    <Version>1.3.2</Version>
+    <PackageVersion>1.3.2</PackageVersion>
     <RepositoryUrl>https://github.com/AlFasGD/GenericsAnalyzer</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>A Roslyn analyzer that empowers usage of generics through attributes.</Description>
-    <PackageReleaseNotes>Fixed several bugs involving partial type constraint profile interface declarations</PackageReleaseNotes>
+    <PackageReleaseNotes>- Several abstractions migrated to RoseLynn
+- Properly fixed analyzer instance creation</PackageReleaseNotes>
     <Copyright>© 2021, Alex Kalfakakos</Copyright>
     <PackageTags>roslyn, analyzer, generics, constraints</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
@@ -26,7 +27,6 @@
   <ItemGroup>
     <ProjectReference Include="..\GenericsAnalyzer.CodeFixes\GenericsAnalyzer.CodeFixes.csproj" />
     <ProjectReference Include="..\GenericsAnalyzer\GenericsAnalyzer.csproj" />
-    <ProjectReference Include="..\..\GenericsAnalyzer.Core\GenericsAnalyzer.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

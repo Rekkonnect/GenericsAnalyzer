@@ -17,7 +17,7 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new DiagnosticDescriptor[]
         {
-            Instance.GA0023_Rule
+            Instance[0023]
         };
 
         protected override async Task<Document> PerformCodeFixActionAsync(CodeFixContext context, SyntaxNode syntaxNode, CancellationToken cancellationToken)

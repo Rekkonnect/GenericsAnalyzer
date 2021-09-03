@@ -39,7 +39,7 @@ namespace GenericsAnalyzer
 
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            Instance.GA0024_Rule,
+            Instance[0024],
         };
     }
 

@@ -19,7 +19,7 @@ namespace GenericsAnalyzer
     {
         protected override IEnumerable<DiagnosticDescriptor> FixableDiagnosticDescriptors => new[]
         {
-            Instance.GA0008_Rule
+            Instance[0008]
         };
 
         public override FixAllProvider GetFixAllProvider() => null;

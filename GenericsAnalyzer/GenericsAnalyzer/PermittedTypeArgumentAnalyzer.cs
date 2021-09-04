@@ -20,6 +20,7 @@ using System.Linq;
 
 namespace GenericsAnalyzer
 {
+    [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class PermittedTypeArgumentAnalyzer : CSharpDiagnosticAnalyzer
     {
         private readonly GenericTypeConstraintInfoCollection genericNames = new();

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using RoseLynn.Utilities;
+using System;
 using System.Linq;
 
 namespace GenericsAnalyzer.Core
@@ -8,22 +8,13 @@ namespace GenericsAnalyzer.Core
     [AttributeUsage(AttributeTargets.GenericParameter | AttributeTargets.Interface, AllowMultiple = true)]
     public abstract class ConstrainedTypesAttributeBase : Attribute, IGenericTypeConstraintAttribute
     {
-        private static readonly Type[] constrainedTypeAttributeTypes;
-        private static readonly Dictionary<Type, ConstrainedTypesAttributeBase> defaultInstances;
+        private static readonly InstanceContainer instanceContainer = new();
 
-        /// <summary>Gets all the constrained type attribute types that exist in this assembly.</summary>
-        public static Type[] ConstrainedTypeAttributeTypes => constrainedTypeAttributeTypes.ToArray();
-
-        static ConstrainedTypesAttributeBase()
+        private sealed class InstanceContainer : DefaultInstanceContainer<ConstrainedTypesAttributeBase>
         {
-            var baseType = typeof(ConstrainedTypesAttributeBase);
-            constrainedTypeAttributeTypes = baseType.Assembly.GetTypes().Where(IsValidConstraintRuleAttributeType).ToArray();
-
-            defaultInstances = new Dictionary<Type, ConstrainedTypesAttributeBase>(constrainedTypeAttributeTypes.Length);
-            foreach (var type in constrainedTypeAttributeTypes)
+            protected override object[] GetDefaultInstanceArguments()
             {
-                var instance = (ConstrainedTypesAttributeBase)type.GetConstructor(new[] { typeof(Type[]) }).Invoke(new[] { Type.EmptyTypes } );
-                defaultInstances.Add(type, instance);
+                return new object[] { Type.EmptyTypes };
             }
         }
 
@@ -44,27 +35,18 @@ namespace GenericsAnalyzer.Core
         public static TypeConstraintRule? GetConstraintRule<T>()
             where T : ConstrainedTypesAttributeBase
         {
-            return GetConstraintRule(typeof(T));
+            return instanceContainer.GetDefaultInstance<T>()?.Rule;
         }
         /// <summary>Gets the constraint rule that the attribute with the given attribute name reflects.</summary>
         /// <param name="attributeTypeName">The name of the attribute whose constraint rule to get.</param>
         /// <returns>The <seealso cref="TypeConstraintRule"/> that is reflected from the attribute with the given name.</returns>
         public static TypeConstraintRule? GetConstraintRuleFromAttributeName(string attributeTypeName)
         {
-            return GetConstraintRule(constrainedTypeAttributeTypes.FirstOrDefault(t => t.Name == attributeTypeName));
+            return instanceContainer.GetDefaultInstance(attributeTypeName)?.Rule;
         }
         public static TypeConstraintRule? GetConstraintRule(Type type)
         {
-            if (!IsValidConstraintRuleAttributeType(type))
-                return null;
-
-            return defaultInstances[type].Rule;
-        }
-
-        public static bool IsValidConstraintRuleAttributeType(Type type)
-        {
-            var baseType = typeof(ConstrainedTypesAttributeBase);
-            return !type.IsAbstract && baseType.IsAssignableFrom(type);
+            return instanceContainer.GetDefaultInstance(type)?.Rule;
         }
     }
 }

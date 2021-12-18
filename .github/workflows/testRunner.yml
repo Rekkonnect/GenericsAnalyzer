@@ -10,5 +10,11 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v1
 
-    - name: Run Tests
+    - name: Run Analyzer Tests
       run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Test/GenericsAnalyzer.Test.csproj
+      
+    - name: Run Code Fix Tests
+      run: dotnet test GenericsAnalyzer/GenericsAnalyzer.CodeFixes.Test/GenericsAnalyzer.CodeFixes.Test.csproj
+      
+    - name: Run Core Tests
+      run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Core.Test/GenericsAnalyzer.Core.Test.csproj

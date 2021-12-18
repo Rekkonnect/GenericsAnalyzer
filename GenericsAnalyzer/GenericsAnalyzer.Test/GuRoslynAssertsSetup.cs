@@ -1,9 +1,20 @@
-﻿using GenericsAnalyzer.Test;
-using Gu.Roslyn.Asserts;
+﻿using Gu.Roslyn.Asserts;
+using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
-// Properly includes all the required assemblies for the compiled code in the tests
-[assembly: TransitiveMetadataReferences
-(
-    // All assemblies that this assembly depends on
-    typeof(BaseGADiagnosticTests<>)
-)]
+namespace GenericsAnalyzer.Test
+{
+    public static class GuRoslynAssertsSetup
+    {
+        [ModuleInitializer]
+        public static void Setup()
+        {
+            Settings.Default = Settings.Default
+                .WithAllowedCompilerDiagnostics(AllowedCompilerDiagnostics.WarningsAndErrors)
+                .WithMetadataReferences(MetadataReferences.Transitive(typeof(GuRoslynAssertsSetup)));
+        }
+    }
+}

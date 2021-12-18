@@ -1,4 +1,4 @@
-﻿using GenericsAnalyzer.Test.Helpers;
+﻿using GenericsAnalyzer.AnalysisTestsBase.Helpers;
 using Gu.Roslyn.Asserts;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

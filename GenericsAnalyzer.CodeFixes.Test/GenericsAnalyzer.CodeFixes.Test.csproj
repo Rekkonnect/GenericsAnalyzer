@@ -1,15 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>10.0</LangVersion>
-
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Gu.Roslyn.Asserts" Version="4.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
@@ -20,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\GenericsAnalyzer.AnalysisTestsBase\GenericsAnalyzer.AnalysisTestsBase.csproj" />
+    <ProjectReference Include="..\GenericsAnalyzer.AnalysisTestsBase\GenericsAnalyzer.AnalysisTestsBase.csproj" />
   </ItemGroup>
 
 </Project>

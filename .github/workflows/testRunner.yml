@@ -5,8 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: windows-latest
-
+    
     steps:
+    - name: Setup .NET 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
     - name: Checkout Code
       uses: actions/checkout@v1
 
@@ -14,7 +19,7 @@ jobs:
       run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Test/GenericsAnalyzer.Test.csproj
       
     - name: Run Code Fix Tests
-      run: dotnet test GenericsAnalyzer/GenericsAnalyzer.CodeFixes.Test/GenericsAnalyzer.CodeFixes.Test.csproj
+      run: dotnet test GenericsAnalyzer.CodeFixes.Test/GenericsAnalyzer.CodeFixes.Test.csproj
       
     - name: Run Core Tests
-      run: dotnet test GenericsAnalyzer/GenericsAnalyzer.Core.Test/GenericsAnalyzer.Core.Test.csproj
+      run: dotnet test GenericsAnalyzer.Core.Test/GenericsAnalyzer.Core.Test.csproj

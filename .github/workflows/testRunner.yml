@@ -5,8 +5,13 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: windows-latest
-
+    
     steps:
+    - name: Setup .NET 6.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+
     - name: Checkout Code
       uses: actions/checkout@v1
 

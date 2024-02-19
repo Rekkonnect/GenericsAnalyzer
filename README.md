@@ -1,6 +1,12 @@
 # GenericsAnalyzer
 A Roslyn analyzer for C# for generic types and functions
 
+# IMPORTANT
+
+The project has been ported over under the umbrella of RossLean: [Link](https://github.com/RossLean/RossLean/tree/master/RossLean.GenericsAnalyzer)
+
+This repository will remain as a public archive, but development will continue over at RossLean.
+
 ## References
 - [Usage](docs/usage.md)
 - [Diagnostics](docs/index.md)
